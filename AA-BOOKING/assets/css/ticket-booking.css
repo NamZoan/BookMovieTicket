@@ -1,0 +1,296 @@
+* {
+	margin: 0;
+	padding: 0
+}
+
+html {
+
+	height: 100%
+}
+
+h2 {
+	color: var(--theme-rose);
+	font-size: 1.7rem;
+	margin-bottom: 20px;
+}
+
+/* custom css */
+
+#progress-container-id {
+	width: 100%;
+}
+
+#form {
+	text-align: center;
+	position: relative;
+	margin-top: 20px
+}
+
+#form fieldset {
+	background: var(--theme-bg);
+	border: 0 none;
+	border-radius: 0.5rem;
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+	padding-bottom: 20px;
+	position: relative
+}
+
+.finish {
+	text-align: center
+}
+
+#form fieldset:not(:first-of-type) {
+	display: none
+}
+
+#form .previous-step,
+.next-step {
+	width: min-content;
+	font-weight: bold;
+	color: white;
+	border: 0 none;
+	border-radius: 0px;
+	cursor: pointer;
+	font-size: 0.8rem;
+	padding: 10px 35px;
+	margin: 10px 5px 10px 0px;
+	float: right;
+	border-radius: 22px;
+}
+
+.form,
+.previous-step {
+	background: #616161;
+}
+
+.form,
+.next-step {
+	margin-left: 20px;
+	margin-right: 20px;
+	background: var(--theme-rose);
+}
+
+#form .previous-step:hover,
+#form .previous-step:focus {
+	background-color: var(--theme-title);
+	color: var(--theme-bg)
+}
+
+#form .next-step:hover,
+#form .next-step:focus {
+	background-color: #c70050
+}
+
+#form .next-step:disabled {
+	background-color: #443d40;
+	cursor: not-allowed;
+	opacity: 0.7
+}
+
+.text {
+	color: var(--theme-rose);
+	font-weight: normal
+}
+
+#progressbar {
+	margin-top: 45px;
+	;
+	margin-bottom: 15px;
+	overflow: hidden;
+	color: var(--theme-progressbar);
+}
+
+#progressbar .active {
+	color: var(--theme-rose);
+}
+
+#progressbar li {
+	list-style-type: none;
+	font-size: 15px;
+	width: 20%;
+	float: left;
+	position: relative;
+	font-weight: 400;
+}
+
+/* improve step labels wrapping on small screens */
+@media (max-width: 576px) {
+	#progressbar li {
+		font-size: 12px;
+	}
+	#progressbar li:before {
+		width: 40px;
+		height: 40px;
+		line-height: 36px;
+		font-size: 16px;
+	}
+}
+
+#progressbar #step1:before {
+	content: "1"
+}
+
+#progressbar #step2:before {
+	content: "2"
+}
+
+#progressbar #step3:before {
+	content: "3"
+}
+
+#progressbar #step4:before {
+	content: "4"
+}
+
+#progressbar #step5:before {
+	content: "5"
+}
+
+#progressbar li:before {
+	width: 50px;
+	height: 50px;
+	line-height: 45px;
+	display: block;
+	font-size: 20px;
+	color: #ffffff;
+	background: lightgray;
+	border-radius: 50%;
+	margin: 0 auto 10px auto;
+	padding: 2px
+}
+
+#progressbar li:after {
+	content: '';
+	width: 100%;
+	height: 2px;
+	background: var(--theme-progressbar);
+	position: absolute;
+	left: 0;
+	top: 25px;
+	z-index: -1;
+}
+
+#progressbar li.active:before,
+#progressbar li.active:after {
+	background: var(--theme-rose);
+}
+
+.progress {
+	height: 20px
+}
+
+.progress-bar {
+	background-color: var(--theme-rose);
+}
+
+.fa-user-circle-o {
+	font-size: 2rem;
+	display: inline-block;
+	position: relative;
+	color: var(--theme-rose);
+}
+
+.cancel-pay-btn {
+	width: min-content;
+	font-weight: bold;
+	color: white;
+	border: 0 none;
+	border-radius: 0px;
+	cursor: pointer;
+	font-size: 0.8rem;
+	padding: 10px 35px;
+	margin: 10px 5px 10px 0px;
+	float: right;
+	border-radius: 22px;
+	background: rgb(235, 34, 34);
+}
+
+.pay-btn {
+	margin-left: 20px;
+	margin-right: 20px;
+	background: rgb(58, 223, 25);
+}
+
+/* snack grid tweaks */
+.snack-grid {
+	row-gap: 20px;
+}
+.snack-card {
+	background: var(--theme-bg);
+	border-radius: 10px;
+	box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+	padding: 16px;
+	text-align: center;
+	transition: transform .2s ease, box-shadow .2s ease;
+}
+.snack-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+.snack-card img {
+	width: 100%;
+	height: 120px;
+	object-fit: contain;
+}
+.qty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+.qty-btn {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: none;
+	background: var(--theme-rose);
+	color: #fff;
+	cursor: pointer;
+}
+.qty-input {
+	width: 48px;
+	text-align: center;
+	padding: 6px 4px;
+	border: 1px solid var(--theme-border);
+	border-radius: 6px;
+}
+
+/* iframe responsiveness */
+#seat-sel-iframe {
+	max-width: 100%;
+	width: 100%;
+	height: 60vh;
+}
+
+.home-page-btn {
+	width: min-content;
+	font-weight: bold;
+	color: white;
+	border: 0 none;
+	border-radius: 0px;
+	cursor: pointer;
+	font-size: 0.8rem;
+	padding: 10px 35px;
+	margin: 10px 5px 10px 0px;
+	float: right;
+	border-radius: 22px;
+	background: var(--theme-rose);
+	background: #616161;
+}
+
+#form .cancel-pay-btn:hover,
+#form .cancel-pay-btn:focus {
+	background-color: #da0000
+}
+
+#form .pay-btn:hover,
+#form .pay-btn:focus {
+	background: rgb(0, 170, 9);
+}
+
+#form .home-page-btn:hover,
+#form .home-page-btn:focus {
+	background-color: #c70050;
+}

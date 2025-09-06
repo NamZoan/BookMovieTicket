@@ -1,0 +1,51 @@
+    #cinema-screen {
+        background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .seat {
+        cursor: move;
+        transition: all 0.2s;
+    }
+
+    .seat.selected {
+        background-color: #3B82F6;
+        color: white;
+    }
+
+    .seat.vip {
+        background-color: #f59e0b;
+        color: white;
+    }
+
+    .seat.disabled {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .seat-legend {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin-right: 5px;
+        vertical-align: middle;
+    }
+
+    #cinema-room {
+        background-color: #f3f4f6;
+        position: relative;
+        min-height: 500px;
+        border: 2px dashed #d1d5db;
+    }
+
+    .draggable-handle {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 20px;
+        height: 20px;
+        background-color: white;
+        border-radius: 50%;
+        border: 1px solid #d1d5db;
+        cursor: pointer;
+    }

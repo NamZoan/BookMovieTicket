@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Em Xinh Tinh Quái - Move Cinema</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --text: #333333;
+            --muted: #666666;
+            --link: #1a73e8;
+            --accent: #e51c23;
+            --border: #e0e0e0;
+            --chip: #f5f5f5;
+            --card: #ffffff;
+            --background: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            color: var(--link);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* Header */
+        .topbar {
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .brand .logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ff6b6b, #f44336);
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 900;
+        }
+
+        .brand span {
+            color: #333;
+        }
+
+        .search {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 10px 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .search input {
+            flex: 1;
+            background: transparent;
+            border: 0;
+            color: var(--text);
+            outline: none;
+        }
+
+        .links {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .links a {
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .links .user {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #5f6368;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            color: #70757a;
+            font-size: 14px;
+            display: flex;
+            gap: 10px;
+            padding: 16px 0;
+        }
+
+        .breadcrumb a {
+            color: var(--accent);
+        }
+
+        .sep {
+            opacity: 0.5;
+        }
+
+        /* Hero */
+        .hero {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 24px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            padding: 24px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .poster {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .meta h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            color: #1a1a1a;
+        }
+
+        .sub {
+            color: var(--muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .chip {
+            background: var(--chip);
+            border: 1px solid var(--border);
+            color: #5f6368;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .synopsis {
+            margin-top: 10px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .facts {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .fact {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .fact b {
+            color: #1a1a1a;
+        }
+
+        /* Tabs */
+        .tabs {
+            margin-top: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 18px;
+        }
+
+        .tab {
+            padding: 12px 0;
+            margin-bottom: -1px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .tab:hover {
+            color: var(--accent);
+        }
+
+        /* Panels */
+        .panels {
+            padding-top: 24px;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Showtime block */
+        .showtime-note {
+            background: linear-gradient(180deg, #ffffff, #f9f9f9);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: #d50c13;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(229, 28, 35, 0.3);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        /* Trailer */
+        .trailer {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .video {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .video::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(transparent 60%, rgba(0, 0, 0, 0.1));
+            pointer-events: none;
+        }
+
+        iframe {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border: 0;
+        }
+
+        /* Related */
+        .related {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .card h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #1a1a1a;
+        }
+
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            padding: 32px 0;
+            border-top: 1px solid var(--border);
+            color: #5f6368;
+            background: #fff;
+        }
+
+        .foot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .foot-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .foot-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .pay-logos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+            opacity: 0.8;
+        }
+
+        .icon-chip {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            background: #f5f5f5;
+            border: 1px solid var(--border);
+            color: #5f6368;
+            font-size: 14px;
+        }
+
+        /* Layout spacing */
+        main {
+            padding: 24px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 24px;
+            margin-top: 18px;
+        }
+
+        h3 {
+            margin-bottom: 12px;
+            color: #1a1a1a;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .hero {
+                grid-template-columns: 160px 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .links {
+                display: none;
+            }
+            .hero {
+                grid-template-columns: 1fr;
+            }
+            .poster {
+                max-width: 240px;
+                margin: 0 auto;
+            }
+            .facts {
+                grid-template-columns: 1fr;
+            }
+            .related {
+                grid-template-columns: 1fr;
+            }
+            .foot-grid {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="topbar">
+        <div class="wrap">
+            <div class="nav">
+                <a href="#" class="brand">
+                    <div class="logo">MV</div>
+                    <span>Move Cinema</span>
+                </a>
+                <div class="search">
+                    <i class='bx bx-search'></i>
+                    <input type="text" placeholder="Tìm kiếm phim, rạp chiếu...">
+                </div>
+                <div class="links">
+                    <a href="#">Lịch chiếu</a>
+                    <a href="#">Phim</a>
+                    <a href="#">Rạp</a>
+                    <a href="#">Giá vé</a>
+                    <a href="#" class="user">
+                        <i class='bx bx-user'></i>
+                        <span>Đăng nhập</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <div class="wrap">
+        <main>
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="#">Trang chủ</a>
+                <span class="sep">/</span>
+                <a href="#">Phim</a>
+                <span class="sep">/</span>
+                <span>Em Xinh Tinh Quái</span>
+            </div>
+
+            <!-- Hero block -->
+            <section class="hero">
+                <div class="poster">
+                    <img src="https://images.unsplash.com/photo-1517602302552-471fe67acf66?q=80&w=640&auto=format&fit=crop" alt="Poster Em Xinh Tinh Quái">
+                </div>
+                <div class="meta">
+                    <h1>Em Xinh Tinh Quái</h1>
+                    <div class="sub">
+                        <span>Hài, Bí ẩn</span>
+                        <span>•</span>
+                        <span>Thời lượng: 111 phút</span>
+                        <span>•</span>
+                        <span>Rated: T13</span>
+                    </div>
+                    <div class="chips">
+                        <span class="chip">16+</span>
+                        <span class="chip">Chất lượng 2D</span>
+                        <span class="chip">T13 không phù hợp trẻ em dưới 13 tuổi</span>
+                    </div>
+                    <p class="synopsis">
+                        Quỳnh – cô gái xinh đẹp nhưng tinh quái khiến thầy giáo Trung liên tục rơi vào những tình huống dở khóc dở cười.
+                        Trong khi tìm hiểu lý do phía sau hành vi khó đoán của Quỳnh, Trung dần phát hiện các bí mật bất ngờ đan xen hài hước và màu sắc trinh thám.
+                    </p>
+                    <div class="facts">
+                        <div class="fact"><b>Đạo diễn:</b> Võ Thanh Hòa</div>
+                        <div class="fact"><b>Diễn viên:</b> Minh Hằng, Quốc Trường, Phương Lan, Lê Dương Bảo Lâm</div>
+                        <div class="fact"><b>Quốc gia:</b> Việt Nam</div>
+                        <div class="fact"><b>Ngôn ngữ:</b> Tiếng Việt</div>
+                        <div class="fact"><b>Khởi chiếu:</b> Đang cập nhật</div>
+                        <div class="fact"><b>Trạng thái:</b> Đang mở bán</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tabs -->
+            <div class="tabs" id="tabs">
+                <div class="tab active" data-tab="info">Thông tin phim</div>
+                <div class="tab" data-tab="showtimes">Lịch chiếu</div>
+                <div class="tab" data-tab="trailer">Trailer</div>
+                <div class="tab" data-tab="reviews">Đánh giá</div>
+            </div>
+
+            <div class="panels">
+                <!-- Thông tin phim -->
+                <div class="panel active" id="panel-info">
+                    <div class="grid">
+                        <div>
+                            <h3>Giới thiệu</h3>
+                            <p class="muted">
+                                Câu chuyện xoay quanh hành trình "bóc phốt hay bóc mẽ?" giữa thầy Trung và cô học trò Quỳnh. Mỗi lần "chạm trán"
+                                là một lần những lớp màn kịch vui nhộn bị kéo xuống, để lộ ra những động cơ bất ngờ phía sau.
+                            </p>
+                        </div>
+                        <aside>
+                            <div class="showtime-note">
+                                <span class="muted">Lịch chiếu và thông tin có thể thay đổi mà không cần báo trước.</span>
+                                <button class="btn" data-tab-jump="showtimes">
+                                    <i class='bx bx-calendar'></i> Xem lịch chiếu
+                                </button>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+
+                <!-- Lịch chiếu -->
+                <div class="panel" id="panel-showtimes">
+                    <div class="showtime-note">
+                        <span>Hiện chưa có lịch chiếu được cập nhật cho "Em Xinh Tinh Quái". Vui lòng quay lại sau!</span>
+                        <button class="btn" id="btn-notify">
+                            <i class='bx bx-bell'></i> Nhận thông báo
+                        </button>
+                    </div>
+                    <div class="muted" style="margin-top:12px">Mẹo: Chọn rạp yêu thích để nhận lịch chiếu sớm nhất.</div>
+                </div>
+
+                <!-- Trailer -->
+                <div class="panel" id="panel-trailer">
+                    <div class="trailer">
+                        <div class="video">
+                            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Trailer Em Xinh Tinh Quái" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        </div>
+                        <div class="muted">Xem thêm trailer và video liên quan.</div>
+                    </div>
+                </div>
+
+                <!-- Đánh giá -->
+                <div class="panel" id="panel-reviews">
+                    <div class="muted">Chưa có đánh giá. Hãy là người đầu tiên chia sẻ cảm nhận của bạn!</div>
+                </div>
+            </div>
+
+            <!-- Bài viết liên quan -->
+            <section style="margin-top:32px">
+                <h3>Bài viết liên quan</h3>
+                <div class="related">
+                    <article class="card">
+                        <img src="https://images.unsplash.com/photo-1511094457467-d3c0d6e4d8f5?q=80&w=800&auto=format&fit=crop" alt>
+                        <div class="card-body">
+                            <h4>Review Em Xinh Tinh Quái — Khi bí mật dẫn lối tiếng cười</h4>
+                            <p>Góc nhìn nhanh về nhịp phim, diễn xuất và điểm nhấn hài hước.</p>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <img src="https://images.unsplash.com/photo-1541781286675-7b8c2d8d6d86?q=80&w=800&auto=format&fit=crop" alt>
+                        <div class="card-body">
+                            <h4>Phim Việt nổi bật mùa này</h4>
+                            <p>Tổng hợp các tựa phim phù hợp gia đình và giới trẻ.</p>
+                        </div>
+                    </article>
+                    <article class="card">
+                        <img src="https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?q=80&w=800&auto=format&fit=crop" alt>
+                        <div class="card-body">
+                            <h4>Top phim hài học đường đáng xem</h4>
+                            <p>Danh sách những câu chuyện nhẹ nhàng nhưng nhiều thông điệp.</p>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="wrap">
+            <div class="foot-grid">
+                <div>
+                    <div class="foot-logo">
+                        <div class="logo">MV</div>
+                        <div>
+                            <strong>MOVE SK., JSC</strong><br>
+                            Số ĐKKD: 9999999999 — 01/01/2020, Sở KHĐT TP.HCM<br>
+                            © 2020–2024 MoveSK. All rights reserved.
+                        </div>
+                    </div>
+                    <div class="pay-logos">
+                        <div class="icon-chip">V</div>
+                        <div class="icon-chip"><i class='bx bxl-visa'></i></div>
+                        <div class="icon-chip"><i class='bx bxl-mastercard'></i></div>
+                        <div class="icon-chip">VN</div>
+                        <div class="icon-chip">BV</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="foot-links">
+                        <a href="#">Giới thiệu</a>
+                        <a href="#">Tiện ích</a>
+                        <a href="#">Quảng cáo</a>
+                        <a href="#">Liên hệ</a>
+                        <a href="#">FAQ</a>
+                        <a href="#">Thỏa thuận sử dụng</a>
+                        <a href="#">Chính sách thanh toán</a>
+                        <a href="#">Chính sách bảo mật</a>
+                        <a href="#">Bảo vệ thông tin cá nhân</a>
+                    </div>
+                    <div class="pay-logos">
+                        <div class="icon-chip"><i class='bx bxl-facebook'></i></div>
+                        <div class="icon-chip"><i class='bx bxl-instagram'></i></div>
+                        <div class="icon-chip">ZL</div>
+                        <div class="icon-chip"><i class='bx bxl-tiktok'></i></div>
+                        <div class="icon-chip"><i class='bx bxl-apple'></i></div>
+                        <div class="icon-chip"><i class='bx bxl-play-store'></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const panels = document.querySelectorAll('.panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // Show active panel
+                    panels.forEach(panel => {
+                        panel.classList.remove('active');
+                        if (panel.id === `panel-${tabName}`) {
+                            panel.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Tab jump buttons
+            document.querySelectorAll('[data-tab-jump]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabName = button.getAttribute('data-tab-jump');
+                    document.querySelector(`.tab[data-tab="${tabName}"]`).click();
+                });
+            });
+
+            // Notify button
+            document.getElementById('btn-notify').addEventListener('click', function() {
+                alert('Tính năng thông báo sẽ sớm có mặt!');
+            });
+        });
+    </script>
+</body>
+</html>
