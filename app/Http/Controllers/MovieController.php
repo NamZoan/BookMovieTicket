@@ -369,7 +369,7 @@ class MovieController extends Controller
                 ->groupBy('screen.cinema.name');
 
             // Render view fragment
-            $html = view('client.movies.partials.showtime-list', compact('showtimes'))->render();
+            $html = view('client.movies.showtime-list', compact('showtimes'))->render();
 
             return response()->json([
                 'success' => true,

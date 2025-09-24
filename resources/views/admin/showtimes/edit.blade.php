@@ -69,6 +69,17 @@
                                     <strong>Giờ chiếu:</strong> {{ $showtime->show_time ?? 'N/A' }} - {{ $showtime->end_time ?? 'N/A' }}
                                 </div>
                             </div>
+                            <div class="row mt-2">
+                                <div class="col-md-4">
+                                    <strong>Giá ghế thường:</strong> {{ number_format($showtime->price_seat_normal) }} VNĐ
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Giá ghế VIP:</strong> {{ number_format($showtime->price_seat_vip) }} VNĐ
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Giá ghế đôi:</strong> {{ number_format($showtime->price_seat_couple) }} VNĐ
+                                </div>
+                            </div>
                         </div>
 
                         <form action="{{ route('admin.showtimes.update', $showtime->showtime_id) }}" method="POST" id="editShowtimeForm">
@@ -133,7 +144,7 @@
                                            class="form-control @error('show_date') is-invalid @enderror"
                                            id="show_date"
                                            name="show_date"
-                                           value="{{ old('show_date', $showtime->show_date) }}"
+                                           value="{{ $showtime->show_date ? \Carbon\Carbon::parse($showtime->show_date)->format('Y-m-d') : '' }}"
                                            required>
                                     @error('show_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -144,11 +155,13 @@
                                     <label for="show_time" class="form-label">
                                         <i class="bx bx-time me-1"></i>Giờ bắt đầu <span class="text-danger">*</span>
                                     </label>
+
+
                                     <input type="time"
                                            class="form-control @error('show_time') is-invalid @enderror"
                                            id="show_time"
                                            name="show_time"
-                                           value="{{ old('show_time', $showtime->show_time) }}"
+                                           value="{{ $showtime->show_time ? \Carbon\Carbon::parse($showtime->show_time)->format('H:i') : '' }}"
                                            required>
                                     @error('show_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -163,7 +176,7 @@
                                            class="form-control @error('end_time') is-invalid @enderror"
                                            id="end_time"
                                            name="end_time"
-                                           value="{{ old('end_time', $showtime->end_time) }}"
+                                           value="{{ $showtime->end_time ? \Carbon\Carbon::parse($showtime->end_time)->format('H:i') : '' }}"
                                            required>
                                     @error('end_time')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -173,43 +186,67 @@
 
                             <!-- Thông tin giá vé và ghế -->
                             <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label for="base_price" class="form-label">
-                                        <i class="bx bx-money me-1"></i>Giá vé (VNĐ) <span class="text-danger">*</span>
+                                <div class="col-md-4">
+                                    <label for="price_seat_normal" class="form-label">
+                                        <i class="bx bx-chair me-1"></i>Giá ghế thường <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
-                                        <input type="number"
-                                               class="form-control @error('base_price') is-invalid @enderror"
-                                               id="base_price"
-                                               name="base_price"
-                                               value="{{ old('base_price', $showtime->base_price) }}"
-                                               min="10000"
-                                               max="500000"
-                                               step="1000"
-                                               required>
+                                        <input type="number" name="price_seat_normal" id="price_seat_normal"
+                                               class="form-control @error('price_seat_normal') is-invalid @enderror"
+                                               min="10000" max="500000" step="1000"
+                                               value="{{ old('price_seat_normal', $showtime->price_seat_normal) }}" required>
                                         <span class="input-group-text">VNĐ</span>
                                     </div>
-                                    <small class="text-muted">Giá vé từ 10,000 - 500,000 VNĐ</small>
-                                    @error('base_price')
+                                    @error('price_seat_normal')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+                                    <label for="price_seat_vip" class="form-label">
+                                        <i class="bx bx-chair me-1"></i>Giá ghế VIP <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" name="price_seat_vip" id="price_seat_vip"
+                                               class="form-control @error('price_seat_vip') is-invalid @enderror"
+                                               min="10000" max="500000" step="1000"
+                                               value="{{ old('price_seat_vip', $showtime->price_seat_vip) }}" required>
+                                        <span class="input-group-text">VNĐ</span>
+                                    </div>
+                                    @error('price_seat_vip')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="price_seat_couple" class="form-label">
+                                        <i class="bx bx-chair me-1"></i>Giá ghế đôi <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" name="price_seat_couple" id="price_seat_couple"
+                                               class="form-control @error('price_seat_couple') is-invalid @enderror"
+                                               min="10000" max="500000" step="1000"
+                                               value="{{ old('price_seat_couple', $showtime->price_seat_couple) }}" required>
+                                        <span class="input-group-text">VNĐ</span>
+                                    </div>
+                                    @error('price_seat_couple')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Thêm trường available_seats -->
+                            <div class="row mb-4">
+                                <div class="col-md-4">
                                     <label for="available_seats" class="form-label">
                                         <i class="bx bx-chair me-1"></i>Số ghế trống <span class="text-danger">*</span>
                                     </label>
-                                    <div class="input-group">
-                                        <input type="number"
-                                               class="form-control @error('available_seats') is-invalid @enderror"
-                                               id="available_seats"
-                                               name="available_seats"
-                                               value="{{ old('available_seats', $showtime->available_seats) }}"
-                                               min="1"
-                                               required>
-                                        <span class="input-group-text">ghế</span>
-                                    </div>
-                                    <small class="text-muted" id="seatsInfo">Tổng số ghế: <span id="totalSeats">0</span></small>
+                                    <input type="number"
+                                           name="available_seats"
+                                           id="available_seats"
+                                           class="form-control @error('available_seats') is-invalid @enderror"
+                                           value="{{ old('available_seats', $showtime->available_seats) }}"
+                                           readonly>
                                     @error('available_seats')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -387,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateMovieInfo();
     updateScreenInfo();
     calculateShowDuration();
-    
+
     // Lưu giá trị ban đầu để reset
     saveInitialValues();
 });
@@ -396,11 +433,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function saveInitialValues() {
     const form = document.getElementById('editShowtimeForm');
     const initialValues = {};
-    
+
     form.querySelectorAll('input, select').forEach(field => {
         initialValues[field.name] = field.value;
     });
-    
+
     window.initialFormValues = initialValues;
 }
 
@@ -413,6 +450,7 @@ document.getElementById('movie_id').addEventListener('change', function() {
 // Cập nhật thông tin phòng chiếu khi chọn
 document.getElementById('screen_id').addEventListener('change', function() {
     updateScreenInfo();
+    validateForm();
 });
 
 // Tính toán thời gian chiếu khi thay đổi giờ
@@ -450,13 +488,15 @@ function updateScreenInfo() {
     const totalSeats = selectedOption ? selectedOption.dataset.totalSeats : 0;
     const cinemaName = selectedOption ? selectedOption.dataset.cinema : 'N/A';
 
-    document.getElementById('totalSeats').textContent = totalSeats;
+    // Cập nhật thông tin hiển thị
     document.getElementById('totalSeatsInfo').textContent = totalSeats + ' ghế';
     document.getElementById('cinemaName').textContent = cinemaName;
 
-    // Cập nhật max value cho available_seats
+    // Tự động cập nhật số ghế trống
     const availableSeatsInput = document.getElementById('available_seats');
-    availableSeatsInput.max = totalSeats;
+    if (availableSeatsInput) {
+        availableSeatsInput.value = totalSeats;
+    }
 }
 
 // Tính toán thời gian chiếu
@@ -530,7 +570,7 @@ function checkScheduleConflict() {
     .then(data => {
         const conflictWarning = document.getElementById('conflictWarning');
         const conflictMessage = document.getElementById('conflictMessage');
-        
+
         if (data.has_conflict) {
             conflictWarning.className = 'alert alert-danger';
             conflictMessage.textContent = data.message;
@@ -553,7 +593,7 @@ function resetForm() {
     if (confirm('Bạn có chắc chắn muốn khôi phục về giá trị ban đầu?')) {
         const form = document.getElementById('editShowtimeForm');
         const initialValues = window.initialFormValues;
-        
+
         if (initialValues) {
             Object.keys(initialValues).forEach(fieldName => {
                 const field = form.querySelector(`[name="${fieldName}"]`);
@@ -561,7 +601,7 @@ function resetForm() {
                     field.value = initialValues[fieldName];
                 }
             });
-            
+
             updateMovieInfo();
             updateScreenInfo();
             calculateShowDuration();
@@ -656,14 +696,14 @@ function showAlert(message, type) {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
-    
+
     // Remove existing alerts
     document.querySelectorAll('.alert:not(.alert-info)').forEach(alert => alert.remove());
-    
+
     // Add new alert
     const form = document.getElementById('editShowtimeForm');
     form.insertAdjacentHTML('afterbegin', alertHtml);
-    
+
     // Auto dismiss after 3 seconds
     setTimeout(function() {
         const alerts = document.querySelectorAll('.alert:not(.alert-info)');
@@ -674,6 +714,63 @@ function showAlert(message, type) {
         });
     }, 3000);
 }
+
+// Validate prices
+function validatePrices() {
+    const normalPrice = parseInt($('#price_seat_normal').val());
+    const vipPrice = parseInt($('#price_seat_vip').val());
+    const couplePrice = parseInt($('#price_seat_couple').val());
+
+    if (vipPrice <= normalPrice) {
+        showAlert('Giá ghế VIP phải cao hơn giá ghế thường', 'danger');
+        $('#price_seat_vip').addClass('is-invalid');
+        return false;
+    }
+
+    if (couplePrice <= vipPrice) {
+        showAlert('Giá ghế đôi phải cao hơn giá ghế VIP', 'danger');
+        $('#price_seat_couple').addClass('is-invalid');
+        return false;
+    }
+
+    return true;
+}
+
+// Validate form
+function validateForm() {
+    let isValid = true;
+    const requiredFields = document.querySelectorAll('[required]');
+
+    // Validate required fields
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+
+    // Validate available seats
+    const availableSeats = parseInt(document.getElementById('available_seats').value);
+    const screenSelect = document.getElementById('screen_id');
+    const selectedOption = screenSelect.options[screenSelect.selectedIndex];
+    const totalSeats = parseInt(selectedOption?.dataset.totalSeats || 0);
+
+    if (availableSeats > totalSeats) {
+        document.getElementById('available_seats').classList.add('is-invalid');
+        showAlert(`Số ghế trống không được vượt quá tổng số ghế (${totalSeats})`, 'danger');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+$('#editShowtimeForm').on('submit', function(e) {
+    if (!validateForm() || !validatePrices()) {
+        e.preventDefault();
+    }
+});
 </script>
 
 <style>

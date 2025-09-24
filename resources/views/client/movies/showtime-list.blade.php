@@ -6,7 +6,8 @@
                     <h3 class="cinema-name">{{ $cinemaName }}</h3>
                     @if($cinemaShowtimes->first() && $cinemaShowtimes->first()->screen && $cinemaShowtimes->first()->screen->cinema)
                         <div class="cinema-info">
-                            📍 {{ $cinemaShowtimes->first()->screen->cinema->address ?? $cinemaShowtimes->first()->screen->cinema->city }}
+                            📍
+                            {{ $cinemaShowtimes->first()->screen->cinema->address ?? $cinemaShowtimes->first()->screen->cinema->city }}
                         </div>
                     @endif
                 </div>
@@ -14,8 +15,8 @@
 
             <div class="showtimes-grid">
                 @foreach($cinemaShowtimes as $showtime)
-                    <a href="{{ route('booking.seatSelection', $showtime->showtime_id) }}"
-                       class="showtime-card">
+                    <a @auth href="{{ route('booking.seatSelection', $showtime->showtime_id) }}" @else
+                    href="{{ route('auth.login') }}" @endauth class="showtime-card">
                         <div class="showtime-time">
                             {{ date('H:i', strtotime($showtime->show_time)) }}
                         </div>
@@ -42,7 +43,9 @@
 @else
     <div class="empty-state">
         <svg class="empty-icon" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+            <path fill-rule="evenodd"
+                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                clip-rule="evenodd"></path>
         </svg>
         <div class="empty-title">Không có lịch chiếu</div>
         <div class="empty-message">
@@ -59,8 +62,15 @@
     }
 
     @keyframes slideUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .cinema-header {

@@ -34,9 +34,12 @@
                                         <div class="d-flex align-items-center">
                                             @php
                                                 $posterPath = $showtime->movie->poster_url ?? null;
-                                                $posterUrl = $posterPath ? asset('storage/' . $posterPath) : asset('assets/img/default/cinema.jpg');
+                                                $posterUrl = $posterPath
+                                                    ? asset('storage/' . $posterPath)
+                                                    : asset('assets/img/default/cinema.jpg');
                                             @endphp
-                                            <img src="{{ $posterUrl }}" alt="Poster" class="rounded me-3" style="width: 48px; height: 48px; object-fit: cover;">
+                                            <img src="{{ $posterUrl }}" alt="Poster" class="rounded me-3"
+                                                style="width: 48px; height: 48px; object-fit: cover;">
                                             <div>
                                                 <h6 class="mb-0">{{ $showtime->movie->title ?? 'N/A' }}</h6>
                                                 <small class="text-muted">{{ $showtime->movie->duration ?? 0 }} phút</small>
@@ -64,9 +67,18 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="fw-bold text-primary">
-                                            {{ number_format($showtime->base_price ?? 0) }} VNĐ
-                                        </span>
+                                        <div class="d-flex flex-column">
+                                            <small class="text-muted mb-1">Giá vé:</small>
+                                            <span class="badge bg-label-primary mb-1">
+                                                Thường: {{ number_format($showtime->price_seat_normal) }} VNĐ
+                                            </span>
+                                            <span class="badge bg-label-warning mb-1">
+                                                VIP: {{ number_format($showtime->price_seat_vip) }} VNĐ
+                                            </span>
+                                            <span class="badge bg-label-danger">
+                                                Ghế đôi: {{ number_format($showtime->price_seat_couple) }} VNĐ
+                                            </span>
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -74,20 +86,33 @@
                                                 @php
                                                     $totalSeats = $showtime->screen->total_seats ?? 0;
                                                     $availableSeats = $showtime->available_seats ?? 0;
-                                                    $percentage = $totalSeats > 0 ? ($availableSeats / $totalSeats) * 100 : 0;
+                                                    $percentage =
+                                                        $totalSeats > 0 ? ($availableSeats / $totalSeats) * 100 : 0;
                                                 @endphp
                                                 <div class="progress-bar bg-{{ $percentage > 50 ? 'success' : ($percentage > 20 ? 'warning' : 'danger') }}"
-                                                     style="width: {{ $percentage }}%"></div>
+                                                    style="width: {{ $percentage }}%"></div>
                                             </div>
-                                            <span class="text-muted small">{{ $availableSeats }}/{{ $totalSeats }}</span>
+                                            <span
+                                                class="text-muted small">{{ $availableSeats }}/{{ $totalSeats }}</span>
                                         </div>
                                     </td>
                                     <td>
                                         @php
-                                            $now = now();
-                                            $showDateTime = \Carbon\Carbon::parse($showtime->show_date . ' ' . $showtime->show_time);
-                                            $endDateTime = \Carbon\Carbon::parse($showtime->show_date . ' ' . $showtime->end_time);
 
+                                            $now = now();
+
+
+                                            // Xử lý thời gian chiếu bắt đầu
+                                            $showDateTime = \Carbon\Carbon::parse(
+                                                $showtime->show_date,
+                                            );
+
+                                            // Xử lý thời gian chiếu kết thúc
+                                            $endDateTime = \Carbon\Carbon::parse(
+                                                $showtime->show_date ,
+                                            );
+
+                                            // Kiểm tra trạng thái
                                             if ($now < $showDateTime) {
                                                 $status = 'Sắp chiếu';
                                                 $statusClass = 'warning';
@@ -99,8 +124,10 @@
                                                 $statusClass = 'secondary';
                                             }
                                         @endphp
+
+
                                         <span class="badge bg-label-{{ $statusClass }}">
-                                            {{ $status }}
+                                            {{ $showtime->status }}
                                         </span>
                                     </td>
                                     <td>
@@ -110,11 +137,12 @@
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="{{ route('admin.showtimes.edit', $showtime->showtime_id) }}">
+                                                <a class="dropdown-item"
+                                                    href="{{ route('admin.showtimes.edit', $showtime->showtime_id) }}">
                                                     <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa
                                                 </a>
                                                 <a class="dropdown-item" href="javascript:void(0);"
-                                                   onclick="viewShowtimeDetails({{ $showtime->showtime_id }})">
+                                                    onclick="viewShowtimeDetails({{ $showtime->showtime_id }})">
                                                     <i class="bx bx-show me-1"></i> Xem chi tiết
                                                 </a>
                                                 <div class="dropdown-divider"></div>
@@ -167,70 +195,76 @@
 @endsection
 
 @push('scripts')
-<script>
-    let table = new DataTable('#showtimesTable', {
-        responsive: true,
-        order: [[2, 'asc'], [3, 'asc']], // Sắp xếp theo ngày và giờ
-        columnDefs: [
-            { orderable: false, targets: 8 } // Cột thao tác không sắp xếp được
-        ]
-    });
+    <script>
+        let table = new DataTable('#showtimesTable', {
+            responsive: true,
+            order: [
+                [2, 'asc'],
+                [3, 'asc']
+            ], // Sắp xếp theo ngày và giờ
+            columnDefs: [{
+                    orderable: false,
+                    targets: 8
+                } // Cột thao tác không sắp xếp được
+            ]
+        });
 
-    function refreshTable() {
-        table.ajax.reload();
-        location.reload();
-    }
+        function refreshTable() {
+            table.ajax.reload();
+            location.reload();
+        }
 
-    function viewShowtimeDetails(showtimeId) {
-        // Hiển thị loading
-        $('#showtimeDetailsContent').html('<div class="text-center"><i class="bx bx-loader-alt bx-spin bx-lg"></i><p>Đang tải...</p></div>');
-        $('#showtimeDetailsModal').modal('show');
+        function viewShowtimeDetails(showtimeId) {
+            // Hiển thị loading
+            $('#showtimeDetailsContent').html(
+                '<div class="text-center"><i class="bx bx-loader-alt bx-spin bx-lg"></i><p>Đang tải...</p></div>');
+            $('#showtimeDetailsModal').modal('show');
 
-        // Load chi tiết bằng AJAX (có thể implement sau)
-        setTimeout(() => {
-            $('#showtimeDetailsContent').html(`
+            // Load chi tiết bằng AJAX (có thể implement sau)
+            setTimeout(() => {
+                $('#showtimeDetailsContent').html(`
                 <div class="alert alert-info">
                     <i class="bx bx-info-circle me-2"></i>
                     Tính năng xem chi tiết sẽ được phát triển trong phiên bản tiếp theo.
                 </div>
             `);
-        }, 1000);
-    }
-
-    function deleteShowtime(showtimeId, movieTitle) {
-        if (confirm(`Bạn có chắc chắn muốn xóa lịch chiếu phim "${movieTitle}"?`)) {
-            // Tạo form ẩn để submit
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/admin/showtimes/${showtimeId}`;
-            form.style.display = 'none';
-
-            // Thêm CSRF token
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            form.appendChild(csrfToken);
-
-            // Thêm method DELETE
-            const methodField = document.createElement('input');
-            methodField.type = 'hidden';
-            methodField.name = '_method';
-            methodField.value = 'DELETE';
-            form.appendChild(methodField);
-
-            document.body.appendChild(form);
-            form.submit();
+            }, 1000);
         }
-    }
 
-    // Hiển thị thông báo thành công nếu có
-    @if(session('success'))
-        // Tạo toast notification
-        const toast = document.createElement('div');
-        toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
-        toast.style.zIndex = '9999';
-        toast.innerHTML = `
+        function deleteShowtime(showtimeId, movieTitle) {
+            if (confirm(`Bạn có chắc chắn muốn xóa lịch chiếu phim "${movieTitle}"?`)) {
+                // Tạo form ẩn để submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/showtimes/${showtimeId}`;
+                form.style.display = 'none';
+
+                // Thêm CSRF token
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
+
+                // Thêm method DELETE
+                const methodField = document.createElement('input');
+                methodField.type = 'hidden';
+                methodField.name = '_method';
+                methodField.value = 'DELETE';
+                form.appendChild(methodField);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Hiển thị thông báo thành công nếu có
+        @if (session('success'))
+            // Tạo toast notification
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
             <div class="d-flex">
                 <div class="toast-body">
                     <i class="bx bx-check-circle me-2"></i>
@@ -239,15 +273,15 @@
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-        document.body.appendChild(toast);
+            document.body.appendChild(toast);
 
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
 
-        // Tự động xóa toast sau 5 giây
-        setTimeout(() => {
-            toast.remove();
-        }, 5000);
-    @endif
-</script>
+            // Tự động xóa toast sau 5 giây
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        @endif
+    </script>
 @endpush

@@ -42,7 +42,9 @@ class ShowtimeController extends Controller
             'show_date' => 'required|date|after_or_equal:today',
             'show_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:show_time',
-            'base_price' => 'required|numeric|min:10000|max:500000',
+            'price_seat_normal' => 'required|numeric|min:10000|max:500000',
+            'price_seat_vip' => 'required|numeric|min:10000|max:500000',
+            'price_seat_couple' => 'required|numeric|min:10000|max:500000',
             'available_seats' => 'required|integer|min:1',
         ], [
             'movie_id.required' => 'Vui lòng chọn phim',
@@ -55,14 +57,25 @@ class ShowtimeController extends Controller
             'show_time.date_format' => 'Giờ bắt đầu không đúng định dạng',
             'end_time.required' => 'Vui lòng chọn giờ kết thúc',
             'end_time.after' => 'Giờ kết thúc phải sau giờ bắt đầu',
-            'base_price.required' => 'Vui lòng nhập giá vé',
-            'base_price.numeric' => 'Giá vé phải là số',
-            'base_price.min' => 'Giá vé tối thiểu là 10,000 VNĐ',
-            'base_price.max' => 'Giá vé tối đa là 500,000 VNĐ',
+            'price_seat_normal.required' => 'Vui lòng nhập giá vé thường',
+            'price_seat_vip.required' => 'Vui lòng nhập giá vé VIP',
+            'price_seat_couple.required' => 'Vui lòng nhập giá vé cặp',
+            'price_seat_normal.min' => 'Giá vé thường tối thiểu là 10,000 VNĐ',
+            'price_seat_vip.min' => 'Giá vé VIP tối thiểu là 10,000 VNĐ',
+            'price_seat_couple.min' => 'Giá vé cặp tối thiểu là 10,000 VNĐ',
             'available_seats.required' => 'Vui lòng nhập số ghế trống',
             'available_seats.integer' => 'Số ghế trống phải là số nguyên',
             'available_seats.min' => 'Số ghế trống phải lớn hơn 0',
         ]);
+
+        // Kiểm tra logic giá vé
+        if ($request->price_seat_vip <= $request->price_seat_normal) {
+            return back()->withErrors(['price_seat_vip' => 'Giá vé VIP phải cao hơn giá vé thường'])->withInput();
+        }
+
+        if ($request->price_seat_couple <= $request->price_seat_vip) {
+            return back()->withErrors(['price_seat_couple' => 'Giá vé cặp phải cao hơn giá vé VIP'])->withInput();
+        }
 
         // Kiểm tra xung đột lịch chiếu
         $conflict = $this->checkScheduleConflict(
@@ -86,11 +99,11 @@ class ShowtimeController extends Controller
         $startTime = Carbon::parse($request->show_time);
         $endTime = Carbon::parse($request->end_time);
         $duration = $endTime->diffInMinutes($startTime);
-        
+
         if ($duration < 30) {
             return back()->withErrors(['end_time' => 'Thời gian chiếu phải ít nhất 30 phút.'])->withInput();
         }
-        
+
         if ($duration > 240) {
             return back()->withErrors(['end_time' => 'Thời gian chiếu không được vượt quá 4 giờ.'])->withInput();
         }
@@ -104,13 +117,16 @@ class ShowtimeController extends Controller
                 'show_date' => $request->show_date,
                 'show_time' => $request->show_time,
                 'end_time' => $request->end_time,
-                'base_price' => $request->base_price,
+                'price_seat_normal' => $request->price_seat_normal,
+                'price_seat_vip' => $request->price_seat_vip,
+                'price_seat_couple' => $request->price_seat_couple,
                 'available_seats' => $request->available_seats,
-                'status' => 'active'
+                'status' => 'Active'
             ]);
 
             DB::commit();
-            return redirect()->route('admin.showtimes.index')->with('success', 'Lịch chiếu đã được tạo thành công!');
+            return redirect()->route('admin.showtimes.index')
+                ->with('success', 'Lịch chiếu đã được tạo thành công!');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -127,6 +143,8 @@ class ShowtimeController extends Controller
             ->orderBy('title')
             ->get();
         $screens = Screen::with('cinema')->orderBy('screen_name')->get();
+
+
         return view('admin.showtimes.edit', compact('showtime', 'movies', 'screens'));
     }
 
@@ -141,7 +159,9 @@ class ShowtimeController extends Controller
             'show_date' => 'required|date',
             'show_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:show_time',
-            'base_price' => 'required|numeric|min:10000|max:500000',
+            'price_seat_normal' => 'required|numeric|min:10000|max:500000',
+            'price_seat_vip' => 'required|numeric|min:10000|max:500000',
+            'price_seat_couple' => 'required|numeric|min:10000|max:500000',
             'available_seats' => 'required|integer|min:1',
         ], [
             'movie_id.required' => 'Vui lòng chọn phim',
@@ -152,14 +172,19 @@ class ShowtimeController extends Controller
             'show_time.required' => 'Vui lòng chọn giờ bắt đầu',
             'end_time.required' => 'Vui lòng chọn giờ kết thúc',
             'end_time.after' => 'Giờ kết thúc phải sau giờ bắt đầu',
-            'base_price.required' => 'Vui lòng nhập giá vé',
-            'base_price.numeric' => 'Giá vé phải là số',
-            'base_price.min' => 'Giá vé tối thiểu là 10,000 VNĐ',
-            'base_price.max' => 'Giá vé tối đa là 500,000 VNĐ',
-            'available_seats.required' => 'Vui lòng nhập số ghế trống',
-            'available_seats.integer' => 'Số ghế trống phải là số nguyên',
-            'available_seats.min' => 'Số ghế trống phải lớn hơn 0',
+            'price_seat_normal.required' => 'Vui lòng nhập giá vé thường',
+            'price_seat_vip.required' => 'Vui lòng nhập giá vé VIP',
+            'price_seat_couple.required' => 'Vui lòng nhập giá vé cặp',
         ]);
+
+        // Kiểm tra logic giá vé
+        if ($request->price_seat_vip <= $request->price_seat_normal) {
+            return back()->withErrors(['price_seat_vip' => 'Giá vé VIP phải cao hơn giá vé thường'])->withInput();
+        }
+
+        if ($request->price_seat_couple <= $request->price_seat_vip) {
+            return back()->withErrors(['price_seat_couple' => 'Giá vé cặp phải cao hơn giá vé VIP'])->withInput();
+        }
 
         // Kiểm tra xung đột lịch chiếu (loại trừ lịch chiếu hiện tại)
         $conflict = $this->checkScheduleConflict(
@@ -184,11 +209,11 @@ class ShowtimeController extends Controller
         $startTime = Carbon::parse($request->show_time);
         $endTime = Carbon::parse($request->end_time);
         $duration = $endTime->diffInMinutes($startTime);
-        
+
         if ($duration < 30) {
             return back()->withErrors(['end_time' => 'Thời gian chiếu phải ít nhất 30 phút.'])->withInput();
         }
-        
+
         if ($duration > 240) {
             return back()->withErrors(['end_time' => 'Thời gian chiếu không được vượt quá 4 giờ.'])->withInput();
         }
@@ -202,12 +227,15 @@ class ShowtimeController extends Controller
                 'show_date' => $request->show_date,
                 'show_time' => $request->show_time,
                 'end_time' => $request->end_time,
-                'base_price' => $request->base_price,
+                'price_seat_normal' => $request->price_seat_normal,
+                'price_seat_vip' => $request->price_seat_vip,
+                'price_seat_couple' => $request->price_seat_couple,
                 'available_seats' => $request->available_seats,
             ]);
 
             DB::commit();
-            return redirect()->route('admin.showtimes.index')->with('success', 'Lịch chiếu đã được cập nhật thành công!');
+            return redirect()->route('admin.showtimes.index')
+                ->with('success', 'Lịch chiếu đã được cập nhật thành công!');
 
         } catch (\Exception $e) {
             DB::rollback();

@@ -36,7 +36,7 @@ class Pricing extends Model
     }
 
     // Accessor để lấy tên tiếng Việt của loại ngày
-    public function getDayTypeNameAttribute()
+    public function getDayTypeNameAttribute(): mixed
     {
         return match($this->day_type) {
             'Weekday' => 'Ngày thường',

@@ -21,9 +21,20 @@ class Showtime extends Model
         'show_date',
         'show_time',
         'end_time',
-        'base_price',
+        'price_seat_normal',
+        'price_seat_vip',
+        'price_seat_couple',
         'available_seats',
         'status'
+    ];
+
+    protected $casts = [
+        'price_seat_normal' => 'decimal:2',
+        'price_seat_vip' => 'decimal:2',
+        'price_seat_couple' => 'decimal:2',
+        'show_date' => 'date',
+        'show_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i'
     ];
 
     // Quan hệ với bảng Movie (Mỗi suất chiếu thuộc về một bộ phim)
@@ -36,5 +47,15 @@ class Showtime extends Model
     public function screen()
     {
         return $this->belongsTo(Screen::class, 'screen_id');
+    }
+
+    // Helper method để lấy giá theo loại ghế
+    public function getPriceByType($seatType)
+    {
+        return match($seatType) {
+            'VIP' => $this->price_seat_vip,
+            'Couple' => $this->price_seat_couple,
+            default => $this->price_seat_normal,
+        };
     }
 }

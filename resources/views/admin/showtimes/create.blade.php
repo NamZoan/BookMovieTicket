@@ -54,7 +54,7 @@
                                     <select name="movie_id" id="movie_id" class="form-select @error('movie_id') is-invalid @enderror" required>
                                 <option value="">-- Chọn phim --</option>
                                 @foreach($movies as $movie)
-                                        <option value="{{ $movie->movie_id }}" 
+                                        <option value="{{ $movie->movie_id }}"
                                                 data-duration="{{ $movie->duration }}"
                                                 data-status="{{ $movie->status }}">
                                             {{ $movie->title }} ({{ $movie->duration }} phút) - {{ $movie->status }}
@@ -122,35 +122,58 @@
 
                             <!-- Thông tin giá vé và ghế -->
                             <div class="row mb-4">
-                        <div class="col-md-6">
-                                    <label for="base_price" class="form-label">
-                                        <i class="bx bx-money me-1"></i>Giá vé (VNĐ) <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                                        <input type="number" name="base_price" id="base_price" class="form-control @error('base_price') is-invalid @enderror"
-                                   min="10000" max="500000" step="1000" required>
-                                        <span class="input-group-text">VNĐ</span>
-                                    </div>
-                                    <small class="text-muted">Giá vé từ 10,000 - 500,000 VNĐ</small>
-                                    @error('base_price')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                        </div>
+                        <div class="col-md-4">
+        <label for="price_seat_normal" class="form-label">
+            <i class="bx bx-chair me-1"></i>Giá ghế thường <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <input type="number" name="price_seat_normal" id="price_seat_normal"
+                   class="form-control @error('price_seat_normal') is-invalid @enderror"
+                   min="10000" max="500000" step="1000"
+                   value="{{ old('price_seat_normal') }}" required>
+            <span class="input-group-text">VNĐ</span>
+        </div>
+        @error('price_seat_normal')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-                        <div class="col-md-6">
-                                    <label for="available_seats" class="form-label">
-                                        <i class="bx bx-chair me-1"></i>Số ghế có sẵn <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group">
-                            <input type="number" name="available_seats" id="available_seats"
-                                               class="form-control @error('available_seats') is-invalid @enderror" readonly>
-                                        <span class="input-group-text">ghế</span>
-                                    </div>
-                                    <small class="text-muted" id="seatsInfo">Tổng số ghế: <span id="totalSeats">0</span></small>
-                                    @error('available_seats')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+    <div class="col-md-4">
+        <label for="price_seat_vip" class="form-label">
+            <i class="bx bx-chair me-1"></i>Giá ghế VIP <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <input type="number" name="price_seat_vip" id="price_seat_vip"
+                   class="form-control @error('price_seat_vip') is-invalid @enderror"
+                   min="10000" max="500000" step="1000"
+                   value="{{ old('price_seat_vip') }}" required>
+            <span class="input-group-text">VNĐ</span>
+        </div>
+        @error('price_seat_vip')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-4">
+        <label for="price_seat_couple" class="form-label">
+            <i class="bx bx-chair me-1"></i>Giá ghế đôi <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+            <input type="number" name="price_seat_couple" id="price_seat_couple"
+                   class="form-control @error('price_seat_couple') is-invalid @enderror"
+                   min="10000" max="500000" step="1000"
+                   value="{{ old('price_seat_couple') }}" required>
+            <span class="input-group-text">VNĐ</span>
+        </div>
+        @error('price_seat_couple')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+                            <!-- Thêm trường ẩn available_seats -->
+                            <div class="row mb-4">
+                                <input type="hidden" name="available_seats" id="available_seats" value="">
                             </div>
 
                             <!-- Conflict Warning -->
@@ -295,7 +318,7 @@ $(document).ready(function() {
 
     // Form submission
     $('#createShowtimeForm').on('submit', function(e) {
-        if (!validateForm()) {
+        if (!validateForm() || !validatePrices()) {
             e.preventDefault();
         }
     });
@@ -308,8 +331,8 @@ function updateScreenInfo() {
     const totalSeats = selectedOption.data('seats') || 0;
     const cinemaName = selectedOption.data('cinema') || 'N/A';
 
+    // Cập nhật available_seats bằng total_seats
     $('#available_seats').val(totalSeats);
-    $('#totalSeats').text(totalSeats);
     $('#totalSeatsInfo').text(totalSeats + ' ghế');
     $('#cinemaName').text(cinemaName);
 }
@@ -446,21 +469,34 @@ function validateForm() {
 
     // Kiểm tra số ghế
     const availableSeats = parseInt($('#available_seats').val());
-    const totalSeats = parseInt($('#totalSeats').text());
-
-    if (availableSeats > totalSeats) {
-        $('#available_seats').addClass('is-invalid');
+    if (!availableSeats || availableSeats <= 0) {
+        showAlert('Vui lòng chọn phòng chiếu', 'danger');
+        $('#screen_id').addClass('is-invalid');
         isValid = false;
     }
 
-    if (!isValid) {
-        const firstError = $('#createShowtimeForm .is-invalid').first();
-        if (firstError.length) {
-            firstError[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+    return isValid;
+}
+
+// Validation giá vé
+function validatePrices() {
+    const normalPrice = parseInt($('#price_seat_normal').val());
+    const vipPrice = parseInt($('#price_seat_vip').val());
+    const couplePrice = parseInt($('#price_seat_couple').val());
+
+    if (vipPrice <= normalPrice) {
+        showAlert('Giá ghế VIP phải cao hơn giá ghế thường', 'danger');
+        $('#price_seat_vip').addClass('is-invalid');
+        return false;
     }
 
-    return isValid;
+    if (couplePrice <= vipPrice) {
+        showAlert('Giá ghế đôi phải cao hơn giá ghế VIP', 'danger');
+        $('#price_seat_couple').addClass('is-invalid');
+        return false;
+    }
+
+    return true;
 }
 
 // Show alert
@@ -471,13 +507,13 @@ function showAlert(message, type) {
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
-    
+
     // Remove existing alerts
     $('.alert').remove();
-    
+
     // Add new alert
     $('#createShowtimeForm').prepend(alertHtml);
-    
+
     // Auto dismiss after 3 seconds
     setTimeout(function() {
         $('.alert').fadeOut();

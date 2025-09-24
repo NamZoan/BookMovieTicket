@@ -1,5 +1,6 @@
 <?php
 
+use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\HomeController;
@@ -8,8 +9,9 @@ use App\Http\Controllers\CinemaController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SocialiteController;
 
-require __DIR__.'/admin.php';
+require __DIR__ . '/admin.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +87,8 @@ Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('forgot-password.post');
         Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password.post');
+        Route::get('/google/redirect', [SocialiteController::class, 'redirectToGoogle'])->name('google.redirect');
+        Route::get('/google/call-back', [SocialiteController::class, 'handleGoogleCallback'])->name('google.callback');
     });
 
     // Authenticated routes
@@ -99,7 +103,7 @@ Route::middleware('auth')->prefix('booking')->name('booking.')->group(function (
     Route::post('/store', [BookingController::class, 'store'])->name('store');
     Route::get('/seat-selection/{showtime}', [BookingController::class, 'seatSelection'])->name('seatSelection');
     Route::post('/select-seats', [BookingController::class, 'selectSeats'])->name('select-seats');
-    Route::get('/payment/{booking}', [BookingController::class, 'payment'])->name('payment');
+    Route::get('/payment/{showtime}', [BookingController::class, 'payment'])->name('payment');
     Route::post('/process-payment', [BookingController::class, 'processPayment'])->name('process-payment');
     Route::get('/confirmation/{booking}', [BookingController::class, 'confirmation'])->name('confirmation');
     Route::get('/ticket/{booking}', [BookingController::class, 'ticket'])->name('ticket');
@@ -107,7 +111,7 @@ Route::middleware('auth')->prefix('booking')->name('booking.')->group(function (
 
     // AJAX Routes for booking
     Route::get('/available-seats/{showtime}', [BookingController::class, 'getAvailableSeats'])->name('available-seats');
-    Route::post('/hold-seats', [BookingController::class, 'holdSeats'])->name('hold-seats');
+    Route::post('/hold-seats', [BookingController::class, 'holdSeat'])->name('hold-seats');
     Route::post('/release-seats', [BookingController::class, 'releaseSeats'])->name('release-seats');
     Route::get('/pricing/{showtime}', [BookingController::class, 'getPricing'])->name('pricing');
 });

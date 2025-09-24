@@ -33,4 +33,9 @@ class FoodItem extends Model
         'is_available' => 'boolean',
         'created_at'   => 'datetime',
     ];
+
+    public function bookingFoods()
+    {
+        return $this->hasMany(BookingFood::class, 'item_id', 'item_id');
+    }
 }

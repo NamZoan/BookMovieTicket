@@ -31,6 +31,8 @@ class User extends Authenticatable
         'loyalty_points',
         'user_type',
         'is_active',
+        'provider',
+        'provider_id',
     ];
 
     /**
@@ -77,5 +79,10 @@ class User extends Authenticatable
     public function isActive()
     {
         return $this->is_active == 1;
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'user_id', 'user_id');
     }
 }
