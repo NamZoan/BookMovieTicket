@@ -32,12 +32,13 @@ class BookingController extends Controller
                     $query->orderBy('row_name')->orderBy('seat_number');
                 }
             ]);
-            // Check if showtime is available
-            if (!$this->isShowtimeAvailable($showtime)) {
-                return redirect()->route('movies.showtimes', $showtime->movie_id)
-                    ->with('error', 'Suất chiếu này không còn khả dụng.');
-            }
 
+
+            // Check if showtime is available
+            // if (!$this->isShowtimeAvailable($showtime)) {
+            //     return redirect()->route('movies.showtimes', $showtime->movie_id)
+            //         ->with('error', 'Suất chiếu này không còn khả dụng.');
+            // }
             // Get booked seats for this showtime
             $bookedSeats = $this->getBookedSeats($showtime->showtime_id);
 
@@ -50,13 +51,17 @@ class BookingController extends Controller
                 ->orderBy('name')
                 ->get()
                 ->groupBy('category');
-
             // Get pricing information
-            $pricing = $this->getPricingInfo($showtime);
+
+
+            $pricing = [
+                'Normal' => $showtime->price_seat_normal,
+                'VIP' => $showtime->price_seat_vip,
+                'Couple' => $showtime->price_seat_couple
+            ];
 
             // Generate seat map
             $seatMap = $this->generateSeatMap($showtime->screen->seats, $bookedSeats, $heldSeats);
-
             return view('client.booking.seat-selection', compact(
                 'showtime',
                 'seatMap',
@@ -85,6 +90,7 @@ class BookingController extends Controller
             'payment_method' => 'required|in:Cash,Credit Card,Banking,E-Wallet,Loyalty Points'
         ]);
 
+        dd('123');
         // Parse JSON data
         $selectedSeats = json_decode($request->selected_seats, true);
         $foodItems = json_decode($request->food_items, true) ?? [];
@@ -561,14 +567,15 @@ class BookingController extends Controller
 
     // ==================== PRIVATE HELPER METHODS ====================
 
-    private function isShowtimeAvailable(Showtime $showtime)
-    {
-        $showtimeDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $showtime->show_date . ' ' . $showtime->show_time);
+    // private function isShowtimeAvailable(Showtime $showtime)
+    // {
+    //     dd($showtime);
+    //     $showtimeDateTime = Carbon::createFromFormat('Y-m-d H:i:s', $showtime->show_date . ' ' . $showtime->show_time);
 
-        return $showtime->status === 'Active' &&
-               $showtime->available_seats > 0 &&
-               $showtimeDateTime->gt(Carbon::now()->addMinutes(10));
-    }
+    //     return $showtime->status === 'Active' &&
+    //            $showtime->available_seats > 0 &&
+    //            $showtimeDateTime->gt(Carbon::now()->addMinutes(10));
+    // }
 
    private function getBookedSeats($showtime_id)
     {
@@ -669,43 +676,6 @@ class BookingController extends Controller
         return $seatMap;
     }
 
-    private function getPricingInfo(Showtime $showtime)
-    {
-        // Simplified pricing calculation
-        // In a real application, you would query the pricing table
-        $dayOfWeek = Carbon::createFromFormat('Y-m-d', $showtime->show_date)->dayOfWeek;
-        $hour = (int) date('H', strtotime($showtime->show_time));
-
-        $dayType = ($dayOfWeek >= 1 && $dayOfWeek <= 5) ? 'Weekday' : 'Weekend';
-
-        if ($hour >= 6 && $hour < 12) {
-            $timeSlot = 'Morning';
-            $multiplier = 0.8;
-        } elseif ($hour >= 12 && $hour < 18) {
-            $timeSlot = 'Afternoon';
-            $multiplier = 1.0;
-        } elseif ($hour >= 18 && $hour < 22) {
-            $timeSlot = 'Evening';
-            $multiplier = 1.2;
-        } else {
-            $timeSlot = 'Late Night';
-            $multiplier = 1.5;
-        }
-
-        $basePrices = [
-            'Normal' => $showtime->base_price * $multiplier,
-            'VIP' => $showtime->base_price * $multiplier * 1.5,
-            'Couple' => $showtime->base_price * $multiplier * 2,
-            'Disabled' => $showtime->base_price * $multiplier * 0.8,
-        ];
-
-        return [
-            'base_price' => $showtime->base_price,
-            'day_type' => $dayType,
-            'time_slot' => $timeSlot,
-            'prices' => $basePrices
-        ];
-    }
 
     private function calculateSeatPrices($seats, $showtime)
     {

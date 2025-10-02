@@ -1,5 +1,7 @@
 @extends('client.layouts.app')
+
 @section('title', 'Đặt vé xem phim')
+
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,15 +20,6 @@
             --warning: #ffc107;
             --danger: #dc3545;
             --info: #0dcaf0;
-            --gray-100: #f8f9fa;
-            --gray-200: #e9ecef;
-            --gray-300: #dee2e6;
-            --gray-400: #ced4da;
-            --gray-500: #adb5bd;
-            --gray-600: #6c757d;
-            --gray-700: #495057;
-            --gray-800: #343a40;
-            --gray-900: #212529;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
             --border-radius: 12px;
@@ -38,8 +31,6 @@
             --text-color: var(--text-light);
             --card-bg: #1e1e1e;
             --border-color: #2d2d2d;
-            --theme-bg: #1e1e1e;
-            --theme-border: #2d2d2d;
         }
 
         .light-theme {
@@ -47,14 +38,6 @@
             --text-color: var(--text-dark);
             --card-bg: #ffffff;
             --border-color: var(--border-light);
-            --theme-bg: #f3ebeb;
-            --theme-border: #dee2e6;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
 
         body {
@@ -62,73 +45,27 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             transition: var(--transition);
-            line-height: 1.6;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        /* Header Styles */
-        header {
-            background-color: var(--card-bg);
+        /* Movie Info Card */
+        .movie-info-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
             box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 15px 0;
         }
 
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .movie-poster {
+            width: 100%;
+            border-radius: 8px;
+            object-fit: cover;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 1.5rem;
+        .movie-details {
+            line-height: 2;
         }
 
-        .logo i {
-            margin-right: 10px;
-            font-size: 1.8rem;
-        }
-
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--bg-color);
-        }
-
-        .user-icon {
-            font-size: 1.5rem;
-            color: var(--text-color);
-            text-decoration: none;
-        }
-
-        /* Progress Bar */
+        /* Progress Steps */
         .progress-container {
             margin: 30px 0;
         }
@@ -138,7 +75,6 @@
             justify-content: space-between;
             position: relative;
             margin-bottom: 30px;
-            counter-reset: step;
         }
 
         .progress-steps::before {
@@ -148,7 +84,7 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background-color: var(--gray-300);
+            background-color: #dee2e6;
             z-index: 1;
         }
 
@@ -177,8 +113,8 @@
             justify-content: center;
             width: 34px;
             height: 34px;
-            background-color: var(--gray-300);
-            color: var(--gray-700);
+            background-color: #dee2e6;
+            color: #495057;
             border-radius: 50%;
             margin: 0 auto 10px;
             font-weight: 600;
@@ -200,13 +136,12 @@
             font-weight: 500;
         }
 
-        /* Form Steps */
+        /* Booking Form */
         .booking-form {
             background-color: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 20px;
         }
 
         .form-step {
@@ -232,118 +167,25 @@
 
         .step-title {
             font-size: 1.5rem;
-            margin-bottom: 20px;
             color: var(--primary);
             font-weight: 600;
         }
 
-        /* Date Selection */
-        .date-carousel {
-            display: flex;
-            overflow-x: auto;
-            gap: 15px;
-            padding: 10px 5px;
-            margin-bottom: 30px;
-            scrollbar-width: thin;
-        }
-
-        .date-cell {
-            min-width: 80px;
-            height: 80px;
-            background-color: var(--bg-color);
-            border-radius: var(--border-radius);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
-            flex-shrink: 0;
-        }
-
-        .date-cell.selected {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .date-numeric {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .date-day {
-            font-size: 0.9rem;
-        }
-
-        /* Show Times */
-        .show-times {
-            margin-top: 20px;
-        }
-
-        .screen-times {
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: var(--bg-color);
-            border-radius: var(--border-radius);
-        }
-
-        .screen-title {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .time-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .time-btn {
-            padding: 10px 15px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .time-btn:hover {
-            border-color: var(--primary);
-        }
-
-        .time-btn.selected {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
         /* Seat Selection */
         .seat-selection-container {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            gap: 20px;
         }
 
         @media (min-width: 992px) {
             .seat-selection-container {
-                flex-direction: row;
-            }
-
-            .seat-map-container {
-                flex: 2;
-            }
-
-            .selected-seats-container {
-                flex: 1;
+                grid-template-columns: 2fr 1fr;
             }
         }
 
         .seat-map {
             background-color: var(--bg-color);
-            padding: 10px;
+            padding: 20px;
             border-radius: var(--border-radius);
             text-align: center;
         }
@@ -356,10 +198,9 @@
             margin-bottom: 30px;
             font-weight: 600;
             position: relative;
-            overflow: hidden;
         }
 
-        .screen-indicator:after {
+        .screen-indicator::after {
             content: '';
             position: absolute;
             bottom: 0;
@@ -367,7 +208,6 @@
             right: 0;
             height: 5px;
             background: linear-gradient(to right, #ff0000, #ff5a00, #ff9a00, #ffce00, #ff9a00, #ff5a00, #ff0000);
-            border-radius: 0 0 4px 4px;
         }
 
         .seats-container {
@@ -377,7 +217,8 @@
         .seat-row {
             display: flex;
             justify-content: center;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            gap: 4px;
         }
 
         .seat {
@@ -388,70 +229,42 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             transition: all 0.3s ease;
             position: relative;
-            margin: 4px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* Ghế thường */
         .seat.normal {
             background: linear-gradient(to bottom, #5C9CE5, #4A89DC);
             color: white;
             border: 1px solid #4A89DC;
         }
 
-        .seat.normal:hover {
-            background: linear-gradient(to bottom, #4A89DC, #357ABD);
-            transform: translateY(-2px);
-        }
-
-        /* Ghế VIP */
         .seat.vip {
             background: linear-gradient(to bottom, #FFD700, #FFC200);
             color: #000;
             border: 1px solid #FFC200;
         }
 
-        .seat.vip:hover {
-            background: linear-gradient(to bottom, #FFC200, #FFB400);
-            transform: translateY(-2px);
-        }
-
-        /* Ghế đôi */
         .seat.couple {
             background: linear-gradient(to bottom, #FF7BAC, #FF5B93);
             color: white;
             border: 1px solid #FF5B93;
-            width: 70px; /* Ghế đôi rộng gấp đôi */
+            width: 74px;
         }
 
-        .seat.couple:hover {
-            background: linear-gradient(to bottom, #FF5B93, #FF3B7A);
-            transform: translateY(-2px);
-        }
-
-        /* Ghế disabled */
-        .seat.disabled {
-            background: linear-gradient(to bottom, #E0E0E0, #CCCCCC);
-            color: #999;
-            cursor: not-allowed;
-            border: 1px solid #CCCCCC;
-        }
-
-        /* Ghế đã chọn */
         .seat.selected {
-            background: linear-gradient(to bottom, #2ECC71, #27AE60);
-            color: white;
-            border: 1px solid #27AE60;
+            background: linear-gradient(to bottom, #2ECC71, #27AE60) !important;
+            color: white !important;
+            border: 1px solid #27AE60 !important;
             transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
         }
 
-        /* Ghế đã được đặt */
-        .seat.occupied {
+        .seat.booked,
+        .seat.held {
             background: linear-gradient(to bottom, #E74C3C, #C0392B);
             color: white;
             cursor: not-allowed;
@@ -459,82 +272,47 @@
             opacity: 0.8;
         }
 
-        /* Hiệu ứng before cho tất cả các ghế */
-        .seat:before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 4px;
-            right: 4px;
-            height: 4px;
-            border-radius: 0 0 3px 3px;
-            opacity: 0.6;
+        .seat:not(.booked):not(.held):hover {
+            transform: translateY(-2px);
         }
 
-        /* Màu đổ bóng cho từng loại ghế */
-        .seat.normal:before {
-            background-color: #357ABD;
-        }
-
-        .seat.vip:before {
-            background-color: #FFB400;
-        }
-
-        .seat.couple:before {
-            background-color: #FF3B7A;
-        }
-
-        .seat.disabled:before {
-            background-color: #BBBBBB;
-        }
-
-        .seat.selected:before {
-            background-color: #219A55;
-        }
-
-        .seat.occupied:before {
-            background-color: #962D22;
-        }
-
-        /* Cập nhật màu cho chú thích ghế */
-        .seat-info {
+        /* Seat Legend */
+        .seat-legend {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
             flex-wrap: wrap;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
         }
 
-        .seat-info-item {
+        .legend-item {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        .seat-color {
+        .legend-color {
             width: 20px;
             height: 20px;
             border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .normal-color { background: linear-gradient(to bottom, #5C9CE5, #4A89DC); }
-        .vip-color { background: linear-gradient(to bottom, #FFD700, #FFC200); }
-        .couple-color { background: linear-gradient(to bottom, #FF7BAC, #FF5B93); }
-        .disabled-color { background: linear-gradient(to bottom, #E0E0E0, #CCCCCC); }
-        .selected-color { background: linear-gradient(to bottom, #2ECC71, #27AE60); }
-        .occupied-color { background: linear-gradient(to bottom, #E74C3C, #C0392B); }
-
-        .selected-seats-container {
+        /* Selected Seats Panel */
+        .selected-seats-panel {
             background-color: var(--bg-color);
             border-radius: var(--border-radius);
-            padding: 10px;
+            padding: 20px;
             box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
         }
 
-        .selected-seats-title {
+        .panel-title {
             font-size: 1.2rem;
             margin-bottom: 15px;
             font-weight: 600;
@@ -544,66 +322,58 @@
             gap: 10px;
         }
 
-        .selected-seats-title i {
-            font-size: 1.5rem;
-            color: var(--primary);
-        }
-
         .selected-seats-list {
-            margin-bottom: 20px;
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
+            margin-bottom: 20px;
         }
 
-        .selected-seat-item {
+        .seat-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--card-bg);
+            padding: 10px;
+            background: var(--card-bg);
             border-radius: 6px;
             margin-bottom: 8px;
         }
 
-        .seat-remove {
+        .seat-remove-btn {
             background: none;
             border: none;
             color: var(--danger);
             cursor: pointer;
             font-size: 1.2rem;
+            padding: 0;
         }
 
-        .seat-price {
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .selected-seats-total {
+        .summary-section {
             border-top: 2px solid var(--border-color);
             padding-top: 15px;
-            margin-top: 15px;
         }
 
-        .total-item {
+        .summary-row {
             display: flex;
             justify-content: space-between;
+            margin-bottom: 10px;
         }
 
-        .total-final {
+        .summary-total {
             font-weight: 700;
             font-size: 1.2rem;
             color: var(--primary);
         }
 
         /* Food Selection */
-        .snack-grid {
+        .food-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
+            gap: 10px;
+            margin: 10px 0;
         }
 
-        .snack-card {
-            background-color: var(--card-bg);
+        .food-card {
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             padding: 15px;
             text-align: center;
@@ -611,35 +381,24 @@
             transition: var(--transition);
         }
 
-        .snack-card:hover {
+        .food-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-lg);
         }
 
-        .snack-image {
+        .food-image {
             width: 100%;
             height: 120px;
             object-fit: contain;
             margin-bottom: 10px;
         }
 
-        .snack-name {
-            font-size: 1rem;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .snack-price {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .qty-controls {
+        .quantity-controls {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-top: 15px;
         }
 
         .qty-btn {
@@ -647,62 +406,31 @@
             height: 30px;
             border-radius: 50%;
             border: none;
-            background-color: var(--primary);
+            background: var(--primary);
             color: white;
             cursor: pointer;
             font-weight: bold;
         }
 
         .qty-input {
-            width: 40px;
+            width: 50px;
             text-align: center;
             padding: 5px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
+            background: var(--card-bg);
+            color: var(--text-color);
         }
 
-        .snack-summary {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: var(--bg-color);
-            border-radius: var(--border-radius);
-        }
-
-        .summary-title {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .summary-total {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        /* Payment Form */
-        .payment-form {
+        /* Payment Methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin: 20px 0;
         }
 
-        .payment-methods {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .payment-method {
-            flex: 1;
+        .payment-option {
             padding: 20px;
             border: 2px solid var(--border-color);
             border-radius: var(--border-radius);
@@ -711,399 +439,124 @@
             text-align: center;
         }
 
-        .payment-method.selected {
+        .payment-option.selected {
             border-color: var(--primary);
-            background-color: rgba(230, 30, 77, 0.05);
+            background: rgba(230, 30, 77, 0.05);
         }
 
-        .payment-method i {
+        .payment-option i {
             font-size: 2rem;
             margin-bottom: 10px;
-            color: var(--gray-600);
+            color: #6c757d;
         }
 
-        .payment-method.selected i {
+        .payment-option.selected i {
             color: var(--primary);
-        }
-
-        .payment-method-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            font-size: 1rem;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-        }
-
-        .form-col {
-            flex: 1;
-        }
-
-        /* E-Ticket */
-        .ticket-body {
-            background-color: var(--theme-bg);
-            font-family: "Yanone Kaffeesatz", sans-serif;
-        }
-
-        .ticket {
-            width: 400px;
-            max-width: 100%;
-            background-color: var(--theme-bg);
-            margin: 25px auto;
-            position: relative;
-            box-shadow: var(--shadow-lg);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .holes-top {
-            height: 50px;
-            width: 50px;
-            background-color: var(--theme-bg);
-            border-radius: 50%;
-            position: absolute;
-            left: 50%;
-            margin-left: -25px;
-            top: -25px;
-        }
-
-        .holes-top:before,
-        .holes-top:after {
-            content: "";
-            height: 50px;
-            width: 50px;
-            background-color: var(--theme-bg);
-            position: absolute;
-            border-radius: 50%;
-        }
-
-        .holes-top:before {
-            left: -200px;
-        }
-
-        .holes-top:after {
-            left: 200px;
-        }
-
-        .holes-lower {
-            position: relative;
-            margin: 25px;
-            border: 1px dashed var(--theme-border);
-        }
-
-        .holes-lower:before,
-        .holes-lower:after {
-            content: "";
-            height: 50px;
-            width: 50px;
-            background-color: var(--theme-bg);
-            position: absolute;
-            border-radius: 50%;
-        }
-
-        .holes-lower:before {
-            top: -25px;
-            left: -50px;
-        }
-
-        .holes-lower:after {
-            top: -25px;
-            left: 350px;
-        }
-
-        .title {
-            padding: 50px 25px 10px;
-            text-align: center;
-        }
-
-        .cinema {
-            color: var(--gray-700);
-            font-size: 1.5rem;
-        }
-
-        .movie-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .info {
-            padding: 15px 25px;
-        }
-
-        .ticket-table {
-            width: 100%;
-            font-size: 18px;
-            margin-bottom: 15px;
-            border-collapse: collapse;
-        }
-
-        .ticket-table th {
-            text-align: left;
-            padding-bottom: 10px;
-            color: var(--gray-700);
-        }
-
-        .ticket-table td {
-            padding: 5px 0;
-            font-size: 26px;
-        }
-
-        .bigger {
-            font-size: 40px;
-        }
-
-        .serial {
-            background-color: var(--theme-bg);
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 12px;
-        }
-
-        .barcode {
-            border-collapse: collapse;
-            margin: 0 auto;
-        }
-
-        .barcode td {
-            width: 3px;
-            height: 50px;
-        }
-
-        .numbers {
-            margin-top: 10px;
-        }
-
-        .numbers td {
-            font-size: 16px;
-            text-align: center;
-            color: var(--gray-700);
-            padding: 0 2px;
         }
 
         /* Navigation Buttons */
         .form-navigation {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 30px;
         }
 
         .nav-btn {
-            padding: 12px 25px;
+            padding: 12px 30px;
             border: none;
             border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
             transition: var(--transition);
+            font-size: 1rem;
         }
 
         .btn-prev {
-            background-color: var(--gray-300);
-            color: var(--gray-700);
+            background: #6c757d;
+            color: white;
         }
 
         .btn-prev:hover {
-            background-color: var(--gray-400);
+            background: #5a6268;
         }
 
-        .btn-next {
-            background-color: var(--primary);
+        .btn-next,
+        .btn-submit {
+            background: var(--primary);
             color: white;
         }
 
-        .btn-next:hover:not(:disabled) {
-            background-color: var(--primary-dark);
+        .btn-next:hover:not(:disabled),
+        .btn-submit:hover:not(:disabled) {
+            background: var(--primary-dark);
         }
 
-        .btn-next:disabled {
-            background-color: var(--gray-400);
+        .btn-next:disabled,
+        .btn-submit:disabled {
+            background: #6c757d;
             cursor: not-allowed;
-        }
-
-        .btn-complete {
-            background-color: var(--success);
-            color: white;
-        }
-
-        .btn-complete:hover {
-            background-color: #0f6848;
+            opacity: 0.6;
         }
 
         .btn-cancel {
-            background-color: var(--danger);
+            background: var(--danger);
             color: white;
         }
 
         .btn-cancel:hover {
-            background-color: #bb2d3b;
+            background: #bb2d3b;
         }
 
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
-            .progress-steps {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 25px;
-            }
-
-            .progress-steps::before {
-                display: none;
-            }
-
-            .progress-bar {
-                display: none;
-            }
-
-            .step {
-                display: flex;
-                align-items: center;
-                width: auto;
-            }
-
-            .step::before {
-                margin: 0 15px 0 0;
-            }
-
-            .date-cell {
-                width: 60px;
-                height: 60px;
-            }
-
-            .date-numeric {
-                font-size: 1.2rem;
-            }
-
-            .time-buttons {
-                gap: 8px;
-            }
-
-            .time-btn {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
-
-            .seats-container {
-                grid-template-columns: repeat(8, 1fr);
-            }
-
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-
-            .payment-methods {
-                flex-direction: column;
-            }
-
-            .ticket {
-                width: 100%;
-                padding: 15px;
-            }
-
-            .holes-top:before {
-                left: -150px;
-            }
-
-            .holes-top:after {
-                left: 150px;
-            }
-
-            .holes-lower:after {
-                left: 280px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .booking-form {
-                padding: 20px;
-            }
-
-            .nav-btn {
-                padding: 10px 20px;
-                font-size: 0.9rem;
-            }
-
-            .step-title {
-                font-size: 1.3rem;
-            }
-
-            .seats-container {
-                grid-template-columns: repeat(6, 1fr);
-            }
-
-            .snack-grid {
-                grid-template-columns: 1fr;
-            }
-
             .seat {
                 width: 30px;
                 height: 30px;
                 font-size: 0.7rem;
             }
 
-            .seat-info {
-                gap: 10px;
+            .seat.couple {
+                width: 64px;
             }
 
-            .seat-info-item {
-                font-size: 0.7rem;
+            .food-grid {
+                grid-template-columns: 1fr;
             }
 
-            .seat-color {
-                width: 12px;
-                height: 12px;
+            .payment-methods {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 @endpush
+
 @section('content')
     <div class="container py-5">
-        <!-- Movie Information -->
-        <div class="movie-info mb-4">
+        {{-- Movie Information --}}
+        <div class="movie-info-card">
             <div class="row">
                 <div class="col-md-3">
-                    <img src="{{ $showtime->movie->poster_url ?? 'https://via.placeholder.com/200x300/f5f5f5/333?text=Movie+Poster' }}"
-                         alt="{{ $showtime->movie->title }}" class="img-fluid rounded">
+                    <img src="{{ '/storage/'.optional($showtime->movie)->poster_url ?? 'https://bizmac.com/Images/Editor/images/404-not-found-la-gi.jpg' }}"
+                        alt="{{ optional($showtime->movie)->title ?? 'Không có tên phim' }}" class="movie-poster">
                 </div>
                 <div class="col-md-9">
-                    <h2 class="movie-title">{{ $showtime->movie->title }}</h2>
-                    <p class="movie-details">
-                        <strong>Rạp:</strong> {{ $showtime->screen->cinema->name }} - {{ $showtime->screen->name }}<br>
-                        <strong>Ngày:</strong> {{ \Carbon\Carbon::parse($showtime->show_date)->format('d/m/Y') }}<br>
-                        <strong>Giờ:</strong> {{ \Carbon\Carbon::parse($showtime->show_time)->format('H:i') }}<br>
-                        <strong>Thời lượng:</strong> {{ $showtime->movie->duration }} phút
-                    </p>
+                    <h2 class="movie-title mb-3">{{ $showtime->movie->title }}</h2>
+                    <div class="movie-details">
+                        <p><strong>Rạp:</strong> {{ optional($showtime->screen->cinema)->name ?? 'Không có thông tin' }} -
+                            {{ optional($showtime->screen)->name ?? 'Không có thông tin' }}
+                        </p>
+                        <p><strong>Ngày:</strong> {{ \Carbon\Carbon::parse($showtime->show_date)->format('d/m/Y') }}</p>
+                        <p><strong>Giờ:</strong> {{ \Carbon\Carbon::parse($showtime->show_time)->format('H:i') }}</p>
+                        <p><strong>Thời lượng:</strong> {{ $showtime->movie->duration }} phút</p>
+                    </div>
                 </div>
             </div>
         </div>
 
+        {{-- Progress Bar --}}
         <div class="progress-container">
-            <div class="progress-steps" id="progress-steps">
+            <div class="progress-steps" style="counter-reset: step;">
                 <div class="step active" data-step="1">
                     <span class="step-label">Chọn ghế</span>
                 </div>
@@ -1111,39 +564,36 @@
                     <span class="step-label">Đồ ăn</span>
                 </div>
                 <div class="step" data-step="3">
-                    <span class="step-label">Thanh toán</span>
-                </div>
-                <div class="step" data-step="4">
-                    <span class="step-label">Hoàn thành</span>
+                    <span class="step-label">Chi tiết</span>
                 </div>
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
         </div>
 
+        {{-- Booking Form --}}
         <form id="booking-form" method="POST" action="{{ route('booking.select-seats') }}">
             @csrf
             <input type="hidden" name="showtime_id" value="{{ $showtime->showtime_id }}">
+            <input type="hidden" name="selected_seats" id="selected-seats-input">
+            <input type="hidden" name="payment_method" id="payment-method-input" value="Cash">
 
-            <div class="booking-form">
-                <!-- Step 1: Seat Selection -->
+            <div class="booking-form ">
+                {{-- Step 1: Seat Selection --}}
                 <div class="form-step active" id="step-1">
                     <h2 class="step-title">Chọn Ghế Ngồi</h2>
-                    <p>Vui lòng chọn ghế từ sơ đồ dưới đây:</p>
 
                     <div class="seat-selection-container">
                         <div class="seat-map-container">
                             <div class="seat-map">
                                 <div class="screen-indicator">Màn Hình</div>
 
-                                <div class="seats-container" id="seats-container">
-                                    @foreach($seatMap as $row => $seats)
-                                        <div class="seat-row" data-row="{{ $row }}">
-                                            @foreach($seats as $seatNumber => $seat)
-                                                <div class="seat {{ $seat['status'] }} {{ strtolower($seat['seat_type']) }}"
-                                                     data-seat-id="{{ $seat['seat_id'] }}"
-                                                     data-row="{{ $seat['row'] }}"
-                                                     data-number="{{ $seat['number'] }}"
-                                                     data-type="{{ $seat['seat_type'] }}">
+                                <div class="seats-container">
+                                    @foreach($seatMap as $rowName => $seats)
+                                        <div class="seat-row" data-row="{{ $rowName }}">
+                                            @foreach($seats as $seat)
+                                                <div class="seat {{ strtolower($seat['seat_type']) }} {{ $seat['status'] }}"
+                                                    data-seat-id="{{ $seat['seat_id'] }}" data-row="{{ $seat['row'] }}"
+                                                    data-number="{{ $seat['number'] }}" data-type="{{ $seat['seat_type'] }}">
                                                     {{ $seat['row'] }}{{ $seat['number'] }}
                                                 </div>
                                             @endforeach
@@ -1151,59 +601,52 @@
                                     @endforeach
                                 </div>
 
-                                <div class="seat-info">
-                                    <div class="seat-info-item">
-                                        <div class="seat-color normal-color"></div>
-                                        <span>Ghế thường</span>
+                                <div class="seat-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-color"
+                                            style="background: linear-gradient(to bottom, #5C9CE5, #4A89DC);"></div>
+                                        <span>Thường ({{ number_format($pricing['Normal']) }}đ)</span>
                                     </div>
-                                    <div class="seat-info-item">
-                                        <div class="seat-color vip-color"></div>
-                                        <span>Ghế VIP</span>
+                                    <div class="legend-item">
+                                        <div class="legend-color"
+                                            style="background: linear-gradient(to bottom, #FFD700, #FFC200);"></div>
+                                        <span>VIP ({{ number_format($pricing['VIP']) }}đ)</span>
                                     </div>
-                                    <div class="seat-info-item">
-                                        <div class="seat-color couple-color"></div>
-                                        <span>Ghế đôi</span>
+                                    <div class="legend-item">
+                                        <div class="legend-color"
+                                            style="background: linear-gradient(to bottom, #FF7BAC, #FF5B93);"></div>
+                                        <span>Đôi ({{ number_format($pricing['Couple']) }}đ)</span>
                                     </div>
-                                    <div class="seat-info-item">
-                                        <div class="seat-color disabled-color"></div>
-                                        <span>Ghế không khả dụng</span>
-                                    </div>
-                                    <div class="seat-info-item">
-                                        <div class="seat-color selected-color"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color"
+                                            style="background: linear-gradient(to bottom, #2ECC71, #27AE60);"></div>
                                         <span>Đã chọn</span>
                                     </div>
-                                    <div class="seat-info-item">
-                                        <div class="seat-color occupied-color"></div>
+                                    <div class="legend-item">
+                                        <div class="legend-color"
+                                            style="background: linear-gradient(to bottom, #E74C3C, #C0392B);"></div>
                                         <span>Đã đặt</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="selected-seats-container">
-                            <h3 class="selected-seats-title">
+                        <div class="selected-seats-panel">
+                            <h3 class="panel-title">
                                 <i class="fas fa-ticket-alt"></i>
                                 Ghế đã chọn
                             </h3>
 
                             <div class="selected-seats-list" id="selected-seats-list">
-                                <div class="no-seats-message">Chưa có ghế nào được chọn</div>
+                                <p class="text-center text-muted">Chưa có ghế nào được chọn</p>
                             </div>
 
-                            <div class="selected-seats-total">
-                                <div class="total-item">
-                                    <span>Số lượng ghế:</span>
+                            <div class="summary-section">
+                                <div class="summary-row">
+                                    <span>Số ghế:</span>
                                     <span id="seats-count">0</span>
                                 </div>
-                                <div class="total-item">
-                                    <span>Giá ghế:</span>
-                                    <span>
-                                        Thường: {{ number_format($pricing['prices']['Normal'] ?? $pricing['base_price']) }}đ |
-                                        VIP: {{ number_format($pricing['prices']['VIP'] ?? $pricing['base_price'] * 1.5) }}đ |
-                                        Đôi: {{ number_format($pricing['prices']['Couple'] ?? $pricing['base_price'] * 2) }}đ
-                                    </span>
-                                </div>
-                                <div class="total-item total-final">
+                                <div class="summary-row summary-total">
                                     <span>Tổng tiền:</span>
                                     <span id="seats-total">0đ</span>
                                 </div>
@@ -1217,520 +660,326 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Food Selection -->
+                {{-- Step 2: Food Selection --}}
                 <div class="form-step" id="step-2">
                     <h2 class="step-title">Đồ Ăn & Thức Uống</h2>
-                    <p>Chọn đồ ăn thức uống cho buổi xem phim của bạn:</p>
 
-                    <div class="snack-grid">
-                        @if($foodItems && count($foodItems) > 0)
-                            @foreach($foodItems as $category => $items)
-                                <h4 class="category-title">{{ $category }}</h4>
+                    @if($foodItems->isNotEmpty())
+                        @foreach($foodItems as $category => $items)
+                            <h4 class="mt-4">{{ $category }}</h4>
+                            <div class="food-grid">
                                 @foreach($items as $item)
-                                    <div class="snack-card" data-id="{{ $item->item_id }}" data-name="{{ $item->name }}" data-price="{{ $item->price }}">
-                                        <img src="{{ $item->image_url ?? 'https://via.placeholder.com/150x100/f5f5f5/333?text=' . urlencode($item->name) }}"
-                                             alt="{{ $item->name }}" class="snack-image">
-                                        <div class="snack-name">{{ $item->name }}</div>
-                                        <div class="snack-price">{{ number_format($item->price) }}đ</div>
-                                        <div class="qty-controls">
-                                            <button type="button" class="qty-btn minus">-</button>
-                                            <input type="number" class="qty-input" value="0" min="0" data-id="{{ $item->item_id }}" name="food_items[{{ $item->item_id }}]">
-                                            <button type="button" class="qty-btn plus">+</button>
+                                    <div class="food-card">
+                                        <img src="{{ $item->image_url ?? 'https://via.placeholder.com/150' }}" alt="{{ $item->name }}"
+                                            class="food-image">
+                                        <h5>{{ $item->name }}</h5>
+                                        <p class="text-primary fw-bold">{{ number_format($item->price) }}đ</p>
+
+                                        <div class="quantity-controls">
+                                            <button type="button" class="qty-btn minus" data-id="{{ $item->item_id }}">-</button>
+                                            <input type="number" class="qty-input" value="0" min="0" data-id="{{ $item->item_id }}"
+                                                data-name="{{ $item->name }}" data-price="{{ $item->price }}"
+                                                name="food_items[{{ $item->item_id }}]">
+                                            <button type="button" class="qty-btn plus" data-id="{{ $item->item_id }}">+</button>
                                         </div>
                                     </div>
                                 @endforeach
-                            @endforeach
-                        @else
-                            <div class="no-food-message">
-                                <p>Hiện tại không có đồ ăn thức uống nào khả dụng.</p>
                             </div>
-                        @endif
-                    </div>
+                        @endforeach
 
-                    <div class="snack-summary">
-                        <div class="summary-title">Tóm tắt đơn hàng</div>
-                        <div id="snack-summary-items">
-                            <div class="summary-item">Chưa có món nào được chọn</div>
+                        <div class="mt-4 p-3" style="background: var(--bg-color); border-radius: var(--border-radius);">
+                            <h5>Tổng đồ ăn: <span id="food-total" class="text-primary">0đ</span></h5>
                         </div>
-                        <div class="summary-total">
-                            <span>Tổng cộng:</span>
-                            <span id="snack-total">0đ</span>
-                        </div>
-                    </div>
+                    @else
+                        <p class="text-center text-muted">Hiện không có đồ ăn thức uống</p>
+                    @endif
 
                     <div class="form-navigation">
                         <button type="button" class="nav-btn btn-prev">Trở về</button>
-                        <button type="button" class="nav-btn btn-next" id="step-2-next">Tiếp tục</button>
+                        <button type="button" class="nav-btn btn-next">Tiếp tục</button>
                     </div>
                 </div>
 
-                <!-- Step 3: Payment -->
+                {{-- Step 3: Payment --}}
                 <div class="form-step" id="step-3">
                     <h2 class="step-title">Thanh Toán</h2>
 
-                    <div class="payment-form">
-                        <div class="payment-methods">
-                            <div class="payment-method selected" data-method="Cash">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <div class="payment-method-name">Tiền mặt</div>
-                                <div class="payment-method-desc">Thanh toán tại rạp</div>
-                            </div>
-                            <div class="payment-method" data-method="Credit Card">
-                                <i class="fas fa-credit-card"></i>
-                                <div class="payment-method-name">Thẻ tín dụng</div>
-                                <div class="payment-method-desc">Thanh toán an toàn</div>
-                            </div>
-                            <div class="payment-method" data-method="Banking">
-                                <i class="fas fa-university"></i>
-                                <div class="payment-method-name">Chuyển khoản</div>
-                                <div class="payment-method-desc">Thanh toán qua ngân hàng</div>
-                            </div>
+                    <h4 class="mb-3">Chọn phương thức thanh toán</h4>
+                    <div class="payment-methods">
+                        <div class="payment-option selected" data-method="Cash">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <h5>Tiền mặt</h5>
+                            <p class="text-muted small">Thanh toán tại quầy</p>
                         </div>
+                        <div class="payment-option" data-method="Credit Card">
+                            <i class="fas fa-credit-card"></i>
+                            <h5>Thẻ tín dụng</h5>
+                            <p class="text-muted small">Thanh toán trực tuyến</p>
+                        </div>
+                        <div class="payment-option" data-method="Banking">
+                            <i class="fas fa-university"></i>
+                            <h5>Chuyển khoản</h5>
+                            <p class="text-muted small">Qua ngân hàng</p>
+                        </div>
+                    </div>
 
-                        <input type="hidden" name="payment_method" value="Cash" id="payment-method-input">
-
-                        <div id="order-summary">
-                            <div class="summary-title">Tóm tắt đơn hàng</div>
-                            <div class="summary-item">
-                                <span>Vé xem phim:</span>
-                                <span id="ticket-price">0đ</span>
-                            </div>
-                            <div class="summary-item">
-                                <span>Đồ ăn thức uống:</span>
-                                <span id="food-price">0đ</span>
-                            </div>
-                            <div class="summary-total">
-                                <span>Tổng cộng:</span>
-                                <span id="total-price">0đ</span>
-                            </div>
+                    <div class="mt-4 p-4" style="background: var(--bg-color); border-radius: var(--border-radius);">
+                        <h4 class="mb-3">Tóm tắt đơn hàng</h4>
+                        <div class="summary-row">
+                            <span>Tiền vé:</span>
+                            <span id="summary-ticket-price">0đ</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Đồ ăn:</span>
+                            <span id="summary-food-price">0đ</span>
+                        </div>
+                        <hr>
+                        <div class="summary-row summary-total">
+                            <span>Tổng cộng:</span>
+                            <span id="summary-total-price">0đ</span>
                         </div>
                     </div>
 
                     <div class="form-navigation">
                         <button type="button" class="nav-btn btn-prev">Trở về</button>
-                        <button type="button" class="nav-btn btn-cancel" onclick="window.location.href='{{ route('home') }}'">Hủy</button>
-                        <button type="submit" class="nav-btn btn-next" id="step-3-next">Đặt vé</button>
+                        <button type="button" class="nav-btn btn-cancel"
+                            onclick="window.location.href='{{ route('home') }}'">Hủy</button>
+                        <button type="submit" class="nav-btn btn-submit" id="submit-btn">Đặt vé</button>
                     </div>
                 </div>
-
             </div>
         </form>
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
+    <!-- jQuery 3.x -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Progress bar functionality
-            const progressBar = document.getElementById('progress-bar');
-            const steps = document.querySelectorAll('.step');
-            const formSteps = document.querySelectorAll('.form-step');
-            const nextButtons = document.querySelectorAll('.btn-next');
-            const prevButtons = document.querySelectorAll('.btn-prev');
-
-            // Initialize progress bar
-            updateProgressBar();
-
-            // Booking data object to store user selections
+        $(function () {
+            const pricing = @json($pricing);
             const bookingData = {
-                showtime_id: {{ $showtime->showtime_id }},
-                selected_seats: [],
-                food_items: {},
-                payment_method: 'Cash',
-                total: 0
+                seats: [],
+                food: {},
+                foodTotal: 0,
+                seatTotal: 0,
             };
 
-            // Pricing data from backend
-            const pricing = @json($pricing);
+            // Progress management
+            const $steps = $('.step');
+            const $formSteps = $('.form-step');
+            const $progressBar = $('#progress-bar');
 
-            // Seat selection functionality
-            const seats = document.querySelectorAll('.seat');
-            seats.forEach(seat => {
-                seat.addEventListener('click', function() {
-                    if (this.classList.contains('occupied') || this.classList.contains('held')) {
-                        return;
-                    }
-
-                    this.classList.toggle('selected');
-                    const seatId = this.getAttribute('data-seat-id');
-
-                    if (this.classList.contains('selected')) {
-                        if (!bookingData.selected_seats.includes(seatId)) {
-                            bookingData.selected_seats.push(seatId);
-                        }
-                    } else {
-                        const index = bookingData.selected_seats.indexOf(seatId);
-                        if (index > -1) {
-                            bookingData.selected_seats.splice(index, 1);
-                        }
-                    }
-
-                    updateSelectedSeatsDisplay();
-                    updateStep1NextButton();
-                });
-            });
-
-            function updateStep1NextButton() {
-                const step1Next = document.getElementById('step-1-next');
-                step1Next.disabled = bookingData.selected_seats.length === 0;
+            function updateProgress() {
+                const $activeStep = $('.step.active');
+                const stepNum = parseInt($activeStep.data('step'));
+                const percentage = ((stepNum - 1) / ($steps.length - 1)) * 100;
+                $progressBar.css('width', percentage + '%');
             }
 
-            function updateSelectedSeatsDisplay() {
-                const selectedSeatsList = document.getElementById('selected-seats-list');
-                const seatsCount = document.getElementById('seats-count');
-                const seatsTotal = document.getElementById('seats-total');
+            // Navigation
+            $('.btn-next').on('click', function () {
+                const $currentStep = $('.form-step.active');
+                const stepId = parseInt($currentStep.attr('id').split('-')[1]);
 
-                // Clear existing list
-                selectedSeatsList.innerHTML = '';
+                if (stepId < 3) {
+                    goToStep(stepId + 1);
+                }
+            });
 
-                if (bookingData.selected_seats.length === 0) {
-                    selectedSeatsList.innerHTML = '<div class="no-seats-message">Chưa có ghế nào được chọn</div>';
-                    seatsCount.textContent = '0';
-                    seatsTotal.textContent = '0đ';
+            $('.btn-prev').on('click', function () {
+                const $currentStep = $('.form-step.active');
+                const stepId = parseInt($currentStep.attr('id').split('-')[1]);
+
+                if (stepId > 1) {
+                    goToStep(stepId - 1);
+                }
+            });
+
+            function goToStep(stepNum) {
+                $formSteps.removeClass('active');
+                $('#step-' + stepNum).addClass('active');
+
+                $steps.each(function () {
+                    const num = parseInt($(this).data('step'));
+                    $(this).removeClass('active completed');
+                    if (num < stepNum) $(this).addClass('completed');
+                    if (num === stepNum) $(this).addClass('active');
+                });
+
+                updateProgress();
+            }
+
+            // Seat selection
+            $('.seat:not(.booked):not(.held)').on('click', function () {
+                const seatId = $(this).data('seatId');
+                const seatType = $(this).data('type');
+                const seatLabel = $(this).data('row') + $(this).data('number');
+
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    bookingData.seats = bookingData.seats.filter(s => s.id !== seatId);
+                } else {
+                    $(this).addClass('selected');
+                    bookingData.seats.push({
+                        id: seatId,
+                        label: seatLabel,
+                        type: seatType,
+                        price: pricing[seatType]
+                    });
+                }
+
+                updateSeatsDisplay();
+            });
+
+            // Di chuyển xử lý sự kiện ghế ra ngoài hàm cập nhật để tránh sự kiện bị đăng ký nhiều lần
+            $('#selected-seats-list').on('click', '.seat-remove-btn', function () {
+                const seatId = $(this).data('seatId');
+                const $seatElement = $(`.seat[data-seat-id="${seatId}"]`);
+                if ($seatElement.length) $seatElement.click();
+            });
+
+            function updateSeatsDisplay() {
+                const $list = $('#selected-seats-list');
+                const $count = $('#seats-count');
+                const $total = $('#seats-total');
+
+                if (bookingData.seats.length === 0) {
+                    $list.html('<p class="text-center text-muted">Chưa có ghế nào được chọn</p>');
+                    $count.text('0');
+                    $total.text('0đ');
+                    bookingData.seatTotal = 0;
+                    $('#step-1-next').prop('disabled', true);
+                    updateOrderSummary();
                     return;
                 }
 
-                // Add each selected seat to the list
-                bookingData.selected_seats.forEach(seatId => {
-                    const seatElement = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
-                    if (seatElement) {
-                        const row = seatElement.getAttribute('data-row');
-                        const number = seatElement.getAttribute('data-number');
-                        const seatLabel = row + number;
+                let html = '';
+                bookingData.seatTotal = 0;
 
-                        const seatType = seatElement.getAttribute('data-type');
-                        const seatPrice = getSeatPrice(seatType);
-
-                        const seatItem = document.createElement('div');
-                        seatItem.className = 'selected-seat-item';
-                        seatItem.innerHTML = `
-                            <div class="seat-info">
-                                <span class="seat-label">Ghế ${seatLabel} (${getSeatTypeName(seatType)})</span>
-                            </div>
-                            <div class="seat-details">
-                                <span class="seat-price">${formatCurrency(seatPrice)}</span>
-                                <button type="button" class="seat-remove" data-seat-id="${seatId}">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        `;
-
-                        // Add event listener to remove button
-                        const removeBtn = seatItem.querySelector('.seat-remove');
-                        removeBtn.addEventListener('click', function () {
-                            const seatId = this.getAttribute('data-seat-id');
-
-                            // Remove from booking data
-                            const index = bookingData.selected_seats.indexOf(seatId);
-                            if (index > -1) {
-                                bookingData.selected_seats.splice(index, 1);
-                            }
-
-                            // Update seat visual state
-                            const seatElement = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
-                            if (seatElement) {
-                                seatElement.classList.remove('selected');
-                            }
-
-                            // Update display
-                            updateSelectedSeatsDisplay();
-                            updateStep1NextButton();
-                        });
-
-                        selectedSeatsList.appendChild(seatItem);
-                    }
+                bookingData.seats.forEach(function (seat) {
+                    const price = parseFloat(seat.price);
+                    bookingData.seatTotal += price;
+                    html += `
+                                <div class="seat-item">
+                                    <div>
+                                        <strong>${seat.label}</strong>
+                                        <small class="d-block text-muted">${seat.type} - ${formatCurrency(seat.price)}</small>
+                                    </div>
+                                    <button type="button" class="seat-remove-btn" data-seat-id="${seat.id}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `;
                 });
 
-                // Update counts
-                let total = 0;
-                bookingData.selected_seats.forEach(seatId => {
-                    const seatElement = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
-                    if (seatElement) {
-                        const seatType = seatElement.getAttribute('data-type');
-                        total += getSeatPrice(seatType);
-                    }
-                });
+                $list.html(html);
+                $count.text(bookingData.seats.length);
+                $total.text(formatCurrency(bookingData.seatTotal));
+                $('#step-1-next').prop('disabled', false);
 
-                seatsCount.textContent = bookingData.selected_seats.length;
-                seatsTotal.textContent = formatCurrency(total);
                 updateOrderSummary();
             }
 
-            // Snack selection
-            const snackCards = document.querySelectorAll('.snack-card');
-            snackCards.forEach(card => {
-                const minusBtn = card.querySelector('.minus');
-                const plusBtn = card.querySelector('.plus');
-                const input = card.querySelector('.qty-input');
-                const id = card.getAttribute('data-id');
-                const name = card.getAttribute('data-name');
-                const price = parseInt(card.getAttribute('data-price'));
 
-                // Initialize snack in booking data
-                if (!bookingData.food_items[id]) {
-                    bookingData.food_items[id] = {
+            // Food selection
+            $('.qty-btn').on('click', function () {
+                const itemId = $(this).data('id');
+                const $input = $(`.qty-input[data-id="${itemId}"]`);
+                let value = parseInt($input.val()) || 0;
+
+                if ($(this).hasClass('plus')) {
+                    value++;
+                } else if ($(this).hasClass('minus') && value > 0) {
+                    value--;
+                }
+
+                $input.val(value);
+                updateFoodData(itemId, value, $input);
+            });
+
+            $('.qty-input').on('change', function () {
+                let value = parseInt($(this).val()) || 0;
+                if (value < 0) value = 0;
+                $(this).val(value);
+                updateFoodData($(this).data('id'), value, $(this));
+            });
+
+            function updateFoodData(itemId, quantity, $input) {
+                const name = $input.data('name');
+                const price = parseFloat($input.data('price'));
+
+                if (quantity > 0) {
+                    bookingData.food[itemId] = {
                         name: name,
                         price: price,
-                        quantity: 0
+                        quantity: quantity
                     };
                 } else {
-                    input.value = bookingData.food_items[id].quantity;
+                    delete bookingData.food[itemId];
                 }
 
-                minusBtn.addEventListener('click', function () {
-                    let value = parseInt(input.value);
-                    if (value > 0) {
-                        value--;
-                        input.value = value;
-                        bookingData.food_items[id].quantity = value;
-                        updateSnackSummary();
-                    }
+                updateFoodTotal();
+            }
+
+            function updateFoodTotal() {
+                bookingData.foodTotal = 0;
+
+                $.each(bookingData.food, function () {
+                    bookingData.foodTotal += this.price * this.quantity;
                 });
 
-                plusBtn.addEventListener('click', function () {
-                    let value = parseInt(input.value);
-                    value++;
-                    input.value = value;
-                    bookingData.food_items[id].quantity = value;
-                    updateSnackSummary();
-                });
-
-                input.addEventListener('change', function () {
-                    let value = parseInt(this.value);
-                    if (isNaN(value) || value < 0) {
-                        value = 0;
-                        this.value = 0;
-                    }
-                    bookingData.food_items[id].quantity = value;
-                    updateSnackSummary();
-                });
-            });
-
-            function updateSnackSummary() {
-                const summaryContainer = document.getElementById('snack-summary-items');
-                const totalElement = document.getElementById('snack-total');
-                let total = 0;
-                let summaryHTML = '';
-
-                // Calculate total and build summary
-                for (const id in bookingData.food_items) {
-                    const snack = bookingData.food_items[id];
-                    if (snack.quantity > 0) {
-                        const itemTotal = snack.price * snack.quantity;
-                        total += itemTotal;
-
-                        summaryHTML += `
-                            <div class="summary-item">
-                                <span>${snack.name} x${snack.quantity}</span>
-                                <span>${formatCurrency(itemTotal)}</span>
-                            </div>
-                        `;
-                    }
-                }
-
-                // Update summary
-                summaryContainer.innerHTML = summaryHTML || '<div class="summary-item">Chưa có món nào được chọn</div>';
-                totalElement.textContent = formatCurrency(total);
+                $('#food-total').text(formatCurrency(bookingData.foodTotal));
                 updateOrderSummary();
             }
 
-            // Payment method selection
-            const paymentMethods = document.querySelectorAll('.payment-method');
-            paymentMethods.forEach(method => {
-                method.addEventListener('click', function () {
-                    paymentMethods.forEach(m => m.classList.remove('selected'));
-                    this.classList.add('selected');
-                    bookingData.payment_method = this.getAttribute('data-method');
-                    document.getElementById('payment-method-input').value = bookingData.payment_method;
-                });
+            // Payment method
+            $('.payment-option').on('click', function () {
+                $('.payment-option').removeClass('selected');
+                $(this).addClass('selected');
+                $('#payment-method-input').val($(this).data('method'));
             });
 
+            // Update order summary
             function updateOrderSummary() {
-                let ticketPrice = 0;
-                bookingData.selected_seats.forEach(seatId => {
-                    const seatElement = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
-                    if (seatElement) {
-                        const seatType = seatElement.getAttribute('data-type');
-                        ticketPrice += getSeatPrice(seatType);
-                    }
-                });
-
-                let foodPrice = 0;
-                for (const id in bookingData.food_items) {
-                    const snack = bookingData.food_items[id];
-                    if (snack.quantity > 0) {
-                        foodPrice += snack.price * snack.quantity;
-                    }
-                }
-
-                const totalPrice = ticketPrice + foodPrice;
-
-                document.getElementById('ticket-price').textContent = formatCurrency(ticketPrice);
-                document.getElementById('food-price').textContent = formatCurrency(foodPrice);
-                document.getElementById('total-price').textContent = formatCurrency(totalPrice);
-
-                bookingData.total = totalPrice;
+                $('#summary-ticket-price').text(formatCurrency(bookingData.seatTotal));
+                $('#summary-food-price').text(formatCurrency(bookingData.foodTotal));
+                $('#summary-total-price').text(formatCurrency(bookingData.seatTotal + bookingData.foodTotal));
             }
 
+            // Format currency
             function formatCurrency(amount) {
-                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-            }
-
-            function getSeatPrice(seatType) {
-                switch(seatType) {
-                    case 'VIP':
-                        return pricing.prices.VIP || pricing.base_price * 1.5;
-                    case 'Couple':
-                        return pricing.prices.Couple || pricing.base_price * 2;
-                    case 'Disabled':
-                        return pricing.prices.Disabled || pricing.base_price * 0.8;
-                    default:
-                        return pricing.prices.Normal || pricing.base_price;
-                }
-            }
-
-            function getSeatTypeName(seatType) {
-                switch(seatType) {
-                    case 'VIP':
-                        return 'VIP';
-                    case 'Couple':
-                        return 'Đôi';
-                    case 'Disabled':
-                        return 'Khuyết tật';
-                    default:
-                        return 'Thường';
-                }
-            }
-
-            // Next button functionality
-            nextButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const currentStep = document.querySelector('.form-step.active');
-                    const currentStepId = currentStep.id;
-                    const stepNumber = parseInt(currentStepId.split('-')[1]);
-
-                    if (stepNumber < 3) {
-                        // Hide current step
-                        currentStep.classList.remove('active');
-
-                        // Show next step
-                        document.getElementById(`step-${stepNumber + 1}`).classList.add('active');
-
-                        // Update progress
-                        steps.forEach(step => {
-                            const stepNum = parseInt(step.getAttribute('data-step'));
-                            if (stepNum <= stepNumber) {
-                                step.classList.add('completed');
-                                step.classList.remove('active');
-                            } else if (stepNum === stepNumber + 1) {
-                                step.classList.add('active');
-                            }
-                        });
-
-                        updateProgressBar();
-                    }
-                });
-            });
-
-            // Previous button functionality
-            prevButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const currentStep = document.querySelector('.form-step.active');
-                    const currentStepId = currentStep.id;
-                    const stepNumber = parseInt(currentStepId.split('-')[1]);
-
-                    if (stepNumber > 1) {
-                        // Hide current step
-                        currentStep.classList.remove('active');
-
-                        // Show previous step
-                        document.getElementById(`step-${stepNumber - 1}`).classList.add('active');
-
-                        // Update progress
-                        steps.forEach(step => {
-                            const stepNum = parseInt(step.getAttribute('data-step'));
-                            if (stepNum === stepNumber - 1) {
-                                step.classList.add('active');
-                                step.classList.remove('completed');
-                            } else if (stepNum >= stepNumber) {
-                                step.classList.remove('active', 'completed');
-                            }
-                        });
-
-                        updateProgressBar();
-                    }
-                });
-            });
-
-            function updateProgressBar() {
-                const activeStep = document.querySelector('.step.active');
-                if (activeStep) {
-                    const stepNumber = parseInt(activeStep.getAttribute('data-step'));
-                    const percentage = ((stepNumber - 1) / (steps.length - 1)) * 100;
-                    progressBar.style.width = `${percentage}%`;
-                }
+                return new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(amount);
             }
 
             // Form submission
-            document.getElementById('booking-form').addEventListener('submit', function(e) {
+            $('#booking-form').on('submit', function (e) {
                 e.preventDefault();
 
-                // Prepare form data
-                const formData = new FormData();
-                formData.append('_token', document.querySelector('input[name="_token"]').value);
-                formData.append('showtime_id', bookingData.showtime_id);
-                formData.append('selected_seats', JSON.stringify(bookingData.selected_seats));
-                formData.append('payment_method', bookingData.payment_method);
-
-                // Add food items
-                const foodItems = [];
-                for (const id in bookingData.food_items) {
-                    const item = bookingData.food_items[id];
-                    if (item.quantity > 0) {
-                        foodItems.push({
-                            item_id: id,
-                            quantity: item.quantity
-                        });
-                    }
+                if (bookingData.seats.length === 0) {
+                    alert('Vui lòng chọn ít nhất một ghế!');
+                    return;
                 }
-                formData.append('food_items', JSON.stringify(foodItems));
 
-                // Show loading
-                const submitBtn = document.getElementById('step-3-next');
-                const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'Đang xử lý...';
-                submitBtn.disabled = true;
+                const $submitBtn = $('#submit-btn');
+                const originalText = $submitBtn.text();
+                $submitBtn.text('Đang xử lý...');
+                $submitBtn.prop('disabled', true);
+
+                // Prepare seat IDs
+                const seatIds = bookingData.seats.map(s => s.id);
+                $('#selected-seats-input').val(JSON.stringify(seatIds));
 
                 // Submit form
-                fetch('{{ route("booking.select-seats") }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Redirect to payment page
-                        window.location.href = data.data.payment_url;
-                    } else {
-                        alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
-                })
-                .finally(() => {
-                    submitBtn.textContent = originalText;
-                    submitBtn.disabled = false;
-                });
+                this.submit();
             });
 
-            // Initialize displays
-            updateSelectedSeatsDisplay();
-            updateSnackSummary();
+            // Initialize
+            updateProgress();
         });
     </script>
-@endsection
+@endpush

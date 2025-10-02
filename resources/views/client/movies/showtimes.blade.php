@@ -36,7 +36,7 @@
         background: linear-gradient(135deg, var(--surface) 0%, var(--border-light) 100%);
         border-radius: 20px;
         padding: 2rem;
-        margin: 2rem 0;
+        margin-top: 5rem;
         box-shadow: 0 8px 32px var(--shadow-light);
         border: 1px solid var(--border);
         position: relative;
@@ -46,10 +46,6 @@
     .movie-header::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
         background: linear-gradient(90deg, var(--primary), var(--primary-light));
     }
 
@@ -128,7 +124,7 @@
         background: var(--surface);
         border-radius: 12px;
         padding: 0.5rem;
-        margin: 2rem 0;
+        margin: 0.5rem 0;
         box-shadow: 0 4px 16px var(--shadow-light);
         border: 1px solid var(--border);
     }
@@ -160,7 +156,7 @@
 
     /* Content Panels */
     .tab-content {
-        margin-top: 2rem;
+        margin-top: 0.5rem;
     }
 
     .tab-panel {
@@ -181,7 +177,7 @@
     .showtimes-panel {
         background: var(--surface);
         border-radius: 16px;
-        padding: 2rem;
+        padding: 1rem 2rem;
         box-shadow: 0 8px 32px var(--shadow-light);
         border: 1px solid var(--border);
     }
