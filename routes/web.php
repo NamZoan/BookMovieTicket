@@ -102,6 +102,7 @@ Route::middleware('auth')->prefix('booking')->name('booking.')->group(function (
     Route::get('/create/{showtime}', [BookingController::class, 'create'])->name('create');
     Route::post('/store', [BookingController::class, 'store'])->name('store');
     Route::get('/seat-selection/{showtime}', [BookingController::class, 'seatSelection'])->name('seatSelection');
+    Route::post('/broadcast-seat-selection/{showtime}', [BookingController::class, 'broadcastSeatSelection'])->name('broadcastSeatSelection');
     Route::post('/select-seats', [BookingController::class, 'selectSeats'])->name('select-seats');
     Route::get('/payment/{showtime}', [BookingController::class, 'payment'])->name('payment');
     Route::post('/process-payment', [BookingController::class, 'processPayment'])->name('process-payment');
@@ -114,6 +115,8 @@ Route::middleware('auth')->prefix('booking')->name('booking.')->group(function (
     Route::post('/hold-seats', [BookingController::class, 'holdSeat'])->name('hold-seats');
     Route::post('/release-seats', [BookingController::class, 'releaseSeats'])->name('release-seats');
     Route::get('/pricing/{showtime}', [BookingController::class, 'getPricing'])->name('pricing');
+    Route::post('/validate-promotion', [BookingController::class, 'validatePromotion'])->name('validate-promotion');
+    Route::get('/available-promotions', [BookingController::class, 'getAvailablePromotions'])->name('available-promotions');
 });
 
 // User Account Routes (Protected)

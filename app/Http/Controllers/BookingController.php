@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
@@ -8,6 +9,7 @@ use App\Models\Showtime;
 use App\Models\Seat;
 use App\Models\FoodItem;
 use App\Models\Promotion;
+use App\Services\PromotionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +17,17 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Events\SeatSelected;
+use App\Events\SeatReleased;
 
 class BookingController extends Controller
 {
+    protected $promotionService;
+
+    public function __construct(PromotionService $promotionService)
+    {
+        $this->promotionService = $promotionService;
+    }
     /**
      * Display seat selection page
      */
@@ -70,13 +80,14 @@ class BookingController extends Controller
                 'foodItems',
                 'pricing'
             ));
-
         } catch (\Exception $e) {
             Log::error('BookingController@seatSelection error: ' . $e->getMessage());
             return redirect()->route('home')
                 ->with('error', 'Không thể tải trang chọn ghế. Vui lòng thử lại.');
         }
     }
+
+
 
     /**
      * Handle seat selection (AJAX)
@@ -85,15 +96,26 @@ class BookingController extends Controller
     {
         $request->validate([
             'showtime_id' => 'required|exists:showtimes,showtime_id',
-            'selected_seats' => 'required|string', // JSON string from frontend
-            'food_items' => 'nullable|string', // JSON string from frontend
-            'payment_method' => 'required|in:Cash,Credit Card,Banking,E-Wallet,Loyalty Points'
+            'selected_seats' => 'required|string',
         ]);
 
-        dd('123');
-        // Parse JSON data
-        $selectedSeats = json_decode($request->selected_seats, true);
-        $foodItems = json_decode($request->food_items, true) ?? [];
+        // Kiểm tra xem selected_seats có phải là chuỗi JSON không
+        if (is_string($request->selected_seats)) {
+            $selectedSeats = json_decode($request->selected_seats, true);
+        } else {
+            // Nếu đã là mảng, gán trực tiếp
+            $selectedSeats = $request->selected_seats;
+        }
+
+        // Kiểm tra và chuẩn hoá dữ liệu food_items từ request
+        $foodItems = [];
+        if ($request->has('food_items')) {
+            if (is_string($request->food_items)) {
+                $foodItems = json_decode($request->food_items, true) ?? [];
+            } elseif (is_array($request->food_items)) {
+                $foodItems = $request->food_items;
+            }
+        }
 
         // Validate parsed data
         if (!is_array($selectedSeats) || empty($selectedSeats)) {
@@ -127,21 +149,98 @@ class BookingController extends Controller
                 ], 422);
             }
 
-            // Hold seats temporarily (15 minutes)
+            // Hold seats temporarily (3 minutes)
             $this->holdSeats($request->showtime_id, $selectedSeats, Auth::id());
 
             // Calculate pricing
-            $seatPrices = $this->calculateSeatPrices($seats, $showtime);
+            // Calculate seat prices (per seat and total)
+            $seatPrices = [
+                'seats' => [],
+                'total' => 0
+            ];
+
+            foreach ($seats as $seat) {
+                // Determine price based on seat type
+                switch (strtolower($seat->seat_type)) {
+                    case 'vip':
+                        $price = $showtime->price_seat_vip;
+                        break;
+                    case 'couple':
+                        $price = $showtime->price_seat_couple;
+                        break;
+                    default:
+                        $price = $showtime->price_seat_normal;
+                        break;
+                }
+
+                $seatPrices['seats'][$seat->seat_id] = $price;
+                $seatPrices['total'] += $price;
+            }
+
+            // Normalize food items into expected structure: array of ['item_id'=>..., 'quantity'=>...]
+            $normalizedFoodItems = [];
+            if (!empty($foodItems) && is_array($foodItems)) {
+                // If structure is id => qty (typical from form inputs named food_items[<id>])
+                $values = array_values($foodItems);
+                $first = reset($values);
+
+                if (!is_array($first)) {
+                    foreach ($foodItems as $k => $v) {
+                        // Only include positive quantities
+                        $qty = is_numeric($v) ? (int) $v : 0;
+                        if ($qty > 0) {
+                            $normalizedFoodItems[] = [
+                                'item_id' => (int) $k,
+                                'quantity' => $qty
+                            ];
+                        }
+                    }
+                } else {
+                    // Already in array-of-arrays shape
+                    foreach ($foodItems as $it) {
+                        if (is_array($it) && isset($it['item_id'])) {
+                            $qty = isset($it['quantity']) ? (int) $it['quantity'] : 0;
+                            if ($qty > 0) {
+                                $normalizedFoodItems[] = [
+                                    'item_id' => (int) $it['item_id'],
+                                    'quantity' => $qty
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Calculate food totals using normalized items
             $foodTotal = 0;
             $foodItemsData = [];
-
-            if (!empty($foodItems)) {
-                $foodCalculation = $this->calculateFoodPrices($foodItems);
+            if (!empty($normalizedFoodItems)) {
+                $foodCalculation = $this->calculateFoodPrices($normalizedFoodItems);
                 $foodTotal = $foodCalculation['total'];
                 $foodItemsData = $foodCalculation['items'];
             }
 
             $totalAmount = $seatPrices['total'] + $foodTotal;
+
+            // Xử lý promotion nếu có
+            $promotionCode = $request->promotion_code;
+            $discountAmount = 0;
+            $finalAmount = $totalAmount;
+            $promotionData = null;
+
+            if ($promotionCode) {
+                $promotionResult = $this->promotionService->validateAndApplyPromotion(
+                    $promotionCode,
+                    $totalAmount,
+                    Auth::id()
+                );
+
+                if ($promotionResult['success']) {
+                    $discountAmount = $promotionResult['discount_amount'];
+                    $finalAmount = $totalAmount - $discountAmount;
+                    $promotionData = $promotionResult['promotion'];
+                }
+            }
 
             // Store selection in session
             Session::put('booking_data', [
@@ -151,23 +250,38 @@ class BookingController extends Controller
                 'food_items' => $foodItemsData,
                 'food_total' => $foodTotal,
                 'total_amount' => $totalAmount,
+                'promotion_code' => $promotionCode,
+                'discount_amount' => $discountAmount,
+                'final_amount' => $finalAmount,
+                'promotion_data' => $promotionData,
                 'payment_method' => $request->payment_method,
-                'expires_at' => Carbon::now()->addMinutes(15)
+                'expires_at' => Carbon::now()->addMinutes(3)
             ]);
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'seat_count' => count($selectedSeats),
-                    'seat_total' => $seatPrices['total'],
-                    'food_total' => $foodTotal,
-                    'total_amount' => $totalAmount,
-                    'payment_url' => route('booking.payment', ['showtime' => $request->showtime_id])
-                ]
-            ]);
+            // If the request expects JSON (AJAX), return JSON response
+            $accept = $request->header('Accept', '');
+            $acceptHasJson = (stripos($accept, 'application/json') !== false) || (stripos($accept, '/json') !== false) || (stripos($accept, '+json') !== false);
 
+            if ($request->wantsJson() || $request->ajax() || $acceptHasJson) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'seat_count' => count($selectedSeats),
+                        'seat_total' => $seatPrices['total'],
+                        'food_total' => $foodTotal,
+                        'total_amount' => $totalAmount,
+                        'discount_amount' => $discountAmount,
+                        'final_amount' => $finalAmount,
+                        'promotion_code' => $promotionCode,
+                        'payment_url' => route('booking.payment', ['showtime' => $request->showtime_id])
+                    ]
+                ]);
+            }
+
+            // For normal form submission (non-AJAX), redirect user to payment page
+            return redirect()->route('booking.payment', ['showtime' => $request->showtime_id]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('BookingController@selectSeats error: ' . $e->getMessage());
@@ -178,6 +292,8 @@ class BookingController extends Controller
             ], 500);
         }
     }
+
+
 
     /**
      * Display payment page
@@ -209,7 +325,6 @@ class BookingController extends Controller
                 'bookingData',
                 'promotions'
             ));
-
         } catch (\Exception $e) {
             Log::error('BookingController@payment error: ' . $e->getMessage());
             return redirect()->route('home')
@@ -222,9 +337,13 @@ class BookingController extends Controller
      */
     public function processPayment(Request $request)
     {
+
         $request->validate([
+            'customer_name' => 'required|string|max:191',
+            'customer_phone' => 'required|string|max:20',
+            'customer_email' => 'required|email|max:100',
             'promotion_code' => 'nullable|string|max:20',
-            'user_notes' => 'nullable|string|max:500'
+            'user_notes' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
@@ -232,11 +351,6 @@ class BookingController extends Controller
         try {
             // Get booking data from session
             $bookingData = Session::get('booking_data');
-
-            if (!$bookingData || Carbon::now()->gt($bookingData['expires_at'])) {
-                return redirect()->back()
-                    ->with('error', 'Thời gian giữ ghế đã hết. Vui lòng đặt lại.');
-            }
 
             $showtime = Showtime::findOrFail($bookingData['showtime_id']);
 
@@ -248,31 +362,32 @@ class BookingController extends Controller
                     ->with('error', 'Một số ghế đã được đặt. Vui lòng chọn ghế khác.');
             }
 
-            // Apply promotion if provided
-            $discountAmount = 0;
-            $promotion = null;
+            // Sử dụng dữ liệu promotion từ session
+            $discountAmount = $bookingData['discount_amount'] ?? 0;
+            $finalAmount = $bookingData['final_amount'] ?? $bookingData['total_amount'];
+            $promotionCode = $bookingData['promotion_code'] ?? null;
 
-            if ($request->promotion_code) {
-                $promotion = $this->validateAndApplyPromotion($request->promotion_code, $bookingData['total_amount']);
-                if ($promotion) {
-                    $discountAmount = $this->calculateDiscount($promotion, $bookingData['total_amount']);
-                }
-            }
-
-            $finalAmount = $bookingData['total_amount'] - $discountAmount;
+            // Generate idempotency key to prevent duplicate payments
+            $idempotencyKey = Str::uuid()->toString();
 
             // Create booking
             $booking = Booking::create([
                 'user_id' => Auth::id(),
+                'customer_name' => $request->customer_name,
+                'customer_phone' => $request->customer_phone,
+                'customer_email' => $request->customer_email,
                 'showtime_id' => $bookingData['showtime_id'],
                 'booking_code' => $this->generateBookingCode(),
+                'idempotency_key' => $idempotencyKey,
                 'total_amount' => $bookingData['total_amount'],
+                'promotion_code' => $promotionCode,
                 'discount_amount' => $discountAmount,
                 'final_amount' => $finalAmount,
-                'payment_method' => $bookingData['payment_method'],
-                'payment_status' => $this->getInitialPaymentStatus($bookingData['payment_method']),
-                'booking_status' => 'Confirmed',
+                'payment_method' => 'Credit Card', // Chỉ hỗ trợ thanh toán online
+                'payment_status' => 'Pending',
+                'booking_status' => 'Pending',
                 'booking_date' => Carbon::now(),
+                'expires_at' => Carbon::now()->addMinutes(3),
                 'notes' => $request->user_notes
             ]);
 
@@ -304,24 +419,32 @@ class BookingController extends Controller
             $showtime->decrement('available_seats', count($bookingData['selected_seats']));
 
             // Update promotion usage if applied
-            if ($promotion) {
-                $promotion->increment('used_count');
+            if ($promotionCode) {
+                $this->promotionService->incrementPromotionUsage($promotionCode);
             }
 
-            // Process payment based on method
-            $paymentResult = $this->processPaymentMethod($booking, $request->payment_method);
+            // Process payment (simulate online payment)
+            $paymentResult = $this->processOnlinePayment($booking);
 
             if ($paymentResult['success']) {
                 $booking->update([
                     'payment_status' => 'Paid',
+                    'booking_status' => 'Confirmed',
                     'payment_date' => Carbon::now()
                 ]);
 
                 // Award loyalty points (1 point per 1000 VND spent)
                 $loyaltyPoints = floor($finalAmount / 1000);
                 if ($loyaltyPoints > 0) {
-                    Auth::user()->increment('loyalty_points', $loyaltyPoints);
+                    DB::table('users')
+                        ->where('user_id', Auth::id())
+                        ->increment('loyalty_points', $loyaltyPoints);
                 }
+            } else {
+                $booking->update([
+                    'payment_status' => 'Failed',
+                    'booking_status' => 'Cancelled'
+                ]);
             }
 
             // Clear session data
@@ -332,7 +455,6 @@ class BookingController extends Controller
 
             return redirect()->route('booking.confirmation', $booking->booking_id)
                 ->with('success', 'Đặt vé thành công! Mã đặt vé của bạn là: ' . $booking->booking_code);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('BookingController@processPayment error: ' . $e->getMessage());
@@ -362,7 +484,6 @@ class BookingController extends Controller
             ]);
 
             return view('client.booking.confirmation', compact('booking'));
-
         } catch (\Exception $e) {
             Log::error('BookingController@confirmation error: ' . $e->getMessage());
             return redirect()->route('home')
@@ -390,7 +511,6 @@ class BookingController extends Controller
             ]);
 
             return view('client.booking.ticket', compact('booking'));
-
         } catch (\Exception $e) {
             Log::error('BookingController@ticket error: ' . $e->getMessage());
             return redirect()->route('home')
@@ -438,7 +558,6 @@ class BookingController extends Controller
 
             return redirect()->route('account.bookings')
                 ->with('success', 'Đã hủy vé thành công. Tiền sẽ được hoàn lại trong 3-5 ngày làm việc.');
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('BookingController@cancel error: ' . $e->getMessage());
@@ -473,7 +592,6 @@ class BookingController extends Controller
                     'available_count' => $availableSeats->count()
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('BookingController@getAvailableSeats error: ' . $e->getMessage());
 
@@ -502,7 +620,6 @@ class BookingController extends Controller
                 'success' => $result,
                 'message' => $result ? 'Ghế đã được giữ tạm thời.' : 'Một số ghế không thể giữ.'
             ]);
-
         } catch (\Exception $e) {
             Log::error('BookingController@holdSeats error: ' . $e->getMessage());
 
@@ -531,7 +648,6 @@ class BookingController extends Controller
                 'success' => true,
                 'message' => 'Đã bỏ giữ ghế.'
             ]);
-
         } catch (\Exception $e) {
             Log::error('BookingController@releaseSeats error: ' . $e->getMessage());
 
@@ -543,24 +659,58 @@ class BookingController extends Controller
     }
 
     /**
-     * Get pricing information for a showtime (AJAX)
+     * Validate promotion code (AJAX)
      */
-    public function getPricing(Showtime $showtime)
+    public function validatePromotion(Request $request)
     {
+        $request->validate([
+            'promotion_code' => 'required|string|max:20',
+            'total_amount' => 'required|numeric|min:0'
+        ]);
+
         try {
-            $pricing = $this->getPricingInfo($showtime);
+            $result = $this->promotionService->validateAndApplyPromotion(
+                $request->promotion_code,
+                $request->total_amount,
+                Auth::id()
+            );
 
-            return response()->json([
-                'success' => true,
-                'data' => $pricing
-            ]);
-
+            return response()->json($result);
         } catch (\Exception $e) {
-            Log::error('BookingController@getPricing error: ' . $e->getMessage());
+            Log::error('BookingController@validatePromotion error: ' . $e->getMessage());
 
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể tải thông tin giá vé.'
+                'message' => 'Có lỗi xảy ra khi kiểm tra mã giảm giá.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get available promotions (AJAX)
+     */
+    public function getAvailablePromotions(Request $request)
+    {
+        $request->validate([
+            'total_amount' => 'required|numeric|min:0'
+        ]);
+
+        try {
+            $promotions = $this->promotionService->getAvailablePromotions(
+                Auth::id(),
+                $request->total_amount
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $promotions
+            ]);
+        } catch (\Exception $e) {
+            Log::error('BookingController@getAvailablePromotions error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tải danh sách mã giảm giá.'
             ], 500);
         }
     }
@@ -577,7 +727,7 @@ class BookingController extends Controller
     //            $showtimeDateTime->gt(Carbon::now()->addMinutes(10));
     // }
 
-   private function getBookedSeats($showtime_id)
+    private function getBookedSeats($showtime_id)
     {
         return BookingSeat::join('bookings', 'booking_seats.booking_id', '=', 'bookings.booking_id')
             ->where('bookings.showtime_id', $showtime_id)
@@ -594,29 +744,63 @@ class BookingController extends Controller
         // Filter out expired holds and current user's holds
         $validHeldSeats = collect($heldSeats)->filter(function ($hold) use ($excludeUserId) {
             return Carbon::now()->lt($hold['expires_at']) &&
-                   ($excludeUserId === null || $hold['user_id'] !== $excludeUserId);
+                ($excludeUserId === null || $hold['user_id'] !== $excludeUserId);
         });
+
+        // Clean up expired holds and update cache
+        $expiredSeats = [];
+        $validHolds = [];
+        foreach ($heldSeats as $seatId => $hold) {
+            if (Carbon::now()->lt($hold['expires_at'])) {
+                $validHolds[$seatId] = $hold;
+            } else {
+                $expiredSeats[] = $seatId;
+            }
+        }
+
+        // If there are expired seats, update cache and broadcast release
+        if (!empty($expiredSeats)) {
+            cache()->put($cacheKey, $validHolds, Carbon::now()->addHours(1));
+            broadcast(new SeatReleased($expiredSeats, $showtime_id))->toOthers();
+        }
 
         return $validHeldSeats->pluck('seat_id')->toArray();
     }
 
-    private function holdSeats($showtime_id, $seat_ids, $user_id, $duration_minutes = 15)
+    private function holdSeats($showtime_id, $seat_ids, $user_id, $duration_minutes = 3)
     {
         $cacheKey = "held_seats_{$showtime_id}";
         $heldSeats = cache()->get($cacheKey, []);
 
         $expiresAt = Carbon::now()->addMinutes($duration_minutes);
+        $successfullyHeld = [];
 
         foreach ($seat_ids as $seat_id) {
+            // Check if seat is already held by someone else
+            if (isset($heldSeats[$seat_id])) {
+                $existingHold = $heldSeats[$seat_id];
+                // If the hold is still valid and not by current user, skip this seat
+                if (Carbon::now()->lt($existingHold['expires_at']) && $existingHold['user_id'] !== $user_id) {
+                    continue;
+                }
+            }
+
             $heldSeats[$seat_id] = [
                 'seat_id' => $seat_id,
                 'user_id' => $user_id,
                 'expires_at' => $expiresAt
             ];
+            $successfullyHeld[] = $seat_id;
         }
 
-        cache()->put($cacheKey, $heldSeats, $expiresAt->addMinutes(5));
-        return true;
+        // Only broadcast if we successfully held some seats
+        if (!empty($successfullyHeld)) {
+            // Broadcast the seat selection event to other clients
+            broadcast(new SeatSelected($successfullyHeld, $showtime_id))->toOthers();
+            cache()->put($cacheKey, $heldSeats, $expiresAt->addMinutes(1));
+        }
+
+        return !empty($successfullyHeld);
     }
 
     private function releaseHeldSeats($showtime_id, $seat_ids, $user_id = null)
@@ -632,6 +816,8 @@ class BookingController extends Controller
             }
         }
 
+        // Broadcast the seat release event to other clients
+        broadcast(new SeatReleased($seat_ids, $showtime_id))->toOthers();
         cache()->put($cacheKey, $heldSeats, Carbon::now()->addHours(1));
     }
 
@@ -677,23 +863,6 @@ class BookingController extends Controller
     }
 
 
-    private function calculateSeatPrices($seats, $showtime)
-    {
-        $pricing = $this->getPricingInfo($showtime);
-        $seatPrices = [];
-        $total = 0;
-
-        foreach ($seats as $seat) {
-            $price = $pricing['prices'][$seat->seat_type] ?? $showtime->base_price;
-            $seatPrices[$seat->seat_id] = $price;
-            $total += $price;
-        }
-
-        return [
-            'seats' => $seatPrices,
-            'total' => $total
-        ];
-    }
 
     private function calculateFoodPrices($foodItems)
     {
@@ -777,33 +946,53 @@ class BookingController extends Controller
         }
     }
 
-    private function processPaymentMethod($booking, $paymentMethod)
+    private function processOnlinePayment($booking)
     {
-        switch ($paymentMethod) {
-            case 'Cash':
+        // Simulate online payment processing
+        // In real implementation, this would integrate with payment gateways like VNPay, MoMo, etc.
+
+        try {
+            // Simulate payment gateway response (95% success rate for demo)
+            $isSuccessful = rand(1, 100) <= 95;
+
+            if ($isSuccessful) {
+                $transactionId = 'TXN_' . time() . '_' . $booking->booking_id;
+
                 return [
                     'success' => true,
-                    'message' => 'Vui lòng thanh toán tại rạp khi đến xem phim.'
+                    'transaction_id' => $transactionId,
+                    'message' => 'Thanh toán thành công.',
+                    'gateway_response' => [
+                        'status' => 'success',
+                        'transaction_id' => $transactionId,
+                        'amount' => $booking->final_amount,
+                        'currency' => 'VND',
+                        'timestamp' => Carbon::now()->toISOString()
+                    ]
                 ];
-
-            case 'Credit Card':
-            case 'Banking':
-            case 'E-Wallet':
-                // Simulate successful payment for demo
-                return [
-                    'success' => true,
-                    'transaction_id' => 'TXN_' . time() . '_' . $booking->booking_id,
-                    'message' => 'Thanh toán thành công.'
-                ];
-
-            case 'Loyalty Points':
-                return $this->processLoyaltyPointsPayment($booking);
-
-            default:
+            } else {
                 return [
                     'success' => false,
-                    'message' => 'Phương thức thanh toán không được hỗ trợ.'
+                    'message' => 'Thanh toán thất bại. Vui lòng thử lại hoặc liên hệ ngân hàng.',
+                    'gateway_response' => [
+                        'status' => 'failed',
+                        'error_code' => 'PAYMENT_FAILED',
+                        'error_message' => 'Insufficient funds or card declined'
+                    ]
                 ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Payment processing error: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.',
+                'gateway_response' => [
+                    'status' => 'error',
+                    'error_code' => 'SYSTEM_ERROR',
+                    'error_message' => $e->getMessage()
+                ]
+            ];
         }
     }
 
@@ -819,7 +1008,9 @@ class BookingController extends Controller
             ];
         }
 
-        $user->decrement('loyalty_points', $requiredPoints);
+        DB::table('users')
+            ->where('user_id', $user->user_id)
+            ->decrement('loyalty_points', $requiredPoints);
 
         return [
             'success' => true,
@@ -830,8 +1021,10 @@ class BookingController extends Controller
 
     private function canCancelBooking(Booking $booking)
     {
-        $showtimeDateTime = Carbon::createFromFormat('Y-m-d H:i:s',
-            $booking->showtime->show_date . ' ' . $booking->showtime->show_time);
+        $showtimeDateTime = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $booking->showtime->show_date . ' ' . $booking->showtime->show_time
+        );
 
         // Can cancel if more than 30 minutes before showtime
         return Carbon::now()->diffInMinutes($showtimeDateTime, false) > 30;

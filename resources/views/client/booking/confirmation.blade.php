@@ -227,28 +227,70 @@
                 </td>
             </tr>
             <tr>
-                <th>Tổng tiền:</th>
+                <th>Tạm tính:</th>
                 <td><strong>{{ number_format($booking->total_amount) }}đ</strong></td>
             </tr>
             @if($booking->discount_amount > 0)
             <tr>
-                <th>Giảm giá:</th>
-                <td>-{{ number_format($booking->discount_amount) }}đ</td>
+                <th>Mã giảm giá:</th>
+                <td>
+                    @if($booking->promotion_code === 'WELCOME50K')
+                        <span class="badge bg-success">WELCOME50K - Ưu đãi người mới</span>
+                    @else
+                        <span class="badge bg-primary">{{ $booking->promotion_code }}</span>
+                    @endif
+                </td>
             </tr>
             <tr>
-                <th>Thành tiền:</th>
-                <td><strong>{{ number_format($booking->final_amount) }}đ</strong></td>
+                <th>Giảm giá:</th>
+                <td><span class="text-success">-{{ number_format($booking->discount_amount) }}đ</span></td>
             </tr>
             @endif
+            <tr>
+                <th>Thành tiền:</th>
+                <td><strong>{{ number_format($booking->final_amount ?? $booking->total_amount) }}đ</strong></td>
+            </tr>
             <tr>
                 <th>Ngày đặt vé:</th>
                 <td>{{ \Carbon\Carbon::parse($booking->booking_date)->format('d/m/Y H:i') }}</td>
             </tr>
         </table>
         
+        @if($booking->customer_name || $booking->customer_phone || $booking->customer_email)
+        <div class="mt-4 p-3" style="background: #f8f9fa; border-radius: 8px;">
+            <h5 class="mb-3">Thông tin liên hệ</h5>
+            @if($booking->customer_name)
+                <p><strong>Họ tên:</strong> {{ $booking->customer_name }}</p>
+            @endif
+            @if($booking->customer_phone)
+                <p><strong>Số điện thoại:</strong> {{ $booking->customer_phone }}</p>
+            @endif
+            @if($booking->customer_email)
+                <p><strong>Email:</strong> {{ $booking->customer_email }}</p>
+            @endif
+        </div>
+        @endif
+
         @if($booking->notes)
         <div class="mt-3">
             <strong>Ghi chú:</strong> {{ $booking->notes }}
+        </div>
+        @endif
+
+        {{-- Food Items Section --}}
+        @if($booking->bookingFoods->count() > 0)
+        <div class="mt-4 p-3" style="background: #f8f9fa; border-radius: 8px;">
+            <h5 class="mb-3">Đồ ăn đã đặt</h5>
+            <div class="row">
+                @foreach($booking->bookingFoods as $food)
+                <div class="col-md-6 mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>{{ $food->item->name }} x{{ $food->quantity }}</span>
+                        <span class="fw-bold">{{ number_format($food->total_price) }}đ</span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
         @endif
     </div>
@@ -257,6 +299,11 @@
     <div class="alert alert-info">
         <i class="fas fa-info-circle"></i>
         <strong>Lưu ý:</strong> Bạn sẽ thanh toán bằng tiền mặt khi đến rạp. Vui lòng đến rạp trước giờ chiếu 15 phút để thanh toán và nhận vé.
+    </div>
+    @else
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <strong>Thanh toán thành công!</strong> Vé đã được xác nhận. Bạn có thể đến rạp trước giờ chiếu 15 phút để nhận vé.
     </div>
     @endif
     

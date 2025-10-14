@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+// Thêm channel cho showtime
+Broadcast::channel('showtime.{showtimeId}', function ($showtimeId) {
+    return true; // Cho phép tất cả người dùng truy cập kênh này
 });

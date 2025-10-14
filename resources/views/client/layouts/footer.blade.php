@@ -4,7 +4,7 @@
             <div class="container py-lg-4">
                 <div class="text-txt">
                     <div class="right-side">
-                        <div class="row footer-about">
+                        {{-- <div class="row footer-about">
                             <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
                                 <a href="movies.html"><img class="img-fluid" src="assets/images/banner1.jpg" alt=""></a>
                             </div>
@@ -17,7 +17,7 @@
                             <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
                                 <a href="movies.html"><img class="img-fluid" src="assets/images/banner4.jpg" alt=""></a>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="row footer-links">
 
 

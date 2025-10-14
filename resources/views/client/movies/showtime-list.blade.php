@@ -15,7 +15,7 @@
 
             <div class="showtimes-grid">
                 @foreach($cinemaShowtimes as $showtime)
-                    <a @auth href="{{ route('booking.seatSelection', $showtime->showtime_id) }}" @else
+                    <a @auth href="{{ route('booking.seatSelection', ['showtime' => $showtime->showtime_id]) }}" @else
                     href="{{ route('auth.login') }}" @endauth class="showtime-card">
                         <div class="showtime-time">
                             {{ date('H:i', strtotime($showtime->show_time)) }}
