@@ -1,120 +1,50 @@
-<footer class="w3l-footer">
-    <section class="footer-inner-main">
-        <div class="footer-hny-grids py-5">
-            <div class="container py-lg-4">
-                <div class="text-txt">
-                    <div class="right-side">
-                        {{-- <div class="row footer-about">
-                            <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner1.jpg" alt=""></a>
-                            </div>
-                            <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner2.jpg" alt=""></a>
-                            </div>
-                            <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner3.jpg" alt=""></a>
-                            </div>
-                            <div class="col-md-3 col-6 footer-img mb-lg-0 mb-4">
-                                <a href="movies.html"><img class="img-fluid" src="assets/images/banner4.jpg" alt=""></a>
-                            </div>
-                        </div> --}}
-                        <div class="row footer-links">
-
-
-                            <div class="col-md-3 col-sm-6 sub-two-right mt-5">
-                                <h6>Movies</h6>
-                                <ul>
-                                    <li><a href="#">Movies</a></li>
-                                    <li><a href="#">Videos</a></li>
-                                    <li><a href="#">English Movies</a></li>
-                                    <li><a href="#">Tailor</a></li>
-                                    <li><a href="#">Upcoming Movies</a></li>
-                                    <li><a href="Contact_Us.html">Contact Us</a></li>
-                                </ul>
-                            </div>
-                            <div class="col-md-3 col-sm-6 sub-two-right mt-5">
-                                <h6>Information</h6>
-                                <ul>
-                                    <li><a href="index.html">Home</a> </li>
-                                    <li><a href="about.html">About</a> </li>
-                                    <li><a href="#">Tv Series</a> </li>
-                                    <li><a href="#">Blogs</a> </li>
-                                    <li><a href="sign_in.html">Login</a></li>
-                                    <li><a href="Contact_Us.html">Contact</a></li>
-                                </ul>
-                            </div>
-                            <div class="col-md-3 col-sm-6 sub-two-right mt-5">
-                                <h6>Locations</h6>
-                                <ul>
-                                    <li><a href="movies.html">Asia</a></li>
-                                    <li><a href="movies.html">France</a></li>
-                                    <li><a href="movies.html">Taiwan</a></li>
-                                    <li><a href="movies.html">United States</a></li>
-                                    <li><a href="movies.html">Korea</a></li>
-                                    <li><a href="movies.html">United Kingdom</a></li>
-                                </ul>
-                            </div>
-                            <div class="col-md-3 col-sm-6 sub-two-right mt-5">
-                                <h6>Newsletter</h6>
-                                <form action="#" class="subscribe mb-3" method="post">
-                                    <input type="email" name="email" placeholder="Your Email Address" required="">
-                                    <button><span class="fa fa-envelope-o"></span></button>
-                                </form>
-                                <p>Enter your email and receive the latest news, updates and special offers from us.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+<footer class="footer py-5 mt-auto">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-4">
+                <h4 class="text-uppercase fw-semibold mb-3 text-black">MyShowz</h4>
+                <p class="small text-black mb-4">{{ __('Trải nghiệm đặt vé phim trực tuyến với giao diện sáng, gọn gàng và tập trung vào sắc đỏ chủ đạo.') }}</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="btn btn-outline-brand btn-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="btn btn-outline-brand btn-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="btn btn-outline-brand btn-icon" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                    <a href="#" class="btn btn-outline-brand btn-icon" aria-label="Tiktok"><i class="bi bi-tiktok"></i></a>
                 </div>
             </div>
-        </div>
-        </div>
-        <div class="below-section">
-            <div class="container">
-                <div class="copyright-footer">
-                    <div class="columns text-lg-left">
-                        <p>&copy; 2021 MyShowz. All rights reserved</p>
-                    </div>
-
-                    <ul class="social text-lg-right">
-                        <li><a href="#facebook"><span class="fa fa-facebook" aria-hidden="true"></span></a>
-                        </li>
-                        <li><a href="#linkedin"><span class="fa fa-linkedin" aria-hidden="true"></span></a>
-                        </li>
-                        <li><a href="#twitter"><span class="fa fa-twitter" aria-hidden="true"></span></a>
-                        </li>
-                        <li><a href="#google"><span class="fa fa-google-plus" aria-hidden="true"></span></a>
-                        </li>
-
-                    </ul>
-                </div>
+            <div class="col-6 col-lg-2">
+                <h6 class="text-uppercase fw-semibold small mb-3 text-black">{{ __('Khám phá') }}</h6>
+                <ul class="list-unstyled small text-black">
+                    <li><a class="link-fade" href="{{ route('movies.index') }}">{{ __('Phim nổi bật') }}</a></li>
+                    <li><a class="link-fade" href="{{ route('movies.index', ['status' => 'now-showing']) }}">{{ __('Đang chiếu') }}</a></li>
+                    <li><a class="link-fade" href="{{ route('movies.index', ['status' => 'coming-soon']) }}">{{ __('Sắp chiếu') }}</a></li>
+                    <li><a class="link-fade" href="{{ route('cinemas.index') }}">{{ __('Rạp gần bạn') }}</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-lg-2">
+                <h6 class="text-uppercase fw-semibold small mb-3 text-black">{{ __('Hỗ trợ') }}</h6>
+                <ul class="list-unstyled small text-black">
+                    <li><a class="link-fade" href="{{ route('faq') }}">{{ __('Câu hỏi thường gặp') }}</a></li>
+                    <li><a class="link-fade" href="{{ route('terms') }}">{{ __('Điều khoản sử dụng') }}</a></li>
+                    <li><a class="link-fade" href="{{ route('privacy') }}">{{ __('Chính sách bảo mật') }}</a></li>
+                    <li><a class="link-fade" href="{{ route('contact') }}">{{ __('Liên hệ chúng tôi') }}</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="text-uppercase fw-semibold small mb-3 text-black">{{ __('Nhận bản tin') }}</h6>
+                <p class="small text-black">{{ __('Luôn cập nhật các suất chiếu hot và ưu đãi mới nhất mỗi tuần.') }}</p>
+                <form id="newsletter-form" action="{{ route('newsletter.subscribe') }}" method="POST" class="d-flex gap-2 flex-wrap">
+                    @csrf
+                    <label for="newsletter-email" class="visually-hidden">{{ __('Email của bạn') }}</label>
+                    <input id="newsletter-email" type="email" name="email" class="form-control flex-grow-1" placeholder="{{ __('you@example.com') }}" required>
+                    <button type="submit" class="btn btn-brand">{{ __('Đăng ký') }}</button>
+                </form>
+                <div id="newsletter-feedback" class="small mt-2 text-black"></div>
             </div>
         </div>
-        <!-- move top -->
-        <button onclick="topFunction()" id="movetop" title="Go to top">
-            <span class="fa fa-arrow-up" aria-hidden="true"></span>
-        </button>
-        <script>
-            // When the user scrolls down 20px from the top of the document, show the button
-            window.onscroll = function () {
-                scrollFunction()
-            };
 
-            function scrollFunction() {
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    document.getElementById("movetop").style.display = "block";
-                } else {
-                    document.getElementById("movetop").style.display = "none";
-                }
-            }
-
-            // When the user clicks on the button, scroll to the top of the document
-            function topFunction() {
-                document.body.scrollTop = 0;
-                document.documentElement.scrollTop = 0;
-            }
-        </script>
-        <!-- /move top -->
-
-    </section>
+        <div class="border-top border-danger-subtle mt-5 pt-3 d-flex flex-column flex-lg-row justify-content-between align-items-center gap-2 small text-black">
+            <p class="mb-0">&copy; {{ now()->year }} MyShowz. {{ __('Giữ mọi quyền.') }}</p>
+            <p class="mb-0">{{ __('Thiết kế bởi đội ngũ MyShowz với niềm đam mê điện ảnh.') }}</p>
+        </div>
+    </div>
 </footer>

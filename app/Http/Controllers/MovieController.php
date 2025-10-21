@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\BuildsMovieViewData;
 use App\Models\Movie;
 use App\Models\Cinema;
 use App\Models\Showtime;
@@ -11,16 +12,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class MovieController extends Controller
 {
+    use BuildsMovieViewData;
+
     /**
      * Display a listing of movies with filtering options
      */
     public function index(Request $request)
     {
         try {
-            $query = Movie::query();
+            $query = Movie::query()->with(['showtimes' => function ($builder) {
+                $builder->select('showtime_id', 'movie_id', 'show_date', 'show_time', 'status')
+                    ->where('show_date', '>=', Carbon::today());
+            }]);
 
             // Filter by status
             if ($request->has('status')) {
@@ -69,9 +78,7 @@ class MovieController extends Controller
                 });
             }
 
-            // Sorting
-            $sortBy = $request->get('sort', 'release_date');
-            $sortDirection = $request->get('direction', 'desc');
+            [$sortBy, $sortDirection] = $this->resolveSort($request);
 
             switch ($sortBy) {
                 case 'title':
@@ -83,6 +90,9 @@ class MovieController extends Controller
                 case 'duration':
                     $query->orderBy('duration', $sortDirection);
                     break;
+                case 'popularity':
+                    $query->orderByDesc('updated_at')->orderBy('rating', $sortDirection);
+                    break;
                 case 'release_date':
                 default:
                     $query->orderBy('release_date', $sortDirection);
@@ -90,15 +100,39 @@ class MovieController extends Controller
             }
 
             // Pagination
-            $perPage = $request->get('per_page', 12);
-            $movies = $query->paginate($perPage);
+            $perPage = (int) $request->get('per_page', 12);
+            if ($perPage <= 0) {
+                $perPage = 12;
+            }
 
-            // Get filter options for sidebar
+            $movies = $query->paginate($perPage)->appends($request->query());
+
+            // Normalize paginator items for rendering without mutating paginator internals
+            $normalized = $this->normalizeMovies(collect($movies->items()));
+
+            $filters = $this->buildFilterOptions();
+            $statsTiles = $this->buildStatsTiles();
+            $meta = $this->buildPaginationMeta($movies);
+            $activeFilters = $this->activeFilters($request, $perPage, $sortBy, $sortDirection);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('client.movies.partials.movie-card-grid', [
+                        'movies' => $normalized,
+                        'emptyMessage' => __('Không tìm thấy phim phù hợp với bộ lọc hiện tại.'),
+                    ])->render(),
+                    'movies' => $normalized->values()->all(),
+                    'meta' => $meta,
+                    'activeFilters' => $activeFilters,
+                    'filters' => $filters,
+                ]);
+            }
+
+            // Legacy data (kept for backwards compatibility)
             $genres = $this->getAvailableGenres();
             $languages = Movie::whereNotNull('language')->distinct()->pluck('language')->sort();
             $ageRatings = Movie::whereNotNull('age_rating')->distinct()->pluck('age_rating')->sort();
-
-            // Get movie statistics
             $stats = [
                 'total' => Movie::count(),
                 'now_showing' => Movie::where('status', 'Now Showing')->count(),
@@ -106,15 +140,28 @@ class MovieController extends Controller
                 'ended' => Movie::where('status', 'Ended')->count()
             ];
 
-            return view('client.movies.index', compact(
-                'movies',
-                'genres',
-                'languages',
-                'ageRatings',
-                'stats'
-            ));
+            return view('client.movies.index', [
+                'movies' => $movies,
+                'filters' => $filters,
+                'activeFilters' => $activeFilters,
+                'statsTiles' => $statsTiles,
+                'meta' => $meta,
+                'sortOptions' => $this->sortOptions(),
+                'genres' => $genres,
+                'languages' => $languages,
+                'ageRatings' => $ageRatings,
+                'stats' => $stats,
+            ]);
         } catch (\Exception $e) {
-            \Log::error('MovieController@index error: ' . $e->getMessage());
+            \Log::error('MovieController@index error: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Không thể tải danh sách phim. Vui lòng thử lại.'),
+                ], 500);
+            }
+
             return back()->with('error', 'Unable to load movies. Please try again.');
         }
     }
@@ -124,21 +171,50 @@ class MovieController extends Controller
      */
     public function nowShowing(Request $request)
     {
-        $query = Movie::where('status', 'Now Showing')
-            ->whereHas('showtimes', function ($q) {
-                $q->where('show_date', '>=', Carbon::today())
-                    ->where('status', 'Active');
-            });
+        try {
+            $query = Movie::where('status', 'Now Showing')
+                ->whereHas('showtimes', function ($q) {
+                    $q->where('show_date', '>=', Carbon::today())
+                        ->where('status', 'Active');
+                });
 
-        // Apply same filtering as index
-        $this->applyFilters($query, $request);
+            // Apply same filtering as index
+            $this->applyFilters($query, $request);
 
-        $movies = $query->orderBy('rating', 'desc')
-            ->paginate(12);
+            $movies = $query->with('showtimes')
+                ->orderBy('rating', 'desc')
+                ->paginate(12)
+                ->appends($request->query());
 
-        $genres = $this->getAvailableGenres();
+            $normalized = $this->normalizeMovies(collect($movies->items()));
 
-        return view('client.movies.now-showing', compact('movies', 'genres'));
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('client.movies.partials.movie-card-grid', [
+                        'movies' => $normalized,
+                        'emptyMessage' => __('Hiện chưa có phim đang chiếu phù hợp.'),
+                    ])->render(),
+                    'movies' => $normalized->values()->all(),
+                    'meta' => $this->buildPaginationMeta($movies),
+                ]);
+            }
+
+            $genres = $this->getAvailableGenres();
+
+            return view('client.movies.now-showing', compact('movies', 'genres'));
+        } catch (\Exception $e) {
+            \Log::error('MovieController@nowShowing error: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Không thể tải danh sách phim đang chiếu. Vui lòng thử lại.'),
+                ], 500);
+            }
+
+            return back()->with('error', __('Unable to load now showing movies. Please try again.'));
+        }
     }
 
     /**
@@ -146,17 +222,46 @@ class MovieController extends Controller
      */
     public function comingSoon(Request $request)
     {
-        $query = Movie::where('status', 'Coming Soon')
-            ->where('release_date', '>', Carbon::now());
+        try {
+            $query = Movie::where('status', 'Coming Soon')
+                ->where('release_date', '>', Carbon::now());
 
-        $this->applyFilters($query, $request);
+            $this->applyFilters($query, $request);
 
-        $movies = $query->orderBy('release_date', 'asc')
-            ->paginate(12);
+            $movies = $query->with('showtimes')
+                ->orderBy('release_date', 'asc')
+                ->paginate(12)
+                ->appends($request->query());
 
-        $genres = $this->getAvailableGenres();
+            $normalized = $this->normalizeMovies(collect($movies->items()));
 
-        return view('client.movies.coming-soon', compact('movies', 'genres'));
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('client.movies.partials.movie-card-grid', [
+                        'movies' => $normalized,
+                        'emptyMessage' => __('Hiện chưa có phim sắp chiếu phù hợp.'),
+                    ])->render(),
+                    'movies' => $normalized->values()->all(),
+                    'meta' => $this->buildPaginationMeta($movies),
+                ]);
+            }
+
+            $genres = $this->getAvailableGenres();
+
+            return view('client.movies.coming-soon', compact('movies', 'genres'));
+        } catch (\Exception $e) {
+            \Log::error('MovieController@comingSoon error: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Không thể tải danh sách phim sắp chiếu. Vui lòng thử lại.'),
+                ], 500);
+            }
+
+            return back()->with('error', __('Unable to load coming soon movies. Please try again.'));
+        }
     }
 
     /**
@@ -164,18 +269,47 @@ class MovieController extends Controller
      */
     public function byGenre(Request $request, $genre)
     {
-        $query = Movie::where('genre', 'LIKE', '%' . $genre . '%')
-            ->where('status', '!=', 'Ended');
+        try {
+            $query = Movie::where('genre', 'LIKE', '%' . $genre . '%')
+                ->where('status', '!=', 'Ended');
 
-        $this->applyFilters($query, $request);
+            $this->applyFilters($query, $request);
 
-        $movies = $query->orderBy('rating', 'desc')
-            ->paginate(12);
+            $movies = $query->with('showtimes')
+                ->orderBy('rating', 'desc')
+                ->paginate(12)
+                ->appends($request->query());
 
-        $genres = $this->getAvailableGenres();
-        $currentGenre = $genre;
+            $normalized = $this->normalizeMovies(collect($movies->items()));
 
-        return view('client.movies.genre', compact('movies', 'genres', 'currentGenre'));
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('client.movies.partials.movie-card-grid', [
+                        'movies' => $normalized,
+                        'emptyMessage' => __('Không có phim thuộc thể loại này.'),
+                    ])->render(),
+                    'movies' => $normalized->values()->all(),
+                    'meta' => $this->buildPaginationMeta($movies),
+                ]);
+            }
+
+            $genres = $this->getAvailableGenres();
+            $currentGenre = $genre;
+
+            return view('client.movies.genre', compact('movies', 'genres', 'currentGenre'));
+        } catch (\Exception $e) {
+            \Log::error('MovieController@byGenre error: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Không thể tải danh sách phim theo thể loại. Vui lòng thử lại.'),
+                ], 500);
+            }
+
+            return back()->with('error', __('Unable to load genre movies. Please try again.'));
+        }
     }
 
     /**
@@ -186,25 +320,59 @@ class MovieController extends Controller
         $searchTerm = $request->get('q', '');
 
         if (strlen($searchTerm) < 2) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Từ khóa tìm kiếm phải có ít nhất 2 ký tự.'),
+                ], 422);
+            }
             return redirect()->route('movies.index')
                 ->with('error', 'Search term must be at least 2 characters');
         }
 
-        $movies = Movie::where(function ($query) use ($searchTerm) {
-            $query->where('title', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('original_title', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('cast', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('director', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('description', 'LIKE', '%' . $searchTerm . '%')
-                ->orWhere('genre', 'LIKE', '%' . $searchTerm . '%');
-        })
-            ->where('status', '!=', 'Ended')
-            ->orderBy('rating', 'desc')
-            ->paginate(12);
+        try {
+            $movies = Movie::where(function ($query) use ($searchTerm) {
+                $query->where('title', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('original_title', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('cast', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('director', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('description', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('genre', 'LIKE', '%' . $searchTerm . '%');
+            })
+                ->where('status', '!=', 'Ended')
+                ->orderBy('rating', 'desc')
+                ->paginate(12)
+                ->appends($request->query());
 
-        $genres = $this->getAvailableGenres();
+            $moviesCollection = $this->normalizeMovies(collect($movies->items()));
 
-        return view('client.movies.search', compact('movies', 'genres', 'searchTerm'));
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('client.movies.partials.movie-card-grid', [
+                        'movies' => $moviesCollection,
+                        'emptyMessage' => __('Không tìm thấy phim phù hợp với từ khóa.'),
+                    ])->render(),
+                    'movies' => $moviesCollection->values()->all(),
+                    'meta' => $this->buildPaginationMeta($movies),
+                ]);
+            }
+
+            $genres = $this->getAvailableGenres();
+
+            return view('client.movies.search', compact('movies', 'genres', 'searchTerm'));
+        } catch (\Exception $e) {
+            \Log::error('MovieController@search error: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('Không thể tìm kiếm phim vào lúc này. Vui lòng thử lại.'),
+                ], 500);
+            }
+
+            return back()->with('error', __('Unable to search movies right now. Please try again.'));
+        }
     }
 
     /**
@@ -604,6 +772,152 @@ class MovieController extends Controller
     /**
      * Private helper methods
      */
+    private function buildFilterOptions(): array
+    {
+        return Cache::remember('movies:filters', now()->addMinutes(5), function () {
+            return [
+                'statuses' => [
+                    ['label' => __('Tất cả'), 'value' => null],
+                    ['label' => __('Đang chiếu'), 'value' => 'now-showing'],
+                    ['label' => __('Sắp chiếu'), 'value' => 'coming-soon'],
+                    ['label' => __('Đã kết thúc'), 'value' => 'ended'],
+                ],
+                'genres' => Movie::query()
+                    ->whereNotNull('genre')
+                    ->select('genre')
+                    ->get()
+                    ->flatMap(fn ($movie) => $this->extractGenres($movie->genre))
+                    ->countBy()
+                    ->sortDesc()
+                    ->map(fn ($count, $genre) => [
+                        'label' => $genre,
+                        'value' => $genre,
+                        'count' => $count,
+                    ])
+                    ->values()
+                    ->all(),
+                'languages' => Movie::query()
+                    ->whereNotNull('language')
+                    ->select('language', DB::raw('COUNT(*) as total'))
+                    ->groupBy('language')
+                    ->orderBy('language')
+                    ->get()
+                    ->map(fn ($row) => [
+                        'label' => $row->language,
+                        'value' => $row->language,
+                        'count' => $row->total,
+                    ])
+                    ->all(),
+                'age_ratings' => Movie::query()
+                    ->whereNotNull('age_rating')
+                    ->select('age_rating', DB::raw('COUNT(*) as total'))
+                    ->groupBy('age_rating')
+                    ->orderBy('age_rating')
+                    ->get()
+                    ->map(fn ($row) => [
+                        'label' => $row->age_rating,
+                        'value' => $row->age_rating,
+                        'count' => $row->total,
+                    ])
+                    ->all(),
+                'ratings' => collect([9, 8, 7, 6, 5])->map(fn ($rating) => [
+                    'label' => $rating . '+',
+                    'value' => (string) $rating,
+                ])->all(),
+            ];
+        });
+    }
+
+    private function buildStatsTiles(): array
+    {
+        return Cache::remember('movies:stats-tiles', now()->addMinutes(5), function () {
+            return [
+                [
+                    'label' => __('Tổng phim'),
+                    'value' => Movie::count(),
+                    'icon' => 'film',
+                    'suffix' => '',
+                ],
+                [
+                    'label' => __('Đang chiếu'),
+                    'value' => Movie::where('status', 'Now Showing')->count(),
+                    'icon' => 'play-circle',
+                    'suffix' => '',
+                ],
+                [
+                    'label' => __('Sắp chiếu'),
+                    'value' => Movie::where('status', 'Coming Soon')->count(),
+                    'icon' => 'clock',
+                    'suffix' => '',
+                ],
+                [
+                    'label' => __('Đánh giá cao'),
+                    'value' => Movie::where('rating', '>=', 8)->count(),
+                    'icon' => 'star',
+                    'suffix' => '+',
+                ],
+            ];
+        });
+    }
+
+    private function buildPaginationMeta(LengthAwarePaginator $paginator): array
+    {
+        return [
+            'current_page' => $paginator->currentPage(),
+            'last_page' => $paginator->lastPage(),
+            'per_page' => $paginator->perPage(),
+            'total' => $paginator->total(),
+            'has_more' => $paginator->hasMorePages(),
+            'next_page_url' => $paginator->nextPageUrl(),
+            'prev_page_url' => $paginator->previousPageUrl(),
+        ];
+    }
+
+    private function activeFilters(Request $request, int $perPage, string $sortBy, string $sortDirection): array
+    {
+        return [
+            'status' => $request->get('status'),
+            'genre' => $request->get('genre'),
+            'min_rating' => $request->get('min_rating'),
+            'language' => $request->get('language'),
+            'age_rating' => $request->get('age_rating'),
+            'search' => $request->get('search'),
+            'per_page' => $perPage,
+            'sort' => $sortBy,
+            'direction' => $sortDirection,
+        ];
+    }
+
+    private function sortOptions(): array
+    {
+        return [
+            'release_date-desc' => __('Mới nhất'),
+            'release_date-asc' => __('Cũ nhất'),
+            'rating-desc' => __('Đánh giá cao'),
+            'rating-asc' => __('Đánh giá thấp'),
+            'title-asc' => __('A → Z'),
+            'title-desc' => __('Z → A'),
+            'duration-desc' => __('Thời lượng dài'),
+            'duration-asc' => __('Thời lượng ngắn'),
+            'popularity-desc' => __('Phổ biến'),
+        ];
+    }
+
+    private function resolveSort(Request $request): array
+    {
+        $sort = $request->get('sort', 'release_date');
+        $direction = $request->get('direction', 'desc');
+
+        if (str_contains($sort, '-')) {
+            [$sort, $forcedDirection] = explode('-', $sort, 2);
+            $direction = $forcedDirection;
+        }
+
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
+
+        return [$sort, $direction];
+    }
+
     private function applyFilters($query, Request $request)
     {
         if ($request->has('genre') && !empty($request->genre)) {

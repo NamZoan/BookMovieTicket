@@ -286,7 +286,7 @@
         <button onclick="window.print()" class="btn btn-primary">
             <i class="fas fa-print"></i> In vé
         </button>
-        <a href="{{ route('account.bookings') }}" class="btn btn-secondary">
+        <a href="{{ route('user.bookings.index') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>

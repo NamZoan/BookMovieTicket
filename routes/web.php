@@ -10,7 +10,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SocialiteController;
-
+use App\Http\Controllers\VnPayController;
 require __DIR__ . '/admin.php';
 
 /*
@@ -25,7 +25,6 @@ Route::get('/home', [HomeController::class, 'index'])->name('client.home');
 // AJAX Routes for Home
 Route::get('/movies-by-genre', [HomeController::class, 'getMoviesByGenre'])->name('movies.by-genre');
 Route::get('/search-movies', [HomeController::class, 'searchMovies'])->name('movies.search');
-Route::get('/movie-showtimes/{movie}', [HomeController::class, 'getMovieShowtimes'])->name('movies.showtimes');
 Route::get('/cinema-locations', [HomeController::class, 'getCinemaLocations'])->name('cinemas.locations');
 Route::post('/newsletter-subscribe', [HomeController::class, 'subscribeNewsletter'])->name('newsletter.subscribe');
 
@@ -36,7 +35,8 @@ Route::prefix('movies')->name('movies.')->group(function () {
     Route::get('/now-showing', [MovieController::class, 'nowShowing'])->name('now-showing');
     Route::get('/coming-soon', [MovieController::class, 'comingSoon'])->name('coming-soon');
     Route::get('/ended', [MovieController::class, 'ended'])->name('ended');
-    Route::get('/search', [MovieController::class, 'search'])->name('search');
+    Route::get('/search', [MovieController::class, 'search'])->name('search.ajax');
+    Route::get('/load-more', [MovieController::class, 'loadMore'])->name('load-more');
 
     // Dynamic routes with specific patterns
     Route::get('/genre/{genre}', [MovieController::class, 'byGenre'])->name('genre');
@@ -46,11 +46,15 @@ Route::prefix('movies')->name('movies.')->group(function () {
         ->name('showtimes.ajax')
         ->where('movie_id', '[0-9]+');
 
-    // Movie detail routes (should come last)
-    Route::get('/{movie}', [MovieController::class, 'show'])->name('show');
+    Route::get('/{movie}/trailer', [MovieController::class, 'trailer'])
+        ->name('trailer')
+        ->where('movie', '[0-9]+');
+
     Route::get('/{movie_id}/showtimes', [MovieController::class, 'showtimes'])
         ->name('showtimes')
         ->where('movie_id', '[0-9]+');
+    // Movie detail routes (should come last)
+    Route::get('/{movie}', [MovieController::class, 'show'])->name('show');
     Route::get('/{movie}/reviews', [MovieController::class, 'reviews'])->name('reviews');
 });
 
@@ -117,22 +121,21 @@ Route::middleware('auth')->prefix('booking')->name('booking.')->group(function (
     Route::get('/pricing/{showtime}', [BookingController::class, 'getPricing'])->name('pricing');
     Route::post('/validate-promotion', [BookingController::class, 'validatePromotion'])->name('validate-promotion');
     Route::get('/available-promotions', [BookingController::class, 'getAvailablePromotions'])->name('available-promotions');
-});
 
-// User Account Routes (Protected)
-Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
-    Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-    Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/bookings', [UserController::class, 'bookings'])->name('bookings');
-    Route::get('/bookings/{booking}', [UserController::class, 'bookingDetails'])->name('booking-details');
-    Route::get('/favorites', [UserController::class, 'favorites'])->name('favorites');
-    Route::post('/favorites/toggle', [UserController::class, 'toggleFavorite'])->name('favorites.toggle');
-    Route::get('/loyalty-points', [UserController::class, 'loyaltyPoints'])->name('loyalty-points');
-    Route::get('/change-password', [UserController::class, 'showChangePasswordForm'])->name('change-password');
-    Route::post('/change-password', [UserController::class, 'changePassword'])->name('change-password.post');
-    Route::get('/notifications', [UserController::class, 'notifications'])->name('notifications');
-    Route::post('/notifications/mark-read', [UserController::class, 'markNotificationsRead'])->name('notifications.mark-read');
+});
+Route::get('/booking/vnpay-return', [VnPayController::class, 'handleReturn'])->name('booking.vnpay.return');
+
+// New User Dashboard Routes (Protected)
+Route::middleware('auth')->prefix('my-account')->name('user.')->group(function () {
+    // Booking History Routes
+    Route::get('/bookings', [App\Http\Controllers\User\BookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/{booking}', [App\Http\Controllers\User\BookingController::class, 'show'])->name('bookings.show');
+
+    // Profile Management Routes
+    Route::get('/profile', [App\Http\Controllers\User\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\User\ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/change-password', [App\Http\Controllers\User\ProfileController::class, 'showChangePasswordForm'])->name('change-password');
+    Route::post('/change-password', [App\Http\Controllers\User\ProfileController::class, 'changePassword'])->name('change-password.post');
 });
 
 // Public Pages

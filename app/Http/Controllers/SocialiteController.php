@@ -54,9 +54,10 @@ class SocialiteController extends Controller
             Auth::login($user, remember: true);
 
             // Điều hướng về trang bạn muốn (vd: homepage, hoặc /)
-            return redirect()->intended('/');
+            return redirect()->back();
         } catch (\Throwable $e) {
-            // Log::error($e); // nếu muốn
+            // Ghi lại lỗi để dễ dàng debug
+            \Illuminate\Support\Facades\Log::error('Google Login Failed: ' . $e->getMessage());
             return redirect()->route('auth.login')->with('error', 'Đăng nhập Google thất bại.');
         }
     }

@@ -94,7 +94,6 @@ h2 {
 
 #progressbar {
 	margin-top: 45px;
-	;
 	margin-bottom: 15px;
 	overflow: hidden;
 	color: var(--theme-progressbar);
@@ -107,7 +106,7 @@ h2 {
 #progressbar li {
 	list-style-type: none;
 	font-size: 15px;
-	width: 25%;
+	width: 20%;
 	float: left;
 	position: relative;
 	font-weight: 400;
@@ -127,6 +126,10 @@ h2 {
 
 #progressbar #step4:before {
 	content: "4"
+}
+
+#progressbar #step5:before {
+	content: "5"
 }
 
 #progressbar li:before {
@@ -207,20 +210,71 @@ h2 {
 	float: right;
 	border-radius: 22px;
 	background: var(--theme-rose);
-	background: #616161; 
+	background: #616161;
 }
 
-#form .cancel-pay-btn:hover, 
-#form .cancel-pay-btn:focus { 
+#form .cancel-pay-btn:hover,
+#form .cancel-pay-btn:focus {
 	background-color: #da0000
-} 
+}
 
-#form .pay-btn:hover, 
-#form .pay-btn:focus { 
-	background: rgb(0, 170, 9); 
-} 
+#form .pay-btn:hover,
+#form .pay-btn:focus {
+	background: rgb(0, 170, 9);
+}
 
-#form .home-page-btn:hover, 
-#form .home-page-btn:focus { 
+#form .home-page-btn:hover,
+#form .home-page-btn:focus {
 	background-color: #c70050;
+}
+
+/* snack grid tweaks */
+.snack-grid {
+	row-gap: 20px;
+}
+.snack-card {
+	background: var(--theme-bg);
+	border-radius: 10px;
+	box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+	padding: 16px;
+	text-align: center;
+	transition: transform .2s ease, box-shadow .2s ease;
+}
+.snack-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+.snack-card img {
+	width: 100%;
+	height: 120px;
+	object-fit: contain;
+}
+.qty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+.qty-btn {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: none;
+	background: var(--theme-rose);
+	color: #fff;
+	cursor: pointer;
+}
+.qty-input {
+	width: 48px;
+	text-align: center;
+	padding: 6px 4px;
+	border: 1px solid var(--theme-border);
+	border-radius: 6px;
+}
+
+/* iframe responsiveness */
+#seat-sel-iframe {
+	max-width: 100%;
+	width: 100%;
+	height: 60vh;
 }

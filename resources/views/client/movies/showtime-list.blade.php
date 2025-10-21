@@ -1,4 +1,4 @@
-@if($showtimes && $showtimes->count() > 0)
+﻿@if($showtimes && $showtimes->count() > 0)
     @foreach($showtimes as $cinemaName => $cinemaShowtimes)
         <div class="cinema-group">
             <div class="cinema-header">

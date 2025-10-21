@@ -22,6 +22,27 @@ class Cinema extends Model
         'city',
     ];
 
+    protected $casts = [
+        'gallery' => 'array',
+        'amenities' => 'array',
+    ];
+
+    // Scope for search
+    public function scopeSearch($query, $term)
+    {
+        if (!$term) return $query;
+        return $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhere('address', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeCity($query, $city)
+    {
+        if (!$city) return $query;
+        return $query->where('city', $city);
+    }
+
     // Các trường không được gán đại trà (protected)
     protected $guarded = [];
     public function screens()

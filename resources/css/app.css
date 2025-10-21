@@ -1,0 +1,383 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+:root {
+    --brand-primary: #D32F2F;
+    --brand-primary-dark: #B71C1C;
+    --brand-white: #FFFFFF;
+    --brand-black: #000000;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--brand-white);
+    color: var(--brand-black);
+    scroll-behavior: smooth;
+}
+
+a {
+    color: var(--brand-primary);
+    text-decoration: none;
+}
+
+a:hover,
+a:focus {
+    color: var(--brand-primary-dark);
+    text-decoration: underline;
+}
+
+.btn-brand {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: var(--brand-white);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-brand:hover,
+.btn-brand:focus {
+    background-color: var(--brand-primary-dark);
+    border-color: var(--brand-primary-dark);
+    color: var(--brand-white);
+    transform: translateY(-1px);
+    box-shadow: 0 0.75rem 1.5rem rgba(211, 47, 47, 0.25);
+}
+
+.btn-outline-brand {
+    color: var(--brand-primary);
+    border-color: var(--brand-primary);
+    background-color: transparent;
+}
+
+.btn-outline-brand:hover,
+.btn-outline-brand:focus {
+    color: var(--brand-white);
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-outline-brand.active,
+.btn-outline-brand:active {
+    color: var(--brand-white) !important;
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+}
+
+.navbar-brand .brand-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+    color: var(--brand-white);
+}
+
+.navbar-nav .nav-link {
+    font-weight: 600;
+    color: var(--brand-black);
+    white-space: nowrap;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: var(--brand-primary);
+}
+
+.offcanvas {
+    background-color: var(--brand-white);
+    color: var(--brand-black);
+}
+
+.hero-section {
+    background-color: var(--brand-white);
+}
+
+.hero-slide {
+    min-height: 70vh;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.hero-overlay {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.75));
+    padding: 3rem;
+}
+
+.section-title {
+    font-family: 'Yanone Kaffeesatz', 'Inter', sans-serif;
+    letter-spacing: 0.02em;
+    color: var(--brand-black);
+}
+
+.stats-tile {
+    background-color: var(--brand-white);
+    border: 1px solid rgba(211, 47, 47, 0.35);
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.stats-tile__icon {
+    font-size: 1.5rem;
+    color: var(--brand-primary);
+}
+
+.movie-card {
+    background-color: var(--brand-white);
+    border-radius: 1.25rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: var(--brand-black);
+}
+
+.movie-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.1);
+}
+
+.movie-card__media {
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.movie-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+}
+
+.movie-card:hover .movie-card__media img {
+    transform: scale(1.05);
+}
+
+.movie-card .badge {
+    font-weight: 600;
+}
+
+.movie-card .badge.bg-warning-subtle {
+    background-color: rgba(211, 47, 47, 0.1) !important;
+    color: var(--brand-primary) !important;
+}
+
+.movie-card .badge.bg-dark-subtle {
+    background-color: rgba(211, 47, 47, 0.12) !important;
+    color: var(--brand-primary) !important;
+}
+
+.movie-card__title a {
+    color: var(--brand-black);
+}
+
+.movie-card__title a:hover,
+.movie-card__title a:focus {
+    color: var(--brand-primary);
+}
+
+.trailer-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.06);
+    background-color: var(--brand-white);
+    color: var(--brand-black);
+}
+
+.trailer-card button {
+    width: 64px;
+    height: 64px;
+    border: 2px solid var(--brand-white);
+}
+
+.movie-poster {
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.08);
+}
+
+.section-accent {
+    border-top: 1px solid rgba(211, 47, 47, 0.3);
+    border-bottom: 1px solid rgba(211, 47, 47, 0.3);
+    background-color: rgba(211, 47, 47, 0.05);
+}
+
+.filters-panel .accordion-button {
+    color: var(--brand-black);
+    background-color: var(--brand-white);
+}
+
+.filters-panel .accordion-button:not(.collapsed) {
+    color: var(--brand-primary);
+    background-color: rgba(211, 47, 47, 0.08);
+}
+
+.filters-panel .form-check-label,
+.filters-panel .form-select,
+.filters-panel .btn {
+    color: var(--brand-black);
+}
+
+.filters-panel .btn-check:checked + .btn-outline-light {
+    color: var(--brand-white);
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.filters-panel .btn-outline-light {
+    color: var(--brand-black);
+    border-color: rgba(0, 0, 0, 0.15);
+}
+
+.filters-panel .btn-outline-light:hover,
+.filters-panel .btn-outline-light:focus {
+    color: var(--brand-white);
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.footer {
+    background-color: var(--brand-white);
+    color: var(--brand-black);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.footer .link-fade,
+.footer a {
+    color: var(--brand-black);
+}
+
+.footer .link-fade:hover,
+.footer .link-fade:focus,
+.footer a:hover,
+.footer a:focus {
+    color: var(--brand-primary);
+}
+
+.is-loading {
+    position: relative;
+    min-height: 120px;
+}
+
+.is-loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(2px);
+    background-image: url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23D32F2F' stroke-width='4'%3E%3Ccircle cx='22' cy='22' r='20' stroke-opacity='.2'/%3E%3Cpath d='M22 2a20 20 0 0 1 20 20' stroke-linecap='round'/%3E%3C/g%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 22 22' to='360 22 22' dur='1s' repeatCount='indefinite'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    z-index: 10;
+}
+
+.showtime-chip {
+    min-width: 130px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--brand-black);
+}
+
+.showtime-chip:hover,
+.showtime-chip:focus {
+    border-color: var(--brand-primary);
+    color: var(--brand-primary);
+}
+
+.testimonial-card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background-color: var(--brand-white);
+    color: var(--brand-black);
+}
+
+.testimonial-card .card-body {
+    border-left: 4px solid rgba(211, 47, 47, 0.3);
+}
+
+.search-inline .form-control {
+    background-color: var(--brand-white);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: var(--brand-black);
+}
+
+.search-inline .form-control:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.2rem rgba(211, 47, 47, 0.25);
+}
+
+.search-inline .btn-link {
+    color: var(--brand-primary);
+}
+
+.badge-status {
+    background-color: rgba(211, 47, 47, 0.12);
+    color: var(--brand-primary);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.form-select,
+.form-control {
+    background-color: var(--brand-white);
+    color: var(--brand-black);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.form-select:focus,
+.form-control:focus {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.2rem rgba(211, 47, 47, 0.25);
+    color: var(--brand-black);
+}
+
+.movie-hero-card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 1.5rem;
+    background-color: var(--brand-white);
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.08);
+}
+
+.movie-hero-card .badge {
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+.movie-detail-list li {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 0.75rem 0;
+}
+
+.testimonial-card .lead {
+    color: var(--brand-black);
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(26%) sepia(74%) saturate(3466%) hue-rotate(345deg) brightness(86%) contrast(102%);
+}
+
+@media (max-width: 991.98px) {
+    .hero-overlay {
+        padding: 2rem;
+    }
+
+    .offcanvas {
+        width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-overlay {
+        padding: 1.5rem;
+    }
+}

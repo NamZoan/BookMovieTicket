@@ -11,6 +11,9 @@ use App\Http\Controllers\Admin\ShowtimeController;
 use App\Http\Controllers\Admin\PricingController;
 use App\Http\Controllers\Admin\FoodItemController;
 use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\RouteController;
+
 // Admin Authentication Routes
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -37,16 +40,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         // Thêm các routes admin khác ở đây sau
         Route::resource('cinemas', CinemaController::class);
+
+        // System Management Routes
+        Route::prefix('system')->name('system.')->group(function () {
+            Route::get('/routes', [RouteController::class, 'index'])->name('routes');
+        });
         Route::resource('screens', ScreenController::class);
         Route::resource('seats', SeatController::class);
         Route::resource('showtimes', ShowtimeController::class);
-        
+
         // Showtime API routes
         Route::get('/showtimes/screen/{screenId}', [ShowtimeController::class, 'getScreenInfo'])->name('showtimes.screen-info');
         Route::get('/showtimes/movie/{movieId}', [ShowtimeController::class, 'getMovieInfo'])->name('showtimes.movie-info');
         Route::post('/showtimes/check-conflict', [ShowtimeController::class, 'checkConflict'])->name('showtimes.check-conflict');
         Route::get('/showtimes/by-screen-date', [ShowtimeController::class, 'getShowtimesByScreenAndDate'])->name('showtimes.by-screen-date');
-        
+
         Route::resource('pricing', PricingController::class);
         Route::resource('food-items', FoodItemController::class);
         Route::resource('promotions', PromotionController::class);
@@ -54,6 +62,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/promotions/{promotion}/toggle-status', [PromotionController::class, 'toggleStatus'])->name('promotions.toggle-status');
         // Additional food item routes
         Route::post('/food-items/{food_item}/toggle-status', [FoodItemController::class, 'toggleStatus'])->name('food-items.toggle-status');
+
+        // Booking Management Routes
+        Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+        Route::put('/bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
     });
 });
 

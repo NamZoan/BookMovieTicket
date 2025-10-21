@@ -65,3 +65,31 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 # BookMovieTicket
+## Storefront Refactor Notes
+
+The client storefront has been modernised with Bootstrap 5 and jQuery driven interactions. Key view models and AJAX endpoints exposed by the controllers:
+
+### Home (client.home)
+- heroSlides: array of featured movies prepared via mapMovieForCard() (id, title, summary, duration, rating, poster_url, trailer_url, details_url, book_url, genres).
+- 
+owShowingMovies, comingSoonMovies, 	rendingMovies, ecommendations: array collections compatible with client.components.movie-card.
+- movieStats: counter tiles (label, value, suffix) consumed by client.components.stats-tile.
+- quickShowtimes: quick booking tiles with movie/showtime metadata.
+- genreFilters: list of genre strings used by the AJAX filter panel.
+- latestTrailers: array of { movie, trailer_url } entries for the trailer gallery.
+
+### Movies index (movies.index)
+- movies: paginator whose collection contains normalised movie arrays.
+- ilters: associative array (statuses, genres, languages, ge_ratings, atings) used by the accordion filter form.
+- ctiveFilters: echo of the current request state, including sort, direction, and per_page.
+- statsTiles: high-level statistics for the counters.
+- meta: pagination metadata returned for both view and JSON responses.
+
+### AJAX endpoints
+- GET /movies/search ? { success, movies[] } for debounced quick search.
+- GET /movies/load-more and GET /movies (with X-Requested-With) ? { success, html, meta, next_page_url } for infinite scroll.
+- GET /movies/{movie}/trailer ? { success, movie, trailer_url } for trailer modal population.
+- GET /movies-by-genre ? { success, html } to hydrate the homepage genre spotlight.
+- GET /movies/{movie_id}/showtimes-ajax ? { success, showtimes[], html } for dynamic showtime lists.
+
+All view responses use cached, normalised data pipelines provided by BuildsMovieViewData to keep Blade templates presentation-focused.

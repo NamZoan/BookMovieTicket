@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 07, 2025 lúc 01:25 PM
+-- Thời gian đã tạo: Th10 17, 2025 lúc 04:37 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -30,18 +30,32 @@ SET time_zone = "+00:00";
 CREATE TABLE `bookings` (
   `booking_id` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED NOT NULL,
-  `name` varchar(191) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
+  `customer_name` varchar(191) DEFAULT NULL,
+  `customer_phone` varchar(20) DEFAULT NULL,
+  `customer_email` varchar(100) DEFAULT NULL,
   `showtime_id` bigint(20) UNSIGNED NOT NULL,
   `booking_code` varchar(20) NOT NULL,
+  `idempotency_key` varchar(64) DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL,
+  `promotion_code` varchar(20) DEFAULT NULL,
+  `discount_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `final_amount` decimal(10,2) DEFAULT NULL,
   `payment_method` enum('Cash','Credit Card','Banking','E-Wallet','Loyalty Points') DEFAULT NULL,
   `payment_status` enum('Pending','Paid','Failed','Refunded') NOT NULL DEFAULT 'Pending',
-  `booking_status` enum('Confirmed','Cancelled','Used') NOT NULL DEFAULT 'Confirmed',
+  `booking_status` enum('Pending','Confirmed','Cancelled','Used','Expired') NOT NULL DEFAULT 'Pending',
   `booking_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `payment_date` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
   `notes` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `bookings`
+--
+
+INSERT INTO `bookings` (`booking_id`, `user_id`, `customer_name`, `customer_phone`, `customer_email`, `showtime_id`, `booking_code`, `idempotency_key`, `total_amount`, `promotion_code`, `discount_amount`, `final_amount`, `payment_method`, `payment_status`, `booking_status`, `booking_date`, `payment_date`, `expires_at`, `notes`) VALUES
+(1, 4, 'Nam Hoài', '0326684220', 'namblue2909@gmail.com', 1, 'BK2025101273354C', 'c60b6b2d-0a1e-417a-b984-810d2a8727bd', 465000.00, 'WELCOME50K', 50000.00, 415000.00, 'Credit Card', 'Paid', 'Confirmed', '2025-10-12 08:16:23', '2025-10-12 08:16:23', '2025-10-12 08:19:23', NULL),
+(2, 4, 'Miranda Sanders', '+1 (387) 606-5106', 'zirajawo@mailinator.com', 1, 'BK202510172C8782', '7065d04b-faec-4d9d-b597-e44b81463270', 240000.00, 'NEW50K', 50000.00, 190000.00, 'Credit Card', 'Paid', 'Confirmed', '2025-10-17 07:20:50', '2025-10-17 07:20:50', '2025-10-17 07:23:50', 'Culpa iusto rerum do');
 
 -- --------------------------------------------------------
 
@@ -58,6 +72,15 @@ CREATE TABLE `booking_food` (
   `total_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `booking_food`
+--
+
+INSERT INTO `booking_food` (`booking_food_id`, `booking_id`, `item_id`, `quantity`, `unit_price`, `total_price`) VALUES
+(1, 1, 7, 1, 45000.00, 45000.00),
+(2, 1, 12, 1, 220000.00, 220000.00),
+(3, 2, 6, 1, 40000.00, 40000.00);
+
 -- --------------------------------------------------------
 
 --
@@ -70,6 +93,16 @@ CREATE TABLE `booking_seats` (
   `seat_id` bigint(20) UNSIGNED NOT NULL,
   `seat_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `booking_seats`
+--
+
+INSERT INTO `booking_seats` (`booking_seat_id`, `booking_id`, `seat_id`, `seat_price`) VALUES
+(1, 1, 739, 100000.00),
+(2, 1, 725, 100000.00),
+(3, 2, 710, 100000.00),
+(4, 2, 696, 100000.00);
 
 -- --------------------------------------------------------
 
@@ -242,7 +275,8 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (19, '2025_09_09_035209_add_social_columns_to_users_table', 9),
 (20, '2025_09_09_085224_update_showtimes_table', 10),
 (21, '2025_10_07_065730_alter_bookings_add_name_phone_drop_amounts', 11),
-(22, '2025_10_07_112431_drop_pricing_table', 12);
+(22, '2025_10_07_112431_drop_pricing_table', 12),
+(23, '2025_01_10_000000_add_promotion_fields_to_bookings_table', 13);
 
 -- --------------------------------------------------------
 
@@ -363,7 +397,7 @@ CREATE TABLE `promotions` (
 
 INSERT INTO `promotions` (`promotion_id`, `code`, `name`, `description`, `discount_type`, `discount_value`, `min_amount`, `max_discount`, `usage_limit`, `used_count`, `start_date`, `end_date`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 'WEEKEND15', 'Cuối tuần -15%', 'Giảm 15% cho mọi vé vào Thứ 7/CN', 'Percentage', 15.00, 0.00, 40000.00, 1000, 0, '2025-09-06', '2025-10-06', 1, '2025-09-08 08:51:56', '2025-09-08 08:51:56'),
-(2, 'NEW50K', 'Tân khách -50K', 'Giảm 50.000đ cho đơn đầu tiên', 'Fixed Amount', 50000.00, 100000.00, NULL, 1, 0, '2025-09-01', '2025-12-31', 1, '2025-09-08 08:51:56', '2025-09-08 08:51:56'),
+(2, 'NEW50K', 'Tân khách -50K', 'Giảm 50.000đ cho đơn đầu tiên', 'Fixed Amount', 50000.00, 100000.00, NULL, 1, 1, '2025-09-01', '2025-12-31', 1, '2025-09-08 08:51:56', '2025-10-17 07:20:50'),
 (3, 'MORNING20', 'Sáng vui -20%', 'Giảm 20% cho suất trước 11:00', 'Percentage', 20.00, 0.00, 30000.00, 500, 0, '2025-09-01', '2025-10-31', 1, '2025-09-08 08:51:56', '2025-09-08 08:51:56'),
 (4, 'STUDENT10', 'Sinh viên -10%', 'Nhập mã kèm thẻ SV tại quầy', 'Percentage', 10.00, 0.00, 25000.00, 2000, 0, '2025-09-08', '2026-03-31', 1, '2025-09-08 08:51:56', '2025-09-08 08:51:56'),
 (5, 'COUPLE80K', 'Cặp đôi -80K', 'Áp dụng khi đặt 2 ghế Couple', 'Fixed Amount', 80000.00, 200000.00, NULL, 1000, 0, '2025-09-08', '2025-11-30', 1, '2025-09-08 08:51:56', '2025-09-08 08:51:56'),
@@ -765,7 +799,7 @@ CREATE TABLE `showtimes` (
 --
 
 INSERT INTO `showtimes` (`showtime_id`, `movie_id`, `screen_id`, `show_date`, `show_time`, `end_time`, `available_seats`, `status`, `created_at`, `updated_at`, `price_seat_normal`, `price_seat_vip`, `price_seat_couple`) VALUES
-(1, 16, 1, '2025-10-07', '14:30:00', '17:12:00', 108, 'Active', '2025-08-28 02:34:55', '2025-09-08 01:11:01', 100000.00, 120000.00, 130000.00),
+(1, 16, 1, '2025-10-17', '14:30:00', '17:12:00', 104, 'Active', '2025-08-28 02:34:55', '2025-10-17 07:20:50', 100000.00, 120000.00, 130000.00),
 (2, 16, 3, '2025-10-05', '14:45:00', '17:27:00', 50, 'Active', '2025-08-28 18:52:11', '2025-09-08 01:17:44', 100000.00, 120000.00, 130000.00),
 (3, 16, 2, '2025-10-05', '09:00:00', '11:42:00', 108, 'Active', '2025-09-04 20:24:56', '2025-09-08 01:21:42', 100000.00, 120000.00, 130000.00),
 (4, 16, 2, '2025-10-05', '10:00:00', '12:42:00', 108, 'Active', '2025-09-04 20:26:42', '2025-09-16 01:52:55', 100000.00, 120000.00, 130000.00),
@@ -807,8 +841,9 @@ INSERT INTO `users` (`user_id`, `email`, `password`, `full_name`, `phone`, `date
 (1, 'customer@example.com', '$2y$12$lZLQe5HOl4Vk3P3A8k67CeOAsXA5oyBmqGSvVxdJoaCJOU0eqSoWq', 'John Doe', '0123456789', '1990-01-01', 'Male', '123 Main Street, City, Country', 0, 'Customer', 0, NULL, NULL, '2025-08-06 21:14:41', '2025-08-06 21:14:41'),
 (2, 'admin@example.com', '$2y$12$TM1udSXkz2MyOVgRhyR2nO90yKu0WPB07UMKmIxkPk2jGXFmQq8Ha', 'Admin User', '0987654321', '1985-05-10', 'Female', '456 Admin Ave, City, Country', 0, 'Admin', 1, NULL, NULL, '2025-08-06 21:14:42', '2025-08-06 21:14:42'),
 (3, 'staff@example.com', '$2y$12$I4/Z8H5LFXYiuj27nNG7xu6aYsCwhw9y0wR.2eZi3omGQjh1T5HBG', 'Staff Member', '0222333444', '1995-12-25', 'Male', '789 Staff Road, City, Country', 0, 'Staff', 1, NULL, NULL, '2025-08-06 21:14:42', '2025-08-06 21:14:42'),
-(4, 'namblue2909@gmail.com', NULL, 'Nam Hoài', NULL, NULL, NULL, NULL, 0, 'Customer', 1, 'google', '102578549864023559403', '2025-09-08 21:03:42', '2025-09-08 21:03:42'),
-(5, 'buihoainam.vn@gmail.com', NULL, 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 0, 'Customer', 1, 'google', '102359496558502341111', '2025-09-09 00:23:14', '2025-09-09 00:23:14');
+(4, 'namblue2909@gmail.com', NULL, 'Nam Hoài', NULL, NULL, NULL, NULL, 605, 'Customer', 1, 'google', '102578549864023559403', '2025-09-08 21:03:42', '2025-09-08 21:03:42'),
+(5, 'buihoainam.vn@gmail.com', NULL, 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 0, 'Customer', 1, 'google', '102359496558502341111', '2025-09-09 00:23:14', '2025-09-09 00:23:14'),
+(6, 'buihoainam2002.vn@gmail.com', NULL, 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 0, 'Customer', 1, 'google', '116147379371202979584', '2025-10-11 21:39:14', '2025-10-11 21:39:14');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -820,6 +855,7 @@ INSERT INTO `users` (`user_id`, `email`, `password`, `full_name`, `phone`, `date
 ALTER TABLE `bookings`
   ADD PRIMARY KEY (`booking_id`),
   ADD UNIQUE KEY `bookings_booking_code_unique` (`booking_code`),
+  ADD UNIQUE KEY `bookings_idempotency_key_unique` (`idempotency_key`),
   ADD KEY `bookings_user_id_foreign` (`user_id`),
   ADD KEY `bookings_showtime_id_foreign` (`showtime_id`);
 
@@ -932,19 +968,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `bookings`
 --
 ALTER TABLE `bookings`
-  MODIFY `booking_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `booking_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_food`
 --
 ALTER TABLE `booking_food`
-  MODIFY `booking_food_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `booking_food_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_seats`
 --
 ALTER TABLE `booking_seats`
-  MODIFY `booking_seat_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `booking_seat_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `cinemas`
@@ -968,7 +1004,7 @@ ALTER TABLE `food_items`
 -- AUTO_INCREMENT cho bảng `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT cho bảng `movies`
@@ -1010,7 +1046,7 @@ ALTER TABLE `showtimes`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

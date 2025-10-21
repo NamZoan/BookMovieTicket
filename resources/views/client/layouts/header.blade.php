@@ -1,157 +1,80 @@
-<header id="site-header" class="w3l-header fixed-top">
-    <!--/nav-->
-    <nav class="navbar navbar-expand-lg navbar-light fill px-lg-0 py-0 px-3">
-        <div class="container">
-            <h1><a class="navbar-brand" href="{{ route('home') }}"><span class="fa fa-play icon-log" aria-hidden="true"></span>
-                    MyShowz</a></h1>
-            <!-- if logo is image enable this
-						<a class="navbar-brand" href="{{ route('home') }}">
-							<img src="image-path" alt="Your logo" title="Your logo" style="height:35px;" />
-						</a> -->
-            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse"
-                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
-                <!-- <span class="navbar-toggler-icon"></span> -->
-                <span class="fa icon-expand fa-bars"></span>
-                <span class="fa icon-close fa-times"></span>
+<header class="navbar-wrap sticky-top bg-white border-bottom border-danger-subtle">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white" aria-label="Main navigation">
+        <div class="container py-2">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-uppercase fw-bold" href="{{ route('home') }}">
+                <span class="brand-icon rounded-circle d-inline-flex align-items-center justify-content-center">
+                    <i class="bi bi-film"></i>
+                </span>
+                <span class="fs-4 text-black">MyShowz</span>
+            </a>
+
+            <button class="navbar-toggler border-danger" type="button" data-bs-toggle="offcanvas" data-bs-target="#site-nav" aria-controls="site-nav" aria-label="{{ __('Mở điều hướng') }}">
+                <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item {{ request()->routeIs('home', 'client.home') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('home') }}">Home</a>
-                    </li>
-                    <li class="nav-item {{ request()->routeIs('movies.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('movies.index') }}">Movies</a>
-                    </li>
-                    <li class="nav-item {{ request()->routeIs('cinemas.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('cinemas.index') }}">Cinemas</a>
-                    </li>
-                    <li class="nav-item {{ request()->routeIs('about') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('about') }}">About</a>
-                    </li>
-                    <li class="nav-item {{ request()->routeIs('contact') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('contact') }}">Contact</a>
-                    </li>
-                </ul>
-
-                <!--/search-right-->
-                <div class="search-right">
-                    <a href="#search" class="btn search-hny mr-lg-3 mt-lg-0 mt-4" title="search">Search <span
-                            class="fa fa-search ml-3" aria-hidden="true"></span></a>
-                    <!-- search popup -->
-                    <div id="search" class="pop-overlay">
-                        <div class="popup">
-                            <form action="{{ route('movies.search') }}" method="GET" class="search-box">
-                                <input type="search" placeholder="Search movies..." name="q" required="required"
-                                    autofocus="" value="{{ request('q') }}">
-                                <button type="submit" class="btn"><span class="fa fa-search"
-                                        aria-hidden="true"></span></button>
-                            </form>
-                            <div class="browse-items">
-                                <h3 class="hny-title two mt-md-5 mt-4">Browse by Genre:</h3>
-                                <ul class="search-items">
-                                    <li><a href="{{ route('movies.genre', 'action') }}">Action</a></li>
-                                    <li><a href="{{ route('movies.genre', 'drama') }}">Drama</a></li>
-                                    <li><a href="{{ route('movies.genre', 'family') }}">Family</a></li>
-                                    <li><a href="{{ route('movies.genre', 'thriller') }}">Thriller</a></li>
-                                    <li><a href="{{ route('movies.genre', 'comedy') }}">Comedy</a></li>
-                                    <li><a href="{{ route('movies.genre', 'romantic') }}">Romantic</a></li>
-                                    <li><a href="{{ route('movies.genre', 'tv-series') }}">TV-Series</a></li>
-                                    <li><a href="{{ route('movies.genre', 'horror') }}">Horror</a></li>
-                                    <li><a href="{{ route('movies.genre', 'sci-fi') }}">Sci-Fi</a></li>
-                                    <li><a href="{{ route('movies.genre', 'adventure') }}">Adventure</a></li>
-                                    <li><a href="{{ route('movies.genre', 'animation') }}">Animation</a></li>
-                                    <li><a href="{{ route('movies.genre', 'documentary') }}">Documentary</a></li>
-                                    <li><a href="{{ route('movies.genre', 'fantasy') }}">Fantasy</a></li>
-                                    <li><a href="{{ route('movies.genre', 'mystery') }}">Mystery</a></li>
-                                    <li><a href="{{ route('movies.genre', 'crime') }}">Crime</a></li>
-                                    <li><a href="{{ route('movies.genre', 'biography') }}">Biography</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <a class="close" href="#close">×</a>
-                    </div>
-                    <!-- /search popup -->
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="site-nav" aria-labelledby="site-nav-label">
+                <div class="offcanvas-header border-bottom">
+                    <h6 class="offcanvas-title text-uppercase small fw-semibold text-black" id="site-nav-label">Menu</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ __('Đóng') }}"></button>
                 </div>
 
-                <!-- Authentication Links -->
-                <div class="Login_SignUp" id="login" style="font-size: 2rem ; display: inline-block; position: relative;">
-                    @guest
+                <div class="offcanvas-body d-flex flex-column flex-lg-row align-items-lg-center gap-lg-4 py-4 py-lg-0 bg-white">
+                    <ul class="navbar-nav flex-lg-row flex-grow-1 gap-2 gap-lg-3 justify-content-lg-end">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('home', 'client.home') ? 'active' : '' }}" href="{{ route('home') }}">{{ __('Trang chủ') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('movies.*') ? 'active' : '' }}" href="{{ route('movies.index') }}">{{ __('Phim') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('cinemas.*') ? 'active' : '' }}" href="{{ route('cinemas.index') }}">{{ __('Rạp') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">{{ __('Giới thiệu') }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">{{ __('Liên hệ') }}</a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 w-100 w-lg-auto mt-3 mt-lg-0">
+                        <form class="search-inline position-relative" action="{{ route('movies.search') }}" method="GET">
+                            <label for="global-search" class="visually-hidden">{{ __('Tìm kiếm phim') }}</label>
+                            <input id="global-search" type="search" name="q" class="form-control form-control-sm pe-5" placeholder="{{ __('Tìm nhanh phim...') }}" value="{{ request('q') }}">
+                            <button class="btn btn-link position-absolute top-50 end-0 translate-middle-y pe-3" type="submit" aria-label="{{ __('Tìm kiếm') }}">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+
                         <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-user-circle-o"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" href="{{ route('auth.login') }}">
-                                    <i class="fa fa-sign-in mr-2"></i>Login
-                                </a>
-                                <a class="dropdown-item" href="{{ route('auth.register') }}">
-                                    <i class="fa fa-user-plus mr-2"></i>Register
-                                </a>
-                            </div>
+                            <button class="btn btn-outline-brand btn-sm rounded-pill d-flex align-items-center gap-2 dropdown-toggle" type="button" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle fs-5"></i>
+                                <span class="d-none d-lg-inline text-black">{{ Auth::user()->name ?? __('Tài khoản') }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="accountDropdown">
+                                @guest
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('auth.login') }}"><i class="bi bi-box-arrow-in-right"></i> {{ __('Đăng nhập') }}</a></li>
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('auth.register') }}"><i class="bi bi-person-plus"></i> {{ __('Đăng ký') }}</a></li>
+                                @else
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.bookings.index') }}"><i class="bi bi-speedometer2"></i> {{ __('Bảng điều khiển') }}</a></li>
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.profile.edit') }}"><i class="bi bi-person-lines-fill"></i> {{ __('Thông tin cá nhân') }}</a></li>
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.bookings.index') }}"><i class="bi bi-ticket-perforated"></i> {{ __('Vé của tôi') }}</a></li>
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.change-password') }}"><i class="bi bi-key"></i> {{ __('Đổi mật khẩu') }}</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('auth.logout') }}">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item d-flex align-items-center gap-2">
+                                                <i class="bi bi-box-arrow-right"></i> {{ __('Đăng xuất') }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                @endguest
+                            </ul>
                         </div>
-                    @else
-                        <div class="dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fa fa-user-circle"></i>
-                                <span class="ml-1">{{ Auth::user()->name ?? 'User' }}</span>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" href="{{ route('account.dashboard') }}">
-                                    <i class="fa fa-dashboard mr-2"></i>Dashboard
-                                </a>
-                                <a class="dropdown-item" href="{{ route('account.profile') }}">
-                                    <i class="fa fa-user mr-2"></i>Profile
-                                </a>
-                                <a class="dropdown-item" href="{{ route('account.bookings') }}">
-                                    <i class="fa fa-ticket mr-2"></i>My Bookings
-                                </a>
-                                <a class="dropdown-item" href="{{ route('account.favorites') }}">
-                                    <i class="fa fa-heart mr-2"></i>Favorites
-                                </a>
-                                <a class="dropdown-item" href="{{ route('account.loyalty-points') }}">
-                                    <i class="fa fa-star mr-2"></i>Loyalty Points
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <form method="POST" action="{{ route('auth.logout') }}" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="dropdown-item">
-                                        <i class="fa fa-sign-out mr-2"></i>Logout
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    @endguest
-                </div>
-            </div>
-            
-            <!-- toggle switch for light and dark theme -->
-            <div class="mobile-position">
-                <nav class="navigation">
-                    <div class="theme-switch-wrapper">
-                        <label class="theme-switch" for="checkbox">
-                            <input type="checkbox" id="checkbox">
-                            <div class="mode-container">
-                                <i class="gg-sun"></i>
-                                <i class="gg-moon"></i>
-                            </div>
-                        </label>
                     </div>
-                </nav>
+                </div>
             </div>
         </div>
     </nav>
 </header>
-@section('styles')
-<style>
-    .dropdown-menu {
-    background-color: var(--bg-color);
-    border: 1px solid var(--border-color);
-}
-
-.dropdown-item:hover {
-    background-color: var(--hover-color);
-}
-</style>
-@endsection

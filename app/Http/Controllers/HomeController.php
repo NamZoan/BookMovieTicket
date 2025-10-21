@@ -2,241 +2,432 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Movie;
+use App\Http\Controllers\Concerns\BuildsMovieViewData;
+use App\Models\Booking;
 use App\Models\Cinema;
+use App\Models\Movie;
 use App\Models\Showtime;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ContactMessage;
+use Illuminate\Support\Facades\Schema;
 
 class HomeController extends Controller
 {
-    /**
-     * Display the home page with featured movies and data
-     */
-    public function index()
+    use BuildsMovieViewData;
+
+    public function index(Request $request)
     {
         try {
-            // Get movies that are currently showing
-            $nowShowingMovies = Movie::where('status', 'Now Showing')
-                ->orderBy('rating', 'desc')
-                ->limit(8)
-                ->get();
+            $featuredMovies = Cache::remember('home:featured', now()->addMinutes(5), function () {
+                return $this->normalizeMovies(
+                    Movie::featured()
+                        ->with('showtimes')
+                        ->limit(5)
+                        ->get()
+                )->all();
+            });
 
-            // Get upcoming movies (coming soon)
-            $upcomingMovies = Movie::where('status', 'Coming Soon')
-                ->where('release_date', '>', Carbon::now())
-                ->orderBy('release_date', 'asc')
-                ->limit(6)
-                ->get();
+            $nowShowingMovies = Cache::remember('home:now-showing', now()->addMinutes(3), function () {
+                return $this->normalizeMovies(
+                    Movie::nowShowing()
+                        ->orderByDesc('release_date')
+                        ->limit(12)
+                        ->get()
+                )->all();
+            });
 
-            // Get popular movies based on rating
-            $popularMovies = Movie::where('status', 'Now Showing')
-                ->where('rating', '>=', 7.0)
-                ->orderBy('rating', 'desc')
-                ->limit(4)
-                ->get();
+            $comingSoonMovies = Cache::remember('home:coming-soon', now()->addMinutes(5), function () {
+                return $this->normalizeMovies(
+                    Movie::comingSoon()
+                        ->limit(12)
+                        ->get()
+                )->all();
+            });
 
-            // Get featured movies for slider (high rating movies)
-            $featuredMovies = Movie::whereIn('status', ['Now Showing', 'Coming Soon'])
-                ->where('rating', '>=', 8.0)
-                ->orderBy('rating', 'desc')
-                ->limit(4)
-                ->get();
+            $trendingMovies = Cache::remember('home:trending', now()->addMinutes(5), function () {
+                return $this->normalizeMovies(
+                    Movie::trending()
+                        ->limit(8)
+                        ->get()
+                )->all();
+            });
 
-            // Get movie statistics for homepage
-            $movieStats = [
-                'total_movies' => Movie::count(),
-                'now_showing' => Movie::where('status', 'Now Showing')->count(),
-                'coming_soon' => Movie::where('status', 'Coming Soon')->count(),
-                'total_cinemas' => Cinema::count()
-            ];
+            $latestTrailers = Cache::remember('home:latest-trailers', now()->addMinutes(10), function () {
+                return Movie::nowShowing()
+                    ->whereNotNull('trailer_url')
+                    ->orderByDesc('release_date')
+                    ->limit(4)
+                    ->get()
+                    ->map(fn (Movie $movie) => [
+                        'movie' => $this->mapMovieForCard($movie),
+                        'trailer_url' => $this->resolveTrailerUrl($movie->trailer_url),
+                    ])
+                    ->all();
+            });
 
-            // Get today's showtimes for quick booking
-            $todayShowtimes = Showtime::with(['movie', 'screen.cinema'])
-                ->where('show_date', Carbon::today())
-                ->where('status', 'Active')
-                ->where('available_seats', '>', 0)
-                ->orderBy('show_time', 'asc')
-                ->limit(10)
-                ->get();
+            $movieStats = Cache::remember('home:stats', now()->addMinutes(15), function () {
+                return $this->buildHomepageStats();
+            });
 
-            // Get movies by genre for filtering
-            $genres = Movie::whereNotNull('genre')
-                ->select('genre')
-                ->distinct()
-                ->pluck('genre')
-                ->map(function ($genre) {
-                    return explode(',', $genre);
-                })
-                ->flatten()
-                ->map('trim')
-                ->unique()
-                ->values()
-                ->take(8);
-
-            // Get latest movie trailers
-            $latestTrailers = Movie::whereNotNull('trailer_url')
-                ->where('status', 'Now Showing')
-                ->orderBy('release_date', 'desc')
-                ->limit(4)
-                ->get();
-
-            return view('client.home', compact(
-                'nowShowingMovies',
-                'upcomingMovies',
-                'popularMovies',
-                'featuredMovies',
-                'movieStats',
-                'todayShowtimes',
-                'genres',
-                'latestTrailers'
-            ));
-
-        } catch (\Exception $e) {
-            // Log error and return with empty data
-            \Log::error('HomeController@index error: ' . $e->getMessage());
-
-            return view('client.home', [
-                'nowShowingMovies' => collect([]),
-                'upcomingMovies' => collect([]),
-                'popularMovies' => collect([]),
-                'featuredMovies' => collect([]),
-                'movieStats' => [
-                    'total_movies' => 0,
-                    'now_showing' => 0,
-                    'coming_soon' => 0,
-                    'total_cinemas' => 0
-                ],
-                'todayShowtimes' => collect([]),
-                'genres' => collect([]),
-                'latestTrailers' => collect([])
-            ]);
+            $genreFilters = Cache::remember('home:genres', now()->addMinutes(30), function () {
+                return $this->buildGenreList();
+            });
+        } catch (Throwable $exception) {
+            Log::error('HomeController@index cache bootstrap failed', ['exception' => $exception]);
+            $featuredMovies = $nowShowingMovies = $comingSoonMovies = $trendingMovies = $latestTrailers = [];
+            $movieStats = $this->buildEmptyStats();
+            $genreFilters = [];
         }
+
+        $todayShowtimes = Showtime::with(['movie', 'screen.cinema'])
+            ->whereDate('show_date', Carbon::today())
+            ->where('status', 'Active')
+            ->where('available_seats', '>', 0)
+            ->orderBy('show_time')
+            ->limit(12)
+            ->get()
+            ->map(fn ($showtime) => $this->mapShowtime($showtime))
+            ->all();
+
+        $heroSlides = collect($featuredMovies)
+            ->map(function (array $movie) {
+                return array_merge($movie, [
+                    'background_image' => $movie['poster_url'],
+                    'cta' => [
+                        'label' => __('Đặt vé ngay'),
+                        'url' => $movie['details_url'],
+                    ],
+                ]);
+            })
+            ->all();
+
+        $homepageViewData = [
+            'heroSlides' => $heroSlides,
+            'nowShowingMovies' => $nowShowingMovies,
+            'comingSoonMovies' => $comingSoonMovies,
+            'trendingMovies' => $trendingMovies,
+            'movieStats' => $movieStats,
+            'quickShowtimes' => $todayShowtimes,
+            'genreFilters' => $genreFilters,
+            'latestTrailers' => $latestTrailers,
+            'testimonials' => $this->buildTestimonials(),
+        ];
+
+        if (Auth::check()) {
+            $homepageViewData['recommendations'] = $this->buildRecommendationsForUser((int) Auth::id());
+        }
+
+        return view('client.home', $homepageViewData);
     }
 
-    /**
-     * Get movies by genre for AJAX requests
-     */
     public function getMoviesByGenre(Request $request)
     {
         $genre = $request->get('genre');
 
-        $movies = Movie::where('status', 'Now Showing')
-            ->where('genre', 'LIKE', '%' . $genre . '%')
-            ->orderBy('rating', 'desc')
-            ->paginate(12);
+        $movies = Movie::nowShowing()
+            ->genre($genre)
+            ->topRated()
+            ->limit(12)
+            ->get();
+
+        $movieCards = $this->normalizeMovies($movies);
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'movies' => $movies->items(),
-                'pagination' => [
-                    'current_page' => $movies->currentPage(),
-                    'last_page' => $movies->lastPage(),
-                    'has_more' => $movies->hasMorePages()
-                ]
+                'genre' => $genre,
+                'movies' => $movieCards->values()->all(),
+                'html' => view('client.movies.partials.movie-card-grid', [
+                    'movies' => $movieCards,
+                ])->render(),
             ]);
         }
 
         return redirect()->route('movies.index', ['genre' => $genre]);
     }
 
-    /**
-     * Search movies for quick search functionality
-     */
     public function searchMovies(Request $request)
     {
-        $query = $request->get('q');
+        $query = (string) $request->get('q', '');
 
-        if (strlen($query) < 2) {
+        if (mb_strlen($query) < 2) {
             return response()->json([
                 'success' => false,
-                'message' => 'Query must be at least 2 characters'
-            ]);
+                'message' => __('Vui lòng nhập ít nhất 2 ký tự để tìm kiếm.'),
+            ], 422);
         }
 
-        $movies = Movie::where(function($q) use ($query) {
-                $q->where('title', 'LIKE', '%' . $query . '%')
-                  ->orWhere('original_title', 'LIKE', '%' . $query . '%')
-                  ->orWhere('cast', 'LIKE', '%' . $query . '%')
-                  ->orWhere('director', 'LIKE', '%' . $query . '%');
+        $movies = Movie::query()
+            ->where(function ($subQuery) use ($query) {
+                $subQuery->where('title', 'LIKE', '%' . $query . '%')
+                    ->orWhere('original_title', 'LIKE', '%' . $query . '%')
+                    ->orWhere('cast', 'LIKE', '%' . $query . '%')
+                    ->orWhere('director', 'LIKE', '%' . $query . '%');
             })
             ->where('status', '!=', 'Ended')
-            ->select('movie_id', 'title', 'poster_url', 'rating', 'status', 'release_date')
+            ->orderByDesc('rating')
             ->limit(8)
-            ->get();
+            ->get()
+            ->map(fn (Movie $movie) => [
+                'id' => $movie->movie_id,
+                'title' => $movie->title,
+                'poster_url' => $this->resolvePosterUrl($movie->poster_url),
+                'rating' => $this->formatRating($movie->rating),
+                'status' => $movie->status,
+                'details_url' => route('movies.show', $movie->movie_id),
+            ])
+            ->all();
 
         return response()->json([
             'success' => true,
-            'movies' => $movies
+            'movies' => $movies,
         ]);
     }
 
-    /**
-     * Get movie showtimes for quick booking
-     */
     public function getMovieShowtimes(Request $request, $movieId)
     {
-        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $dateInput = $request->get('date');
+        $date = $dateInput ? Carbon::parse($dateInput) : Carbon::today();
 
         $showtimes = Showtime::with(['screen.cinema'])
             ->where('movie_id', $movieId)
-            ->where('show_date', $date)
+            ->whereDate('show_date', $date)
             ->where('status', 'Active')
             ->where('available_seats', '>', 0)
-            ->orderBy('show_time', 'asc')
+            ->orderBy('show_time')
             ->get()
-            ->groupBy('screen.cinema.name');
+            ->groupBy(fn ($showtime) => optional(optional($showtime->screen)->cinema)->name ?? __('Rạp khác'));
+
+        $payload = $showtimes->map(function (Collection $cinemaShowtimes, $cinemaName) {
+            $cinema = optional(optional($cinemaShowtimes->first())->screen)->cinema;
+
+            return [
+                'cinema' => $cinemaName,
+                'address' => optional($cinema)->address ?: optional($cinema)->city,
+                'showtimes' => $cinemaShowtimes->map(function ($showtime) {
+                    return [
+                        'id' => $showtime->showtime_id,
+                        'time' => optional($showtime->show_time)->format('H:i'),
+                        'available_seats' => $showtime->available_seats,
+                        'screen' => optional($showtime->screen)->screen_name,
+                        'price' => $showtime->price_seat_normal ?? $showtime->base_price,
+                        'booking_url' => route('booking.seatSelection', ['showtime' => $showtime->showtime_id]),
+                    ];
+                })->values()->all(),
+            ];
+        })->values()->all();
 
         return response()->json([
             'success' => true,
-            'showtimes' => $showtimes
+            'date' => $date->format('Y-m-d'),
+            'showtimes' => $payload,
         ]);
     }
 
-    /**
-     * Get cinema locations for homepage map/list
-     */
     public function getCinemaLocations()
     {
         $cinemas = Cinema::select('cinema_id', 'name', 'address', 'city')
             ->get()
-            ->groupBy('city');
+            ->groupBy('city')
+            ->map(fn ($group, $city) => [
+                'city' => $city,
+                'cinemas' => $group->map(fn ($cinema) => [
+                    'id' => $cinema->cinema_id,
+                    'name' => $cinema->name,
+                    'address' => $cinema->address,
+                ])->values()->all(),
+            ])
+            ->values()
+            ->all();
 
         return response()->json([
             'success' => true,
-            'cinemas' => $cinemas
+            'cinemas' => $cinemas,
         ]);
     }
 
     /**
-     * Newsletter subscription
+     * Handle contact form submission
      */
-    public function subscribeNewsletter(Request $request)
+    public function submitContact(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email|unique:newsletter_subscriptions,email'
+        $data = $request->validate([
+            'name' => 'required|string|max:191',
+            'email' => 'required|email|max:191',
+            'phone' => 'nullable|string|max:30',
+            'subject' => 'required|string|max:191',
+            'message' => 'required|string|max:2000',
         ]);
 
         try {
-            // Assuming you have a newsletter_subscriptions table
+            // If a 'contacts' table exists, store the message
+            if (Schema::hasTable('contacts')) {
+                DB::table('contacts')->insert([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'] ?? null,
+                    'subject' => $data['subject'],
+                    'message' => $data['message'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                // Send email to admin (fallback)
+                $admin = config('mail.from.address') ?: (env('MAIL_FROM_ADDRESS') ?: 'support@myshowz.example');
+                Mail::to($admin)->send(new ContactMessage($data));
+            }
+
+            return redirect()->back()->with('contact_success', 'Cảm ơn bạn! Chúng tôi đã nhận được tin nhắn và sẽ liên hệ sớm.');
+        } catch (Throwable $e) {
+            Log::error('Contact form submit failed', ['exception' => $e]);
+            return redirect()->back()->withInput()->with('contact_error', 'Không thể gửi liên hệ vào lúc này. Vui lòng thử lại sau.');
+        }
+    }
+
+    public function subscribeNewsletter(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:newsletter_subscriptions,email',
+        ]);
+
+        try {
             DB::table('newsletter_subscriptions')->insert([
                 'email' => $request->email,
-                'subscribed_at' => Carbon::now()
+                'subscribed_at' => now(),
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully subscribed to newsletter!'
+                'message' => __('Đăng ký nhận bản tin thành công!'),
             ]);
+        } catch (Throwable $exception) {
+            Log::error('Newsletter subscription failed', ['exception' => $exception]);
 
-        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Subscription failed. Please try again.'
+                'message' => __('Không thể đăng ký. Vui lòng thử lại.'),
             ], 500);
         }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helper methods
+    |--------------------------------------------------------------------------
+    */
+    protected function buildHomepageStats(): array
+    {
+        return [
+            [
+                'label' => __('Phim đang chiếu'),
+                'value' => Movie::nowShowing()->count(),
+                'suffix' => '+',
+            ],
+            [
+                'label' => __('Sắp ra mắt'),
+                'value' => Movie::comingSoon()->count(),
+                'suffix' => '',
+            ],
+            [
+                'label' => __('Tổng số rạp'),
+                'value' => Cinema::count(),
+                'suffix' => '',
+            ],
+            [
+                'label' => __('Suất chiếu hôm nay'),
+                'value' => Showtime::whereDate('show_date', Carbon::today())->count(),
+                'suffix' => '',
+            ],
+        ];
+    }
+
+    protected function buildEmptyStats(): array
+    {
+        return [
+            ['label' => __('Phim đang chiếu'), 'value' => 0, 'suffix' => ''],
+            ['label' => __('Sắp ra mắt'), 'value' => 0, 'suffix' => ''],
+            ['label' => __('Tổng số rạp'), 'value' => 0, 'suffix' => ''],
+            ['label' => __('Suất chiếu hôm nay'), 'value' => 0, 'suffix' => ''],
+        ];
+    }
+
+    protected function buildGenreList(): array
+    {
+        return Movie::query()
+            ->whereNotNull('genre')
+            ->pluck('genre')
+            ->flatMap(fn ($genres) => $this->extractGenres($genres))
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    protected function buildTestimonials(): array
+    {
+        return [
+            [
+                'name' => 'Lan Anh',
+                'role' => __('Khách hàng thân thiết'),
+                'quote' => __('Giao diện mới giúp tôi tìm suất chiếu nhanh hơn rất nhiều. Đặt vé chỉ trong vài bước!'),
+                'avatar' => asset('assets/img/default/cinema.jpg'),
+            ],
+            [
+                'name' => 'Minh Khoa',
+                'role' => __('Thành viên hạng Gold'),
+                'quote' => __('Các đề xuất phim theo sở thích thật chính xác. Tôi luôn tìm thấy phim hay để xem.'),
+                'avatar' => asset('assets/img/default/cinema.jpg'),
+            ],
+            [
+                'name' => 'Quỳnh Nhi',
+                'role' => __('Người yêu điện ảnh'),
+                'quote' => __('Trải nghiệm mượt mà, thông tin rõ ràng. Tôi rất thích phần trailer mới trên trang chủ.'),
+                'avatar' => asset('assets/img/default/cinema.jpg'),
+            ],
+        ];
+    }
+
+    protected function buildRecommendationsForUser(int $userId): array
+    {
+        $preferredGenres = Booking::query()
+            ->where('user_id', $userId)
+            ->with(['showtime.movie'])
+            ->latest('booking_date')
+            ->take(20)
+            ->get()
+            ->pluck('showtime.movie')
+            ->filter()
+            ->flatMap(fn ($movie) => $this->extractGenres(optional($movie)->genre))
+            ->countBy()
+            ->sortDesc()
+            ->keys()
+            ->take(3)
+            ->values()
+            ->all();
+
+        if (empty($preferredGenres)) {
+            return [];
+        }
+
+        $recommendations = Movie::query()
+            ->whereIn('status', ['Now Showing', 'Coming Soon'])
+            ->where(function ($query) use ($preferredGenres) {
+                foreach ($preferredGenres as $genre) {
+                    $query->orWhere('genre', 'LIKE', '%' . $genre . '%');
+                }
+            })
+            ->topRated()
+            ->limit(6)
+            ->get();
+
+        return $this->normalizeMovies($recommendations)->all();
     }
 }

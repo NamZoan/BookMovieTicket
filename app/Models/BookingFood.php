@@ -32,4 +32,8 @@ class BookingFood extends Model
     {
         return $this->belongsTo(FoodItem::class, 'item_id', 'item_id');
     }
+    public function foodItem()
+    {
+        return $this->belongsTo(FoodItem::class, 'item_id', 'item_id');
+    }
 }

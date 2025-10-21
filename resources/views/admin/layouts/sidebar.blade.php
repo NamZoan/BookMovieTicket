@@ -61,6 +61,22 @@
             </a>
         </li>
 
+        <!-- System Management -->
+        <li class="menu-item {{ request()->routeIs('admin.system.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div data-i18n="System">Hệ Thống</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.system.routes') ? 'active' : '' }}">
+                    <a href="{{ route('admin.system.routes') }}" class="menu-link">
+                        <div data-i18n="Routes">Quản Lý Route</div>
+                    </a>
+                </li>
+            </ul>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.movies.*') ? 'active open' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-box"></i>

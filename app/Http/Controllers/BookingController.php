@@ -138,8 +138,8 @@ class BookingController extends Controller
             $showtime = Showtime::findOrFail($request->showtime_id);
             $seats = Seat::whereIn('seat_id', $selectedSeats)->get();
 
-            // Verify seats are available
-            $unavailableSeats = $this->checkSeatAvailability($request->showtime_id, $selectedSeats);
+            // Verify seats are available (exclude current user's temporary holds)
+            $unavailableSeats = $this->checkSeatAvailability($request->showtime_id, $selectedSeats, Auth::id());
             if (!empty($unavailableSeats)) {
                 DB::rollBack();
                 return response()->json([
@@ -335,42 +335,36 @@ class BookingController extends Controller
     /**
      * Process payment and create booking
      */
+    // app/Http/Controllers/BookingController.php
+
     public function processPayment(Request $request)
     {
-
         $request->validate([
             'customer_name' => 'required|string|max:191',
             'customer_phone' => 'required|string|max:20',
             'customer_email' => 'required|email|max:100',
-            'promotion_code' => 'nullable|string|max:20',
+            'payment_method' => 'required|string|in:VNPAY,Cash',
             'user_notes' => 'nullable|string|max:500',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Get booking data from session
             $bookingData = Session::get('booking_data');
+
+            if (!$bookingData || Carbon::now()->gt($bookingData['expires_at'])) {
+                return redirect()->route('booking.seatSelection', $bookingData['showtime_id'] ?? 0)
+                    ->with('error', 'Phiên đặt vé đã hết hạn. Vui lòng thử lại.');
+            }
 
             $showtime = Showtime::findOrFail($bookingData['showtime_id']);
 
-            // Verify seats are still available
-            $unavailableSeats = $this->checkSeatAvailability($bookingData['showtime_id'], $bookingData['selected_seats']);
+            $unavailableSeats = $this->checkSeatAvailability($bookingData['showtime_id'], $bookingData['selected_seats'], Auth::id());
             if (!empty($unavailableSeats)) {
                 DB::rollBack();
-                return redirect()->back()
-                    ->with('error', 'Một số ghế đã được đặt. Vui lòng chọn ghế khác.');
+                return redirect()->back()->with('error', 'Một số ghế đã được đặt. Vui lòng chọn ghế khác.');
             }
 
-            // Sử dụng dữ liệu promotion từ session
-            $discountAmount = $bookingData['discount_amount'] ?? 0;
-            $finalAmount = $bookingData['final_amount'] ?? $bookingData['total_amount'];
-            $promotionCode = $bookingData['promotion_code'] ?? null;
-
-            // Generate idempotency key to prevent duplicate payments
-            $idempotencyKey = Str::uuid()->toString();
-
-            // Create booking
             $booking = Booking::create([
                 'user_id' => Auth::id(),
                 'customer_name' => $request->customer_name,
@@ -378,31 +372,26 @@ class BookingController extends Controller
                 'customer_email' => $request->customer_email,
                 'showtime_id' => $bookingData['showtime_id'],
                 'booking_code' => $this->generateBookingCode(),
-                'idempotency_key' => $idempotencyKey,
                 'total_amount' => $bookingData['total_amount'],
-                'promotion_code' => $promotionCode,
-                'discount_amount' => $discountAmount,
-                'final_amount' => $finalAmount,
-                'payment_method' => 'Credit Card', // Chỉ hỗ trợ thanh toán online
+                'promotion_code' => $bookingData['promotion_code'],
+                'discount_amount' => $bookingData['discount_amount'],
+                'final_amount' => $bookingData['final_amount'],
+                'payment_method' => $request->payment_method,
                 'payment_status' => 'Pending',
                 'booking_status' => 'Pending',
                 'booking_date' => Carbon::now(),
-                'expires_at' => Carbon::now()->addMinutes(3),
+                'expires_at' => Carbon::now()->addMinutes(15), // Thời gian chờ thanh toán
                 'notes' => $request->user_notes
             ]);
 
-            // Create booking seats
             foreach ($bookingData['selected_seats'] as $seatId) {
-                $seatPrice = $bookingData['seat_prices']['seats'][$seatId] ?? $showtime->base_price;
-
                 BookingSeat::create([
                     'booking_id' => $booking->booking_id,
                     'seat_id' => $seatId,
-                    'seat_price' => $seatPrice
+                    'seat_price' => $bookingData['seat_prices']['seats'][$seatId] ?? 0
                 ]);
             }
 
-            // Create booking food items
             if (!empty($bookingData['food_items'])) {
                 foreach ($bookingData['food_items'] as $foodItem) {
                     BookingFood::create([
@@ -415,52 +404,35 @@ class BookingController extends Controller
                 }
             }
 
-            // Update showtime available seats
+            // Xóa ghế đã giữ trong cache
+            $this->releaseHeldSeats($bookingData['showtime_id'], $bookingData['selected_seats'], Auth::id());
+
+            // Giảm số ghế có sẵn của suất chiếu ngay khi tạo booking
             $showtime->decrement('available_seats', count($bookingData['selected_seats']));
-
-            // Update promotion usage if applied
-            if ($promotionCode) {
-                $this->promotionService->incrementPromotionUsage($promotionCode);
-            }
-
-            // Process payment (simulate online payment)
-            $paymentResult = $this->processOnlinePayment($booking);
-
-            if ($paymentResult['success']) {
-                $booking->update([
-                    'payment_status' => 'Paid',
-                    'booking_status' => 'Confirmed',
-                    'payment_date' => Carbon::now()
-                ]);
-
-                // Award loyalty points (1 point per 1000 VND spent)
-                $loyaltyPoints = floor($finalAmount / 1000);
-                if ($loyaltyPoints > 0) {
-                    DB::table('users')
-                        ->where('user_id', Auth::id())
-                        ->increment('loyalty_points', $loyaltyPoints);
-                }
-            } else {
-                $booking->update([
-                    'payment_status' => 'Failed',
-                    'booking_status' => 'Cancelled'
-                ]);
-            }
-
-            // Clear session data
-            Session::forget('booking_data');
-            $this->releaseHeldSeats($bookingData['showtime_id'], $bookingData['selected_seats']);
 
             DB::commit();
 
-            return redirect()->route('booking.confirmation', $booking->booking_id)
-                ->with('success', 'Đặt vé thành công! Mã đặt vé của bạn là: ' . $booking->booking_code);
+            // Xóa session sau khi đã tạo booking thành công
+            Session::forget('booking_data');
+
+            if ($request->payment_method === 'VNPAY') {
+                // Chuyển sang VnPayController để xử lý
+                return app(VnPayController::class)->createPayment($booking);
+            } elseif ($request->payment_method === 'Cash') {
+                // Cập nhật trạng thái cho thanh toán tại quầy
+                $booking->update([
+                    'booking_status' => 'Confirmed',
+                    'payment_status' => 'Pending'
+                ]);
+                return redirect()->route('booking.confirmation', $booking->booking_id)->with('success', 'Đặt vé thành công!');
+            }
+
+            return redirect()->route('home')->with('error', 'Phương thức thanh toán không hợp lệ.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('BookingController@processPayment error: ' . $e->getMessage());
-
-            return redirect()->back()
-                ->with('error', 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.');
+            return redirect()->back()->with('error', 'Có lỗi xảy ra trong quá trình đặt vé. Vui lòng thử lại.');
         }
     }
 
@@ -556,7 +528,7 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('account.bookings')
+            return redirect()->route('user.bookings.index')
                 ->with('success', 'Đã hủy vé thành công. Tiền sẽ được hoàn lại trong 3-5 ngày làm việc.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -821,13 +793,12 @@ class BookingController extends Controller
         cache()->put($cacheKey, $heldSeats, Carbon::now()->addHours(1));
     }
 
-    private function checkSeatAvailability($showtime_id, $seat_ids)
+    private function checkSeatAvailability($showtime_id, $seat_ids, $excludeUserId = null)
     {
         $bookedSeats = $this->getBookedSeats($showtime_id);
-        $heldSeats = $this->getHeldSeats($showtime_id, Auth::id());
+        $heldSeats = $this->getHeldSeats($showtime_id, $excludeUserId);
 
         $unavailableSeats = array_merge($bookedSeats, $heldSeats);
-
         return array_intersect($seat_ids, $unavailableSeats);
     }
 
