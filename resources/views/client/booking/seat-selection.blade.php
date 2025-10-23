@@ -1326,6 +1326,13 @@
                     $('#auto-promotion-text').text(response.message);
                 }
 
+                // Disable input and apply button, show remove button
+                $('#promotion-code-input').prop('disabled', true);
+                $('#apply-promotion-btn').prop('disabled', true);
+                $('#remove-promotion-btn').show();
+                $('#load-promotions-btn').prop('disabled', true);
+
+
                 updateOrderSummary();
             }
 
@@ -1334,8 +1341,13 @@
                 bookingData.promotion.discount = 0;
                 bookingData.promotion.data = null;
 
+                // Enable input and apply button, hide remove button
+                $('#promotion-code-input').prop('disabled', false).val('');
+                $('#apply-promotion-btn').prop('disabled', false);
                 $('#remove-promotion-btn').hide();
                 $('#auto-promotions').hide();
+                $('#load-promotions-btn').prop('disabled', false);
+
 
                 updateOrderSummary();
             }

@@ -46,17 +46,18 @@ class PromotionService
             ];
         }
 
-        // Kiểm tra người dùng đã sử dụng mã này chưa (nếu có giới hạn)
-        if ($promotion->usage_limit && $userId) {
-            $userUsageCount = Booking::where('user_id', $userId)
-                ->where('promotion_code', $promotionCode)
-                ->where('payment_status', 'Paid')
-                ->count();
+        // Kiểm tra giới hạn sử dụng đặc biệt: usage_limit = 1 nghĩa là mỗi người dùng 1 lần
+        if ($promotion->usage_limit === 1 && $userId) {
+            // Kiểm tra xem người dùng có booking nào đang hoạt động (chưa bị hủy) với mã này không
+            $hasActiveBookingWithPromo = Booking::where('user_id', $userId)
+                ->where('promotion_code', $promotion->code)
+                ->whereNotIn('booking_status', ['Cancelled', 'Failed'])
+                ->exists();
 
-            if ($userUsageCount >= $promotion->usage_limit) {
+            if ($hasActiveBookingWithPromo) {
                 return [
                     'success' => false,
-                    'message' => 'Bạn đã sử dụng hết lượt cho mã giảm giá này.'
+                    'message' => 'Bạn đã sử dụng hoặc đang có đơn hàng khác sử dụng mã giảm giá này.'
                 ];
             }
         }
@@ -168,15 +169,32 @@ class PromotionService
         }
 
         // Lấy các mã promotion khác
-        $regularPromotions = Promotion::where('is_active', true)
+        $query = Promotion::where('is_active', true)
             ->where('start_date', '<=', Carbon::today())
             ->where('end_date', '>=', Carbon::today())
             ->where(function ($query) {
                 $query->whereNull('usage_limit')
                       ->orWhereRaw('usage_limit > used_count');
             })
-            ->where('min_amount', '<=', $totalAmount)
-            ->orderBy('discount_value', 'desc')
+            ->where('min_amount', '<=', $totalAmount);
+
+        // Nếu người dùng đã đăng nhập, lọc ra các mã "dùng 1 lần" mà họ đã sử dụng
+        if ($userId) {
+            $query->where(function ($subQuery) use ($userId) {
+                // Giữ lại các mã không phải là "dùng 1 lần"
+                $subQuery->where('usage_limit', '!=', 1)
+                         // Hoặc giữ lại các mã "dùng 1 lần" mà người dùng chưa từng sử dụng
+                         ->orWhereNotExists(function ($existsQuery) use ($userId) {
+                             $existsQuery->select(DB::raw(1))
+                                         ->from('bookings')
+                                         ->whereColumn('bookings.promotion_code', 'promotions.code')
+                                         ->where('bookings.user_id', $userId)
+                                         ->where('bookings.payment_status', 'Paid');
+                         });
+            });
+        }
+
+        $regularPromotions = $query->orderBy('discount_value', 'desc')
             ->get()
             ->map(function ($promotion) {
                 return [

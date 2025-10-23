@@ -18,6 +18,34 @@
         <!-- /Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <!-- Language Selector -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <i class="bx bx-globe bx-sm"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0);">
+                            <span class="align-middle">English</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0);">
+                            <span class="align-middle">Tiếng Việt</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!--/ Language Selector -->
+
+            <!-- Theme Switcher -->
+            <li class="nav-item me-2">
+                <a class="nav-link" href="javascript:void(0);" onclick="toggleTheme()">
+                    <i class="bx bx-sm bx-sun"></i>
+                </a>
+            </li>
+            <!--/ Theme Switcher -->
+
             <!-- Place this tag where you want the button to render. -->
             <li class="nav-item lh-1 me-3">
                 <a class="github-button" href="https://github.com/themeselection/sneat-html-admin-template-free"
@@ -54,24 +82,29 @@
                     </li>
                     <li>
                         <a class="dropdown-item" href="#">
+                            <i class='bx bxs-user-account me-2'></i>
+                            <span class="align-middle">Tài khoản của bạn đang hoạt động</span>
+                        </a>
+                    </li>
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
                             <i class="bx bx-user me-2"></i>
-                            <span class="align-middle">My Profile</span>
+                            <span class="align-middle">Chỉnh sửa hồ sơ</span>
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="#">
-                            <i class="bx bx-cog me-2"></i>
-                            <span class="align-middle">Settings</span>
+                            <i class='bx bx-key me-2'></i>
+                            <span class="align-middle">Thay đổi mật khẩu</span>
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="#">
-                            <span class="d-flex align-items-center align-middle">
-                                <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                                <span class="flex-grow-1 align-middle">Billing</span>
-                                <span
-                                    class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
-                            </span>
+                            <i class='bx bx-history me-2'></i>
+                            <span class="align-middle">Lịch sử đặt vé</span>
                         </a>
                     </li>
                     <li>

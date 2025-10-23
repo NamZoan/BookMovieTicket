@@ -8,6 +8,7 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\CinemaController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\VnPayController;
@@ -56,6 +57,17 @@ Route::prefix('movies')->name('movies.')->group(function () {
     // Movie detail routes (should come last)
     Route::get('/{movie}', [MovieController::class, 'show'])->name('show');
     Route::get('/{movie}/reviews', [MovieController::class, 'reviews'])->name('reviews');
+});
+
+// Review Routes
+// Public: list reviews for a movie (used by AJAX or direct include)
+Route::get('movies/{movie}/reviews', [ReviewController::class, 'index'])->name('movies.reviews.index');
+
+// Auth-protected routes for creating/updating/deleting reviews
+Route::middleware('auth')->prefix('movies/{movie}/reviews')->name('movies.reviews.')->group(function () {
+    Route::post('/', [ReviewController::class, 'store'])->name('store');
+    Route::put('/{review}', [ReviewController::class, 'update'])->name('update');
+    Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('delete');
 });
 
 /*
@@ -160,3 +172,34 @@ Route::get('/terms', function () {
 Route::get('/privacy', function () {
     return view('client.pages.privacy');
 })->name('privacy');
+
+// Admin Routes
+Route::prefix('admin')->name('admin.')->middleware(['auth','admin'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+
+    // Movie Management
+    Route::resource('movies', \App\Http\Controllers\Admin\MovieController::class);
+    Route::post('movies/{movie}/toggle-active', [\App\Http\Controllers\Admin\MovieController::class, 'toggleActive'])
+        ->name('movies.toggle-active');
+
+    // Cinema Management
+    Route::resource('cinemas', \App\Http\Controllers\Admin\CinemaController::class);
+    Route::post('cinemas/{cinema}/toggle-active', [\App\Http\Controllers\Admin\CinemaController::class, 'toggleActive'])
+        ->name('cinemas.toggle-active');
+
+    // Showtime Management
+    Route::resource('showtimes', \App\Http\Controllers\Admin\ShowtimeController::class);
+    Route::post('showtimes/{showtime}/toggle-active', [\App\Http\Controllers\Admin\ShowtimeController::class, 'toggleActive'])
+        ->name('showtimes.toggle-active');
+
+    // Booking Management
+    Route::resource('bookings', \App\Http\Controllers\Admin\BookingController::class);
+    Route::post('bookings/{booking}/toggle-active', [\App\Http\Controllers\Admin\BookingController::class, 'toggleActive'])
+        ->name('bookings.toggle-active');
+
+    // Users management
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::post('users/{user}/toggle-active', [\App\Http\Controllers\Admin\UserController::class, 'toggleActive'])
+        ->name('users.toggle-active');
+});

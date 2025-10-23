@@ -641,6 +641,15 @@ class BookingController extends Controller
         ]);
 
         try {
+            // Kiểm tra xem đã có mã nào được áp dụng trong session chưa
+            $bookingData = Session::get('booking_data');
+            if (!empty($bookingData['promotion_code'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chỉ được sử dụng một mã khuyến mãi cho mỗi đơn hàng.'
+                ], 422);
+            }
+
             $result = $this->promotionService->validateAndApplyPromotion(
                 $request->promotion_code,
                 $request->total_amount,

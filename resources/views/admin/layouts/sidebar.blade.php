@@ -52,6 +52,17 @@
         </a>
     </div>
     <div class="menu-inner-shadow"></div>
+
+    <!-- Search -->
+    <div class="px-3 py-2">
+        <div class="nav-item d-flex align-items-center">
+            <i class="bx bx-search fs-4 lh-0"></i>
+            <input type="text" id="menu-search" class="form-control border-0 shadow-none" placeholder="Search..."
+                aria-label="Search..." />
+        </div>
+    </div>
+    <!-- /Search -->
+
     <ul class="menu-inner py-1">
         <!-- Dashboard -->
         <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -61,11 +72,185 @@
             </a>
         </li>
 
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Quản Lý</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.movies.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-film"></i>
+                <div data-i18n="Movies">Phim</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.movies.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.movies.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.movies.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.movies.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.cinemas.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-building-house"></i>
+                <div data-i18n="Cinemas">Rạp Chiếu</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.cinemas.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.cinemas.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.cinemas.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.cinemas.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.screens.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-desktop"></i>
+                <div data-i18n="Screens">Phòng Chiếu</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.screens.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.screens.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.screens.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.screens.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.seats.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-chair"></i>
+                <div data-i18n="Seats">Ghế Ngồi</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.seats.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.seats.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.seats.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.seats.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.showtimes.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-calendar"></i>
+                <div data-i18n="Showtimes">Lịch Chiếu</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.showtimes.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.showtimes.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.showtimes.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.showtimes.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.pricing.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
+                <div data-i18n="Pricing">Giá Vé</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.pricing.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.pricing.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.pricing.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.pricing.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.food-items.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                <div data-i18n="Food">Món Ăn</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.food-items.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.food-items.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.food-items.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.food-items.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.promotions.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-gift"></i>
+                <div data-i18n="Promotions">Khuyến Mãi</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.promotions.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.promotions.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.promotions.create') ? 'active' : '' }}">
+                    <a href="{{ route('admin.promotions.create') }}" class="menu-link">
+                        <div data-i18n="Create">Thêm mới</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.bookings.*') ? 'active open' : '' }}">
+            <a href="javascript:void(0)" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-gift"></i>
+                <div data-i18n="Promotions">Đơn Hàng</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.bookings.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.bookings.index') }}" class="menu-link">
+                        <div data-i18n="List">Danh sách</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Hệ Thống</span>
+        </li>
+
         <!-- System Management -->
         <li class="menu-item {{ request()->routeIs('admin.system.*') ? 'active open' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div data-i18n="System">Hệ Thống</div>
+                <div data-i18n="System">Cài đặt hệ thống</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->routeIs('admin.system.routes') ? 'active' : '' }}">
@@ -76,464 +261,31 @@
             </ul>
             </a>
         </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.movies.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Phim</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.movies.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.movies.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.movies.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.movies.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.cinemas.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Rạp Chiếu</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.cinemas.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.cinemas.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.cinemas.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.cinemas.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.screens.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Phòng Chiếu</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.screens.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.screens.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.screens.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.screens.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.seats.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Ghế Ngồi</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.seats.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.seats.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.seats.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.seats.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.showtimes.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Lịch Chiếu</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.showtimes.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.showtimes.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.showtimes.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.showtimes.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.pricing.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Giá Vé</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.pricing.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pricing.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.pricing.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pricing.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.food-items.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Món Ăn</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.food-items.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.food-items.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.food-items.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.food-items.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.promotions.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">Khuyến Mãi</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.promotions.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.promotions.index') }}" class="menu-link">
-                        <div data-i18n="Accordion">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.promotions.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.promotions.create') }}" class="menu-link">
-                        <div data-i18n="Alerts">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-
-        <!-- Layouts -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-layout"></i>
-                <div data-i18n="Layouts">Layouts</div>
-            </a>
-
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="layouts-without-menu.html" class="menu-link">
-                        <div data-i18n="Without menu">Without menu</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="layouts-without-navbar.html" class="menu-link">
-                        <div data-i18n="Without navbar">Without navbar</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="layouts-container.html" class="menu-link">
-                        <div data-i18n="Container">Container</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="layouts-fluid.html" class="menu-link">
-                        <div data-i18n="Fluid">Fluid</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="layouts-blank.html" class="menu-link">
-                        <div data-i18n="Blank">Blank</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-
-
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">pHIM</span>
-        </li>
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Phim</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="pages-account-settings-account.html" class="menu-link">
-                        <div data-i18n="Account">Account</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="pages-account-settings-notifications.html" class="menu-link">
-                        <div data-i18n="Notifications">Notifications</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="pages-account-settings-connections.html" class="menu-link">
-                        <div data-i18n="Connections">Connections</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-                <div data-i18n="Authentications">Authentications</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="auth-login-basic.html" class="menu-link" target="_blank">
-                        <div data-i18n="Basic">Login</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="auth-register-basic.html" class="menu-link" target="_blank">
-                        <div data-i18n="Basic">Register</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="auth-forgot-password-basic.html" class="menu-link" target="_blank">
-                        <div data-i18n="Basic">Forgot Password</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-                <div data-i18n="Misc">Misc</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="pages-misc-error.html" class="menu-link">
-                        <div data-i18n="Error">Error</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="pages-misc-under-maintenance.html" class="menu-link">
-                        <div data-i18n="Under Maintenance">Under Maintenance</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <!-- Components -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Components</span></li>
-        <!-- Cards -->
-
-        <!-- User interface -->
-        <li class="menu-item">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-box"></i>
-                <div data-i18n="User interface">User interface</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="ui-accordion.html" class="menu-link">
-                        <div data-i18n="Accordion">Accordion</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-alerts.html" class="menu-link">
-                        <div data-i18n="Alerts">Alerts</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-badges.html" class="menu-link">
-                        <div data-i18n="Badges">Badges</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-buttons.html" class="menu-link">
-                        <div data-i18n="Buttons">Buttons</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-carousel.html" class="menu-link">
-                        <div data-i18n="Carousel">Carousel</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-collapse.html" class="menu-link">
-                        <div data-i18n="Collapse">Collapse</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-dropdowns.html" class="menu-link">
-                        <div data-i18n="Dropdowns">Dropdowns</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-footer.html" class="menu-link">
-                        <div data-i18n="Footer">Footer</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-list-groups.html" class="menu-link">
-                        <div data-i18n="List Groups">List groups</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-modals.html" class="menu-link">
-                        <div data-i18n="Modals">Modals</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-navbar.html" class="menu-link">
-                        <div data-i18n="Navbar">Navbar</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-offcanvas.html" class="menu-link">
-                        <div data-i18n="Offcanvas">Offcanvas</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-pagination-breadcrumbs.html" class="menu-link">
-                        <div data-i18n="Pagination &amp; Breadcrumbs">Pagination
-                            &amp; Breadcrumbs</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-progress.html" class="menu-link">
-                        <div data-i18n="Progress">Progress</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-spinners.html" class="menu-link">
-                        <div data-i18n="Spinners">Spinners</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-tabs-pills.html" class="menu-link">
-                        <div data-i18n="Tabs &amp; Pills">Tabs &amp; Pills</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-toasts.html" class="menu-link">
-                        <div data-i18n="Toasts">Toasts</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-tooltips-popovers.html" class="menu-link">
-                        <div data-i18n="Tooltips & Popovers">Tooltips &amp;
-                            popovers</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="ui-typography.html" class="menu-link">
-                        <div data-i18n="Typography">Typography</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Extended components -->
-        <li class="menu-item">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-copy"></i>
-                <div data-i18n="Extended UI">Extended UI</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="extended-ui-perfect-scrollbar.html" class="menu-link">
-                        <div data-i18n="Perfect Scrollbar">Perfect scrollbar</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="extended-ui-text-divider.html" class="menu-link">
-                        <div data-i18n="Text Divider">Text Divider</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item">
-            <a href="icons-boxicons.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-crown"></i>
-                <div data-i18n="Boxicons">Boxicons</div>
-            </a>
-        </li>
-
-        <!-- Forms & Tables -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Forms &amp; Tables</span></li>
-        <!-- Forms -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-detail"></i>
-                <div data-i18n="Form Elements">Form Elements</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="forms-basic-inputs.html" class="menu-link">
-                        <div data-i18n="Basic Inputs">Basic Inputs</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="forms-input-groups.html" class="menu-link">
-                        <div data-i18n="Input groups">Input groups</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-detail"></i>
-                <div data-i18n="Form Layouts">Form Layouts</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="form-layouts-vertical.html" class="menu-link">
-                        <div data-i18n="Vertical Form">Vertical Form</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="form-layouts-horizontal.html" class="menu-link">
-                        <div data-i18n="Horizontal Form">Horizontal Form</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <!-- Tables -->
-        <li class="menu-item">
-            <a href="tables-basic.html" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-table"></i>
-                <div data-i18n="Tables">Tables</div>
-            </a>
-        </li>
-        <!-- Misc -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Misc</span></li>
-        <li class="menu-item">
-            <a href="https://github.com/themeselection/sneat-html-admin-template-free/issues" target="_blank"
-                class="menu-link">
-                <i class="menu-icon tf-icons bx bx-support"></i>
-                <div data-i18n="Support">Support</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="https://themeselection.com/demo/sneat-bootstrap-html-admin-template/documentation/" target="_blank"
-                class="menu-link">
-                <i class="menu-icon tf-icons bx bx-file"></i>
-                <div data-i18n="Documentation">Documentation</div>
-            </a>
-        </li>
     </ul>
 </aside>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('menu-search');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const filter = searchInput.value.toLowerCase();
+                const menuItems = document.querySelectorAll('.menu-inner .menu-item');
+
+                menuItems.forEach(function(item) {
+                    // Ignore headers and items in submenus for top-level filtering
+                    if (item.classList.contains('menu-header') || item.closest('.menu-sub') !== null) {
+                        return;
+                    }
+
+                    const text = item.textContent || item.innerText;
+                    if (text.toLowerCase().indexOf(filter) > -1) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>

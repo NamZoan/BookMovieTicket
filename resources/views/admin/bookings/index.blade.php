@@ -109,7 +109,7 @@
                                             <td>
                                                 <div>
                                                     <div class="fw-semibold">{{ $booking->customer_name }}</div>
-                                                    <small class="text-muted">{{ $booking->customer_email }}</small>
+                                                    <small class="text-muted">{{ $booking->customer_phone }}</small>
                                                 </div>
                                             </td>
                                             <td>

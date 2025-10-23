@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\FoodItemController;
 use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\RouteController;
+use App\Http\Controllers\Admin\ReviewController;
 
 // Admin Authentication Routes
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -67,6 +68,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
         Route::put('/bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
+
+        // Review Management Routes
+        Route::prefix('reviews')->name('reviews.')->group(function () {
+            Route::get('/', [ReviewController::class, 'index'])->name('index');
+            Route::get('/{review}', [ReviewController::class, 'show'])->name('show');
+            Route::post('/{review}/approve', [ReviewController::class, 'approve'])->name('approve');
+            Route::post('/{review}/reject', [ReviewController::class, 'reject'])->name('reject');
+        });
     });
 });
 

@@ -82,26 +82,60 @@
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 
 
-    <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
-    <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
-    <script src="{{ asset('assets/vendor/js/bootstrap.js') }}"></script>
-    <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
-    <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}" defer></script>
+    <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}" defer></script>
+    <script src="{{ asset('assets/vendor/js/bootstrap.js') }}" defer></script>
+    <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}" defer></script>
+    <script src="{{ asset('assets/vendor/js/menu.js') }}" defer></script>
 
     <!-- Vendors JS -->
-    <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}" defer></script>
 
     <!-- Main JS -->
-    <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="{{ asset('assets/js/main.js') }}" defer></script>
 
     <!-- Page-specific JS -->
-    <script src="{{ asset('assets/js/dashboards-analytics.js') }}"></script>
+    <script src="{{ asset('assets/js/dashboards-analytics.js') }}" defer></script>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const THEME_KEY = 'app-theme';
+        const lightThemeClass = 'light-style';
+        const darkThemeClass = 'dark-style';
+        const sunIconClass = 'bx-sun';
+        const moonIconClass = 'bx-moon';
+
+        function applyTheme(theme) {
+            const html = document.documentElement;
+            const themeIcon = document.querySelector('.nav-item.me-2 .bx');
+
+            html.classList.remove(lightThemeClass, darkThemeClass);
+            html.classList.add(theme === 'dark' ? darkThemeClass : lightThemeClass);
+
+            if (themeIcon) {
+                themeIcon.classList.remove(sunIconClass, moonIconClass);
+                themeIcon.classList.add(theme === 'dark' ? moonIconClass : sunIconClass);
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem(THEME_KEY) || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, newTheme);
+            applyTheme(newTheme);
+        }
+
+        // Apply initial theme when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
+            applyTheme(savedTheme);
+        });
+    </script>
 
         @stack('scripts')
 @yield('scripts')
