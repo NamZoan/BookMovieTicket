@@ -15,14 +15,9 @@
     <link rel="stylesheet" href="{{ asset('assets/css/sign-in.css')}}">
     <link rel="stylesheet" href="{{ asset('assets/css/as-alert-message.min.css')}}">
 
-
-
-
 </head>
 
 <body>
-    @include('client.layouts.header')
-
     <div class="container_signup_signin" id="container_signup_signin">
         <div class="form-container sign-up-container">
             <form name="sign-up-form" action="#" onsubmit="return signUpValidateForm()">

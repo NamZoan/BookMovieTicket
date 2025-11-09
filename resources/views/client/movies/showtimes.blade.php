@@ -654,7 +654,7 @@
 
             Thông tin
         </button>
-        @if($movie->trailer_url)
+        @if($movie->trailer_url && !str_contains($movie->trailer_url, 'example.com'))
         <button class="nav-tab" data-tab="trailer">
 
             Trailer
@@ -768,7 +768,7 @@
         </div>
 
         <!-- Trailer Panel -->
-        @if($movie->trailer_url)
+        @if($movie->trailer_url && !str_contains($movie->trailer_url, 'example.com'))
         <div class="tab-panel" id="panel-trailer">
             <div class="showtimes-panel">
                 <div class="section-title">
@@ -791,13 +791,13 @@
         @endif
 
         <!-- Reviews Panel -->
-        <div class="tab-panel" id="panel-reviews">
+        <div class="tab-panel" id="panel-reviews" style="display: none;">
             <div class="showtimes-panel">
                 <div class="section-title">
                     <svg class="section-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                     </svg>
-                    Đánh giá từ khán giả
+                    Đánh giá của khán giả
                 </div>
 
                 <div id="reviews-root" class="py-2">
@@ -819,6 +819,7 @@
     let currentDate = '{{ $selectedDate }}';
     let currentCinema = '{{ $selectedCinema }}';
     let isLoading = false;
+    let reviewsLoaded = false;
 
     // DOM Elements
     const showtimesContent = document.getElementById('showtimes-content');
@@ -859,6 +860,10 @@
                 panel.classList.add('active');
             }
         });
+
+        if (tabName === 'reviews' && !reviewsLoaded) {
+            loadReviews();
+        }
     }
 
     function showLoading() {
@@ -1014,46 +1019,70 @@
         }
     });
 </script>
-    <script>
-        // Load movie reviews via AJAX and replace placeholder
-        (function() {
-            const reviewsRoot = document.getElementById('reviews-root');
-            const reviewsUrl = `/movies/${currentMovieId}/reviews`;
-
-            function loadReviews() {
-                fetch(reviewsUrl, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'text/html'
-                    }
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error('Network response was not ok');
-                    return res.text();
-                })
-                .then(html => {
-                    // Replace root with returned HTML (which includes the partial)
-                    reviewsRoot.innerHTML = html;
-
-                    // After inserting, ensure review form behavior is wired if present
-                    // The partial registers its own JS for AJAX submission
-                })
-                .catch(err => {
-                    console.error('Failed to load reviews:', err);
-                    reviewsRoot.innerHTML = `
-                        <div class="text-center py-12">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Không thể tải đánh giá</h3>
-                            <p class="text-gray-600">Vui lòng thử lại sau.</p>
-                        </div>
-                    `;
-                });
+<script>
+    function loadReviews() {
+        const reviewsRoot = document.getElementById('reviews-root');
+        const loadingPlaceholder = document.getElementById('reviews-loading-placeholder');
+        loadingPlaceholder.style.display = 'block';
+        reviewsRoot.innerHTML = ''; // Clear previous content
+        fetch(`/movies/{{ $movie->movie_id }}/reviews`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
             }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                reviewsRoot.innerHTML = data.html;
+                reviewsLoaded = true;
+            } else {
+                reviewsRoot.innerHTML = `<div class="text-center text-red-500">Failed to load reviews.</div>`;
+            }
+        })
+        .catch(error => {
+            console.error('Failed to load reviews:', error);
+            reviewsRoot.innerHTML = `<div class="text-center text-red-500">Failed to load reviews: ${error.message}</div>`;
+        });
+    }
 
-            // Load when reviews tab is opened and on initial page load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Only load when user views reviews tab (or pre-load now)
-                loadReviews();
-            });
-        })();
-    </script>
+    // Handle review form submission via AJAX, delegated from the reviews-root container
+    document.getElementById('reviews-root').addEventListener('submit', function(e) {
+        if (e.target && e.target.id === 'review-form') {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const button = form.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Đang gửi...';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload reviews to show the new one and the "thank you" message
+                    loadReviews();
+                } else {
+                    alert(data.message || 'Đã có lỗi xảy ra.');
+                    button.disabled = false;
+                    button.textContent = 'Gửi đánh giá';
+                }
+            })
+            .catch(error => console.error('Error submitting review:', error));
+        });
+    }
+</script>
+
 @endpush

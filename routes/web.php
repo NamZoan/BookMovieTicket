@@ -70,6 +70,14 @@ Route::middleware('auth')->prefix('movies/{movie}/reviews')->name('movies.review
     Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('delete');
 });
 
+// Review routes
+Route::post('/{movie}/reviews', [ReviewController::class, 'store'])
+    ->name('reviews.store')
+    ->middleware('auth');
+Route::delete('/{movie}/reviews/{review}', [ReviewController::class, 'destroy'])
+    ->name('reviews.destroy')
+    ->middleware('auth');
+
 /*
 |--------------------------------------------------------------------------
 | API Routes for AJAX calls

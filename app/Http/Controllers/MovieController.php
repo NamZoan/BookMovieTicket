@@ -375,73 +375,6 @@ class MovieController extends Controller
         }
     }
 
-    /**
-     * Display the specified movie
-     */
-    public function show(Request $request, Movie $movie)
-    {
-        try {
-            // Get movie with related data
-            $movie->load(['showtimes.screen.cinema', 'reviews.user']);
-
-            // Get upcoming showtimes
-            $upcomingShowtimes = $movie->showtimes()
-                ->with(['screen.cinema'])
-                ->where('show_date', '>=', Carbon::today())
-                ->where('status', 'Active')
-                ->where('available_seats', '>', 0)
-                ->orderBy('show_date', 'asc')
-                ->orderBy('show_time', 'asc')
-                ->get()
-                ->groupBy(function ($showtime) {
-                    return $showtime->show_date;
-                });
-
-            // Get similar movies (same genre)
-            $similarMovies = Movie::where('movie_id', '!=', $movie->movie_id)
-                ->where('genre', 'LIKE', '%' . explode(',', $movie->genre)[0] . '%')
-                ->where('status', 'Now Showing')
-                ->orderBy('rating', 'desc')
-                ->limit(6)
-                ->get();
-
-            // Get movie reviews with pagination
-            $reviews = $movie->reviews()
-                ->with('user')
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-
-            // Calculate average rating from reviews
-            $averageReviewRating = $movie->reviews()->avg('rating');
-
-            // Get available cinemas for this movie
-            $availableCinemas = Cinema::whereHas('screens.showtimes', function ($q) use ($movie) {
-                $q->where('movie_id', $movie->movie_id)
-                    ->where('show_date', '>=', Carbon::today())
-                    ->where('status', 'Active');
-            })
-                ->get();
-
-            // Format cast and crew
-            $cast = $movie->cast ? explode(',', $movie->cast) : [];
-            $genres = $movie->genre ? explode(',', $movie->genre) : [];
-
-            return view('client.movies.show', compact(
-                'movie',
-                'upcomingShowtimes',
-                'similarMovies',
-                'reviews',
-                'averageReviewRating',
-                'availableCinemas',
-                'cast',
-                'genres'
-            ));
-        } catch (\Exception $e) {
-            \Log::error('MovieController@show error: ' . $e->getMessage());
-            return redirect()->route('movies.index')
-                ->with('error', 'Movie not found or unavailable.');
-        }
-    }
 
     /**
      * Display showtimes for a specific movie
@@ -705,33 +638,85 @@ class MovieController extends Controller
      */
     public function reviews(Request $request, Movie $movie)
     {
-        $reviews = $movie->reviews()
-            ->with('user')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        try {
+            // Check if user can review (has a successful booking)
+            $canReview = false;
+            $userHasReviewed = false;
 
-        $averageRating = $movie->reviews()->avg('rating');
-        $totalReviews = $movie->reviews()->count();
+            if (Auth::check()) {
+                // Check if user has a successful booking
+                $hasBooking = Booking::where('user_id', Auth::id())
+                    ->where('booking_status', 'Confirmed')
+                    ->whereHas('showtime', function($q) use ($movie) {
+                        $q->where('movie_id', $movie->movie_id);
+                    })
+                    ->exists();
 
-        // Rating distribution
-        $ratingDistribution = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $count = $movie->reviews()->where('rating', $i)->count();
-            $percentage = $totalReviews > 0 ? ($count / $totalReviews) * 100 : 0;
-            $ratingDistribution[$i] = [
-                'count' => $count,
-                'percentage' => round($percentage, 1)
-            ];
+                $canReview = $hasBooking;
+
+                // Check if user has already reviewed
+                $userHasReviewed = Review::where('user_id', Auth::id())
+                    ->where('movie_id', $movie->movie_id)
+                    ->exists();
+            }
+
+            // Get reviews with pagination
+            $reviews = Review::with('user')
+                ->where('movie_id', $movie->movie_id)
+                ->latest()
+                ->paginate(5);
+
+            // Calculate statistics
+            $totalReviews = Review::where('movie_id', $movie->movie_id)->count();
+            $averageRating = $totalReviews > 0
+                ? Review::where('movie_id', $movie->movie_id)->avg('rating')
+                : 0;
+
+            // Get rating distribution
+            $ratingDistribution = [];
+            for ($i = 5; $i >= 1; $i--) {
+                $count = Review::where('movie_id', $movie->movie_id)
+                    ->where('rating', $i)
+                    ->count();
+                $ratingDistribution[$i] = [
+                    'count' => $count,
+                    'percentage' => $totalReviews > 0 ? ($count / $totalReviews * 100) : 0
+                ];
+            }
+
+            // Render the reviews partial
+            $html = view('client.movies.partials.reviews-list', compact(
+                'movie',
+                'reviews',
+                'canReview',
+                'userHasReviewed',
+                'totalReviews',
+                'averageRating',
+                'ratingDistribution'
+            ))->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'stats' => [
+                    'total' => $totalReviews,
+                    'average' => round($averageRating, 1),
+                    'distribution' => $ratingDistribution
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('MovieController@reviews error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tải đánh giá.'
+            ], 500);
         }
-
-        return view('client.movies.reviews', compact(
-            'movie',
-            'reviews',
-            'averageRating',
-            'totalReviews',
-            'ratingDistribution'
-        ));
     }
+
+    /**
+     * Display reviews for a specific movie
+     */
 
     /**
      * API endpoint for movies list
