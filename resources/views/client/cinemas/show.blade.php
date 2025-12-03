@@ -2,123 +2,105 @@
 
 @section('title', $cinema->name)
 
-@push('styles')
-<style>
-.hero-cover{height:320px;background-size:cover;background-position:center;border-radius:12px}
-.gallery-img{height:180px;object-fit:cover}
-</style>
-@endpush
-
 @section('content')
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="hero-cover" style="background-image:url('{{ $cinema->cover_image ? asset('storage/'.$cinema->cover_image) : asset('assets/img/default/cinema.jpg') }}')"></div>
-    </div>
-</div>
+<div class="container py-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+                    <div>
+                        <p class="text-uppercase text-muted small mb-1">{{ __('Rạp chiếu phim') }}</p>
+                        <h1 class="h3 mb-2">{{ $cinema->name }}</h1>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-geo-alt me-1 text-danger"></i>{{ $cinema->address }} · {{ $cinema->city }}
+                        </p>
+                    </div>
+                    <div class="text-md-end">
+                        <p class="mb-1 fw-semibold">{{ __('Có :screens phòng chiếu trong hệ thống', ['screens' => $cinema->screens->count()]) }}</p>
+                        <a href="{{ route('cinemas.showtimes', $cinema->cinema_id) }}" class="btn btn-brand">
+                            {{ __('Xem toàn bộ lịch chiếu dạng JSON') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card mb-3">
-            <div class="card-body">
-                <h2>{{ $cinema->name }}</h2>
-                <p class="muted">{{ $cinema->address }} - {{ $cinema->city }}</p>
-                <p>{{ $cinema->description }}</p>
-
-                <h5 class="mt-4">Amenities</h5>
-                <div class="mb-3">
-                    @if(!empty($cinema->amenities))
-                        @foreach($cinema->amenities as $am)
-                            <span class="badge bg-light text-dark me-1">{{ $am }}</span>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">{{ __('Phim đang chiếu tại rạp') }}</h2>
+                    @if(!empty($groupedShowtimes))
+                        @foreach($groupedShowtimes as $date => $movies)
+                            <div class="border rounded-3 p-3 mb-3">
+                                <h3 class="h6 text-uppercase text-muted mb-3">
+                                    {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d/m/Y') }}
+                                </h3>
+                                @foreach($movies as $movieId => $movieGroup)
+                                    @php $movie = $movieGroup['movie']; @endphp
+                                    <div class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center mb-3">
+                                        <div class="d-flex gap-3 align-items-start flex-grow-1">
+                                            <img src="{{ $movie && $movie->poster_url ? asset('storage/' . ltrim($movie->poster_url, '/')) : asset('assets/img/default/cinema.jpg') }}"
+                                                 alt="{{ $movie?->title }}"
+                                                 class="rounded" style="width:80px;height:110px;object-fit:cover;">
+                                            <div>
+                                                <p class="mb-1 fw-semibold">{{ $movie?->title ?? __('Phim chưa xác định') }}</p>
+                                                <p class="text-muted small mb-0">
+                                                    {{ __('Thời lượng: :minutes phút', ['minutes' => $movie?->duration ?? __('Đang cập nhật')]) }}
+                                                </p>
+                                                <a href="{{ $movie ? route('movies.showtimes', $movie->movie_id) : '#' }}" class="btn btn-link p-0 small">
+                                                    {{ __('Xem các suất chiếu của phim') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 text-lg-end">
+                                            @foreach($movieGroup['showtimes'] as $slot)
+                                                <a href="{{ route('booking.seatSelection', $slot['id']) }}"
+                                                   class="btn btn-outline-secondary btn-sm mb-1">
+                                                    {{ $slot['time'] }} · {{ $slot['screen'] }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         @endforeach
+                    @else
+                        <p class="text-muted mb-0">{{ __('Rạp chưa có suất chiếu khả dụng.') }}</p>
                     @endif
                 </div>
+            </div>
+        </div>
 
-                <h5 class="mt-4">Gallery</h5>
-                <div id="cinemaGallery" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-inner">
-                        @php $first=true; @endphp
-                        @if(!empty($cinema->gallery))
-                            @foreach($cinema->gallery as $img)
-                                <div class="carousel-item {{ $first ? 'active' : '' }}">
-                                    <img src="{{ asset('storage/'.$img) }}" class="d-block w-100 gallery-img" alt="">
-                                </div>
-                                @php $first = false; @endphp
-                            @endforeach
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-muted mb-3">{{ __('Thông tin liên hệ') }}</h2>
+                    <p class="mb-1"><i class="bi bi-telephone me-2 text-danger"></i>{{ $cinema->phone ?? __('Đang cập nhật') }}</p>
+                    <p class="mb-1"><i class="bi bi-envelope me-2 text-danger"></i>{{ $cinema->email ?? __('Đang cập nhật') }}</p>
+                    <p class="mb-0">
+                        <i class="bi bi-globe2 me-2 text-danger"></i>
+                        @if(!empty($cinema->website_url))
+                            <a href="{{ $cinema->website_url }}" target="_blank" rel="noopener">{{ $cinema->website_url }}</a>
                         @else
-                            <div class="carousel-item active"><img src="{{ asset('assets/img/default/cinema.jpg') }}" class="d-block w-100 gallery-img" alt=""></div>
+                            {{ __('Đang cập nhật') }}
                         @endif
-                    </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#cinemaGallery" data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#cinemaGallery" data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    </button>
+                    </p>
                 </div>
-
             </div>
-        </div>
 
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5>Upcoming Showtimes</h5>
-                <div id="showtimesArea">Loading showtimes...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5>Contact</h5>
-                <p><i class="fa fa-phone me-2"></i>{{ $cinema->phone ?? '-' }}</p>
-                <p><i class="fa fa-envelope me-2"></i>{{ $cinema->email ?? '-' }}</p>
-                <p><i class="fa fa-globe me-2"></i><a href="{{ $cinema->website_url ?? '#' }}">{{ $cinema->website_url ?? '-' }}</a></p>
-            </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5>Map</h5>
-                @if($cinema->latitude && $cinema->longitude)
-                    <iframe src="https://www.google.com/maps?q={{ $cinema->latitude }},{{ $cinema->longitude }}&output=embed" style="width:100%;height:220px;border:0;border-radius:8px"></iframe>
-                @else
-                    <img src="https://via.placeholder.com/400x220?text=Map+Unavailable" class="img-fluid rounded">
-                @endif
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h6 text-uppercase text-muted mb-3">{{ __('Sơ đồ') }}</h2>
+                    @if(!empty($cinema->latitude) && !empty($cinema->longitude))
+                        <iframe src="https://www.google.com/maps?q={{ $cinema->latitude }},{{ $cinema->longitude }}&output=embed"
+                                style="width:100%;height:220px;border:0;border-radius:12px"></iframe>
+                    @else
+                        <img src="{{ asset('assets/img/default/cinema.jpg') }}" alt="" class="img-fluid rounded-3">
+                        <p class="text-muted small mt-2 mb-0">{{ __('Rạp chưa cập nhật vị trí bản đồ.') }}</p>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-$(function(){
-    // Load showtimes via ajax
-    $.ajax({
-        url: '{{ route('cinemas.showtimes', $cinema->cinema_id) }}',
-        dataType: 'json'
-    }).done(function(res){
-        if(!res.success) { $('#showtimesArea').html('<div class="text-muted">No showtimes found.</div>'); return; }
-        // server returns grouped data; render partial via client-side insertion of server-rendered HTML if provided
-        if(res.html) {
-            $('#showtimesArea').html(res.html);
-            return;
-        }
-        // fallback: build simple html
-        var html = '';
-        Object.keys(res.data).forEach(function(date){
-            html += '<h6 class="mt-3">'+date+'</h6>';
-            Object.values(res.data[date]).forEach(function(movieGroup){
-                var movie = movieGroup.movie;
-                html += '<div class="mb-2"><strong>'+ (movie ? movie.title : 'Movie') +'</strong>: ';
-                movieGroup.showtimes.forEach(function(s){ html += '<span class="badge bg-light text-dark me-1">'+s.show_time+'</span>'; });
-                html += '</div>';
-            });
-        });
-        $('#showtimesArea').html(html);
-    }).fail(function(){ $('#showtimesArea').html('<div class="text-muted">Failed to load showtimes.</div>'); });
-});
-</script>
-@endpush
-
 @endsection

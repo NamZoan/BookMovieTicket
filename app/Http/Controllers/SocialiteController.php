@@ -41,6 +41,7 @@ class SocialiteController extends Controller
                     'is_active'   => 1,
                     'provider'    => 'google',
                     'provider_id' => $googleUser->getId(),
+                    'email_verified_at' => now(), // Google đã verify email
                 ]);
             } else {
                 // cập nhật thông tin mới nhất
@@ -48,6 +49,7 @@ class SocialiteController extends Controller
                     'provider'    => 'google',
                     'provider_id' => $user->provider_id ?: $googleUser->getId(),
                     'full_name'   => $user->full_name ?: ($googleUser->getName() ?? $user->full_name),
+                    'email_verified_at' => $user->email_verified_at ?: now(), // Verify email nếu chưa verify
                 ]);
             }
 

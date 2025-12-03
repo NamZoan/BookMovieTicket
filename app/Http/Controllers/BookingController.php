@@ -45,10 +45,34 @@ class BookingController extends Controller
 
 
             // Check if showtime is available
-            // if (!$this->isShowtimeAvailable($showtime)) {
-            //     return redirect()->route('movies.showtimes', $showtime->movie_id)
-            //         ->with('error', 'Suất chiếu này không còn khả dụng.');
-            // }
+            if ($showtime->status !== 'Active') {
+                return redirect()->route('movies.showtimes', $showtime->movie_id)
+                    ->with('error', 'Suất chiếu này không còn khả dụng.');
+            }
+
+            if ($showtime->available_seats <= 0) {
+                return redirect()->route('movies.showtimes', $showtime->movie_id)
+                    ->with('error', 'Suất chiếu này đã hết ghế.');
+            }
+
+            // Check if showtime date/time is in the past
+            // Use the model helper in case show_time/show_date use different storage formats
+            try {
+                $showtimeDateTime = $showtime->startDateTime;
+            } catch (\Exception $ex) {
+                // fallback and log more details
+                Log::warning('BookingController@seatSelection: failed to compute startDateTime - falling back to concatenation', [
+                    'showtime_id' => $showtime->showtime_id,
+                    'raw_show_date' => $showtime->getOriginal('show_date'),
+                    'raw_show_time' => $showtime->getOriginal('show_time'),
+                    'exception' => $ex->getMessage()
+                ]);
+                $showtimeDateTime = Carbon::parse(trim($showtime->getOriginal('show_date') . ' ' . $showtime->getOriginal('show_time')));
+            }
+            if ($showtimeDateTime->isPast()) {
+                return redirect()->route('movies.showtimes', $showtime->movie_id)
+                    ->with('error', 'Suất chiếu này đã bắt đầu.');
+            }
             // Get booked seats for this showtime
             $bookedSeats = $this->getBookedSeats($showtime->showtime_id);
 
@@ -136,6 +160,24 @@ class BookingController extends Controller
 
         try {
             $showtime = Showtime::findOrFail($request->showtime_id);
+
+            // Validate showtime is available
+            if ($showtime->status !== 'Active') {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Suất chiếu này không còn khả dụng.'
+                ], 422);
+            }
+
+            if ($showtime->available_seats <= 0) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Suất chiếu này đã hết ghế.'
+                ], 422);
+            }
+
             $seats = Seat::whereIn('seat_id', $selectedSeats)->get();
 
             // Verify seats are available (exclude current user's temporary holds)
@@ -358,6 +400,17 @@ class BookingController extends Controller
             }
 
             $showtime = Showtime::findOrFail($bookingData['showtime_id']);
+
+            // Validate showtime is still available
+            if ($showtime->status !== 'Active') {
+                return redirect()->route('movies.showtimes', $showtime->movie_id)
+                    ->with('error', 'Suất chiếu này không còn khả dụng.');
+            }
+
+            if ($showtime->available_seats < count($bookingData['selected_seats'])) {
+                return redirect()->route('movies.showtimes', $showtime->movie_id)
+                    ->with('error', 'Số ghế còn lại không đủ. Vui lòng chọn lại.');
+            }
 
             $unavailableSeats = $this->checkSeatAvailability($bookingData['showtime_id'], $bookingData['selected_seats'], Auth::id());
             if (!empty($unavailableSeats)) {
@@ -1001,10 +1054,17 @@ class BookingController extends Controller
 
     private function canCancelBooking(Booking $booking)
     {
-        $showtimeDateTime = Carbon::createFromFormat(
-            'Y-m-d H:i:s',
-            $booking->showtime->show_date . ' ' . $booking->showtime->show_time
-        );
+        try {
+            $showtimeDateTime = $booking->showtime->startDateTime;
+        } catch (\Exception $ex) {
+            Log::warning('BookingController@canCancelBooking: fallback parsing booking showtime', [
+                'booking_id' => $booking->booking_id,
+                'raw_show_date' => $booking->showtime->getOriginal('show_date'),
+                'raw_show_time' => $booking->showtime->getOriginal('show_time'),
+                'exception' => $ex->getMessage()
+            ]);
+            $showtimeDateTime = Carbon::parse(trim($booking->showtime->getOriginal('show_date') . ' ' . $booking->showtime->getOriginal('show_time')));
+        }
 
         // Can cancel if more than 30 minutes before showtime
         return Carbon::now()->diffInMinutes($showtimeDateTime, false) > 30;

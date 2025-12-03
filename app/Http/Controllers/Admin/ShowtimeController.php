@@ -8,6 +8,7 @@ use App\Models\Movie;
 use App\Models\Screen;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 class ShowtimeController extends Controller
@@ -250,7 +251,17 @@ class ShowtimeController extends Controller
 
         // Kiểm tra xem lịch chiếu đã bắt đầu chưa
         $now = Carbon::now();
-        $showDateTime = Carbon::parse($showtime->show_date . ' ' . $showtime->show_time);
+        try {
+            $showDateTime = $showtime->startDateTime;
+        } catch (\Exception $ex) {
+            Log::warning('Admin\ShowtimeController: fallback parsing showtime datetime', [
+                'showtime_id' => $showtime->showtime_id,
+                'raw_show_date' => $showtime->getOriginal('show_date'),
+                'raw_show_time' => $showtime->getOriginal('show_time'),
+                'exception' => $ex->getMessage()
+            ]);
+            $showDateTime = Carbon::parse(trim($showtime->getOriginal('show_date') . ' ' . $showtime->getOriginal('show_time')));
+        }
 
         if ($now >= $showDateTime) {
             return redirect()->route('admin.showtimes.index')->with('error', 'Không thể xóa lịch chiếu đã bắt đầu hoặc đã kết thúc.');

@@ -32,11 +32,12 @@ class BookingController extends Controller
 
         $bookings = $query->paginate(10)->appends(request()->query());
 
-        // Get filter options
+        // Get filter options - đúng với database enum values
         $statusOptions = [
             'Pending' => 'Chờ Xử Lý',
             'Confirmed' => 'Đã Xác Nhận',
             'Cancelled' => 'Đã Hủy',
+            'Used' => 'Đã Sử Dụng',
             'Expired' => 'Hết Hạn'
         ];
 

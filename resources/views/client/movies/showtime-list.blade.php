@@ -31,9 +31,9 @@
                                     {{ $showtime->screen->screen_name }}
                                 </div>
                             @endif
-                            @if($showtime->base_price)
+                            @if($showtime->price_seat_normal)
                                 <div class="price-info">
-                                    Từ {{ number_format($showtime->base_price, 0, ',', '.') }}đ
+                                    Từ {{ number_format($showtime->price_seat_normal, 0, ',', '.') }}đ
                                 </div>
                             @endif
                         </div>

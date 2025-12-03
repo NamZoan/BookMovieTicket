@@ -112,7 +112,7 @@ public function handleReturn(Request $request)
                                 'payment_date' => now()
                             ]);
 
-                            $booking->showtime->decrement('available_seats', $booking->bookingSeats->count());
+                            // available_seats đã được giảm khi tạo booking, không cần giảm lại
 
                             $loyaltyPoints = floor($booking->final_amount / 1000);
                             if ($loyaltyPoints > 0 && $booking->user) {

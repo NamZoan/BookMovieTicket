@@ -29,6 +29,7 @@ class HomeController extends Controller
             $featuredMovies = Cache::remember('home:featured', now()->addMinutes(5), function () {
                 return $this->normalizeMovies(
                     Movie::featured()
+                        ->withRatingStats()
                         ->with('showtimes')
                         ->limit(5)
                         ->get()
@@ -38,6 +39,7 @@ class HomeController extends Controller
             $nowShowingMovies = Cache::remember('home:now-showing', now()->addMinutes(3), function () {
                 return $this->normalizeMovies(
                     Movie::nowShowing()
+                        ->withRatingStats()
                         ->orderByDesc('release_date')
                         ->limit(12)
                         ->get()
@@ -47,6 +49,7 @@ class HomeController extends Controller
             $comingSoonMovies = Cache::remember('home:coming-soon', now()->addMinutes(5), function () {
                 return $this->normalizeMovies(
                     Movie::comingSoon()
+                        ->withRatingStats()
                         ->limit(12)
                         ->get()
                 )->all();
@@ -55,6 +58,7 @@ class HomeController extends Controller
             $trendingMovies = Cache::remember('home:trending', now()->addMinutes(5), function () {
                 return $this->normalizeMovies(
                     Movie::trending()
+                        ->withRatingStats()
                         ->limit(8)
                         ->get()
                 )->all();
@@ -62,6 +66,7 @@ class HomeController extends Controller
 
             $latestTrailers = Cache::remember('home:latest-trailers', now()->addMinutes(10), function () {
                 return Movie::nowShowing()
+                    ->withRatingStats()
                     ->whereNotNull('trailer_url')
                     ->orderByDesc('release_date')
                     ->limit(4)
@@ -133,6 +138,7 @@ class HomeController extends Controller
         $genre = $request->get('genre');
 
         $movies = Movie::nowShowing()
+            ->withRatingStats()
             ->genre($genre)
             ->topRated()
             ->limit(12)
@@ -165,6 +171,8 @@ class HomeController extends Controller
             ], 422);
         }
 
+        $ratingColumn = $this->ratingExpression();
+
         $movies = Movie::query()
             ->where(function ($subQuery) use ($query) {
                 $subQuery->where('title', 'LIKE', '%' . $query . '%')
@@ -173,16 +181,17 @@ class HomeController extends Controller
                     ->orWhere('director', 'LIKE', '%' . $query . '%');
             })
             ->where('status', '!=', 'Ended')
-            ->orderByDesc('rating')
+            ->withRatingStats()
+            ->orderByRaw("{$ratingColumn} desc")
             ->limit(8)
             ->get()
             ->map(fn (Movie $movie) => [
                 'id' => $movie->movie_id,
                 'title' => $movie->title,
                 'poster_url' => $this->resolvePosterUrl($movie->poster_url),
-                'rating' => $this->formatRating($movie->rating),
+                'rating' => $this->formatRating($movie->computed_rating ?? $movie->rating),
                 'status' => $movie->status,
-                'details_url' => route('movies.show', $movie->movie_id),
+                'details_url' => route('movies.showtimes', $movie->movie_id),
             ])
             ->all();
 
@@ -218,7 +227,7 @@ class HomeController extends Controller
                         'time' => optional($showtime->show_time)->format('H:i'),
                         'available_seats' => $showtime->available_seats,
                         'screen' => optional($showtime->screen)->screen_name,
-                        'price' => $showtime->price_seat_normal ?? $showtime->base_price,
+                        'price' => $showtime->price_seat_normal,
                         'booking_url' => route('booking.seatSelection', ['showtime' => $showtime->showtime_id]),
                     ];
                 })->values()->all(),
@@ -430,4 +439,12 @@ class HomeController extends Controller
 
         return $this->normalizeMovies($recommendations)->all();
     }
+
+    private function ratingExpression(): string
+    {
+        return 'COALESCE(reviews_avg_rating * 2, rating)';
+    }
 }
+
+
+

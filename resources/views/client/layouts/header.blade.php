@@ -37,14 +37,7 @@
                         </li>
                     </ul>
 
-                    <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 w-100 w-lg-auto mt-3 mt-lg-0">
-                        <form class="search-inline position-relative" action="{{ route('movies.search') }}" method="GET">
-                            <label for="global-search" class="visually-hidden">{{ __('Tìm kiếm phim') }}</label>
-                            <input id="global-search" type="search" name="q" class="form-control form-control-sm pe-5" placeholder="{{ __('Tìm nhanh phim...') }}" value="{{ request('q') }}">
-                            <button class="btn btn-link position-absolute top-50 end-0 translate-middle-y pe-3" type="submit" aria-label="{{ __('Tìm kiếm') }}">
-                                <i class="bi bi-search"></i>
-                            </button>
-                        </form>
+                    <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 w-100 w-lg-auto mt-3 mt-lg-0 ms-lg-auto">
 
                         <div class="dropdown">
                             <button class="btn btn-outline-brand btn-sm rounded-pill d-flex align-items-center gap-2 dropdown-toggle" type="button" id="accountDropdown" data-bs-toggle="dropdown" aria-expanded="false">

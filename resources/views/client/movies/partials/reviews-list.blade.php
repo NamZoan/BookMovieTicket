@@ -1,108 +1,134 @@
-{{-- Form để người dùng gửi đánh giá --}}
+{{-- Reviews UI --}}
 @auth
     @if ($canReview && !$userHasReviewed)
-        <div class="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Viết đánh giá của bạn</h3>
-            <form id="review-form" action="{{ route('movies.reviews.store', $movie) }}" method="POST">
+        <div class="review-card review-card--highlight">
+            <div class="review-card__header">
+                <div>
+                    <p class="review-label">Viết đánh giá</p>
+                    <h3 class="review-title">Chia sẻ cảm nhận của bạn</h3>
+                    <p class="review-subtitle">Chỉ khán giả đã đặt vé mới có thể gửi đánh giá.</p>
+                </div>
+                <div class="review-badge">Khán giả đã xem</div>
+            </div>
+
+            <form id="review-form" action="{{ route('movies.reviews.store', $movie) }}" method="POST" class="review-form">
                 @csrf
 
-                {{-- Rating Stars --}}
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Bạn đánh giá phim này thế nào?</label>
-                    <div class="flex items-center space-x-1 rating-stars">
+                <div class="form-group">
+                    <label class="form-label">Bạn chấm phim này bao nhiêu sao?</label>
+                    <div class="star-input" aria-label="Chọn số sao">
                         @for ($i = 5; $i >= 1; $i--)
-                            <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" class="hidden" required/>
-                            <label for="star{{ $i }}" class="cursor-pointer text-gray-300 text-3xl transition-colors hover:text-yellow-400">★</label>
+                            <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}" required />
+                            <label for="star{{ $i }}" title="{{ $i }} sao">★</label>
                         @endfor
                     </div>
                 </div>
 
-                {{-- Comment Box --}}
-                <div class="mb-4">
-                    <label for="comment" class="block text-gray-700 font-medium mb-2">Bình luận của bạn</label>
-                    <textarea name="comment" id="comment" rows="4"
-                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
-                        placeholder="Chia sẻ cảm nhận của bạn về bộ phim..."></textarea>
+                <div class="form-group">
+                    <label for="comment" class="form-label">Cảm nhận của bạn</label>
+                    <textarea name="comment" id="comment" rows="4" class="input-textarea" placeholder="Viết ngắn gọn về diễn xuất, nội dung, nhịp phim..."></textarea>
                 </div>
 
-                <button type="submit"
-                    class="bg-red-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400">
+                <button type="submit" class="btn-primary">
                     Gửi đánh giá
                 </button>
             </form>
         </div>
     @elseif($userHasReviewed)
-        <div class="mb-8 p-4 text-center bg-green-50 text-green-800 rounded-lg border border-green-200">
-            Cảm ơn bạn đã đánh giá phim này!
+        <div class="review-card review-card--success">
+            <div class="review-success-icon">✓</div>
+            <div>
+                <p class="review-label">Đã gửi</p>
+                <h3 class="review-title">Cảm ơn bạn đã đánh giá phim này!</h3>
+                <p class="review-subtitle">Đánh giá của bạn giúp người khác chọn phim dễ dàng hơn.</p>
+            </div>
         </div>
     @else
-        <div class="mb-8 p-4 text-center bg-blue-50 text-blue-800 rounded-lg border border-blue-200">
-            Bạn cần đặt vé xem phim này để có thể để lại đánh giá.
+        <div class="review-card review-card--info">
+            <div class="review-info-icon">🎟️</div>
+            <div>
+                <p class="review-label">Cần đặt vé</p>
+                <h3 class="review-title">Đặt vé xem phim để mở khóa đánh giá</h3>
+                <p class="review-subtitle">Hãy trải nghiệm phim, sau đó quay lại để chia sẻ nhận xét của bạn.</p>
+            </div>
         </div>
     @endif
 @else
-    <div class="mb-8 p-4 text-center bg-yellow-50 text-yellow-800 rounded-lg border border-yellow-200">
-        <a href="{{ route('auth.login') }}?redirect={{ url()->current() }}" class="font-semibold underline">Đăng nhập</a> để đánh giá phim này.
+    <div class="review-card review-card--warning">
+        <div class="review-warning-icon">🔒</div>
+        <div>
+            <p class="review-label">Đăng nhập để đánh giá</p>
+            <h3 class="review-title">Hãy đăng nhập để viết đánh giá</h3>
+            <a href="{{ route('auth.login') }}?redirect={{ url()->current() }}" class="btn-link">Đăng nhập ngay</a>
+        </div>
     </div>
 @endauth
 
-{{-- Thống kê đánh giá --}}
-<div class="mb-8">
-    <h3 class="text-xl font-bold mb-4">Tổng quan đánh giá</h3>
-    <div class="flex items-center gap-8">
-        <div class="text-center">
-            <div class="text-5xl font-bold text-red-600">{{ number_format($averageRating, 1) }}</div>
-            <div class="text-gray-500">trên 5 sao</div>
-            <div class="text-sm text-gray-400 mt-1">({{ $totalReviews }} đánh giá)</div>
+{{-- Rating summary --}}
+<div class="summary-grid">
+    <div class="summary-card">
+        <p class="review-label">Điểm trung bình</p>
+        <div class="summary-score">
+            <span class="summary-score__number">{{ number_format($averageRating, 1) }}</span>
+            <span class="summary-score__outof">/ 5</span>
         </div>
-        <div class="flex-grow">
-            <div class="space-y-2">
-                @for ($i = 5; $i >= 1; $i--)
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-gray-600">{{ $i }} sao</span>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-yellow-400 h-2.5 rounded-full" style="width: {{ $ratingDistribution[$i]['percentage'] }}%"></div>
-                        </div>
-                        <span class="text-sm font-medium text-gray-600 w-12 text-right">{{ $ratingDistribution[$i]['count'] }}</span>
+        <p class="summary-meta">{{ $totalReviews }} đánh giá</p>
+        <div class="summary-stars">
+            @for ($i = 1; $i <= 5; $i++)
+                <span class="summary-star {{ $i <= round($averageRating) ? 'summary-star--filled' : '' }}">★</span>
+            @endfor
+        </div>
+    </div>
+
+    <div class="distribution-card">
+        <p class="review-label">Phân bố sao</p>
+        <div class="distribution-list">
+            @for ($i = 5; $i >= 1; $i--)
+                <div class="distribution-row">
+                    <span class="distribution-row__label">{{ $i }} sao</span>
+                    <div class="distribution-row__bar">
+                        <span class="distribution-row__fill" style="width: {{ $ratingDistribution[$i]['percentage'] }}%"></span>
                     </div>
-                @endfor
-            </div>
+                    <span class="distribution-row__count">{{ $ratingDistribution[$i]['count'] }}</span>
+                </div>
+            @endfor
         </div>
     </div>
 </div>
 
-{{-- Danh sách các bài đánh giá --}}
-<div>
-    <h3 class="text-xl font-bold mb-6 border-b pb-3">Tất cả đánh giá ({{ $reviews->total() }})</h3>
+{{-- Reviews list --}}
+<div class="reviews-list">
+    <div class="reviews-list__header">
+        <h3 class="review-title">Tất cả đánh giá ({{ $reviews->total() }})</h3>
+    </div>
+
     @if($reviews->isEmpty())
-        <div class="text-center py-12 text-gray-500">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z" />
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Chưa có đánh giá nào</h3>
-            <p class="mt-1 text-sm text-gray-500">Hãy là người đầu tiên chia sẻ cảm nhận của bạn!</p>
+        <div class="empty-state">
+            <div class="empty-icon">☆</div>
+            <p class="review-title">Chưa có đánh giá nào</p>
+            <p class="review-subtitle">Hãy là người đầu tiên chia sẻ cảm nhận về bộ phim này.</p>
         </div>
     @else
-        <div class="space-y-8">
+        <div class="reviews-stack">
             @foreach($reviews as $review)
-                <div class="flex space-x-4">
-                    <div class="flex-shrink-0">
-                        <img class="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name={{ urlencode($review->user->full_name) }}&color=7F9CF5&background=EBF4FF" alt="{{ $review->user->full_name }}">
+                <div class="review-item">
+                    <div class="review-item__avatar">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($review->user->full_name) }}&color=F97316&background=FFF4E5" alt="{{ $review->user->full_name }}">
                     </div>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <h4 class="text-sm font-bold text-gray-900">{{ $review->user->full_name }}</h4>
-                            <span class="text-xs text-gray-400">{{ $review->created_at->diffForHumans() }}</span>
-                        </div>
-                        <div class="flex items-center mt-1">
-                            @for ($i = 1; $i <= 5; $i++)
-                                <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                </svg>
-                            @endfor
+                    <div class="review-item__body">
+                        <div class="review-item__meta">
+                            <div>
+                                <p class="review-item__name">{{ $review->user->full_name }}</p>
+                                <p class="review-item__time">{{ $review->created_at->diffForHumans() }}</p>
+                            </div>
+                            <div class="review-item__stars">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <span class="summary-star {{ $i <= $review->rating ? 'summary-star--filled' : '' }}">★</span>
+                                @endfor
+                            </div>
                         </div>
                         @if($review->comment)
-                            <p class="mt-3 text-gray-700 leading-relaxed">
+                            <p class="review-item__comment">
                                 {{ $review->comment }}
                             </p>
                         @endif
@@ -111,9 +137,8 @@
             @endforeach
         </div>
 
-        {{-- Pagination --}}
         @if ($reviews->hasPages())
-            <div class="mt-8">
+            <div class="reviews-pagination">
                 {{ $reviews->links() }}
             </div>
         @endif
@@ -121,13 +146,216 @@
 </div>
 
 <style>
-.rating-stars {
+.review-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: #fff;
+}
+.review-card--highlight {
+    background: linear-gradient(135deg, #fff7f7, #fff);
+    border-color: #fef2f2;
+    box-shadow: 0 10px 30px rgba(229, 28, 35, 0.08);
+    flex-direction: column;
+    align-items: stretch;
+}
+.review-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.review-card--success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+.review-card--info {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+}
+.review-card--warning {
+    background: #fff7ed;
+    border-color: #fed7aa;
+}
+.review-badge, .review-info-icon, .review-warning-icon, .review-success-icon {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #b91c1c;
+    background: #fee2e2;
+}
+.review-success-icon { background:#bbf7d0; color:#166534; }
+.review-info-icon { background:#dbeafe; color:#1d4ed8; }
+.review-warning-icon { background:#fed7aa; color:#c2410c; }
+
+.review-label {
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #9ca3af;
+    margin: 0 0 4px;
+}
+.review-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+}
+.review-subtitle {
+    color: #6b7280;
+    margin: 4px 0 0;
+}
+
+.review-form {
+    margin-top: 16px;
+    display: grid;
+    gap: 16px;
+}
+.form-group { display: grid; gap: 8px; }
+.form-label { font-weight: 700; color: #111827; }
+.star-input {
+    display: inline-flex;
+    gap: 6px;
+    font-size: 28px;
+    color: #e5e7eb;
     direction: rtl;
 }
-.rating-stars input:checked ~ label,
-.rating-stars label:hover,
-.rating-stars label:hover ~ label {
-    color: #f59e0b; /* text-yellow-400 */
+.star-input input {
+    display: none;
+}
+.star-input label {
+    cursor: pointer;
+    transition: transform 0.15s ease, color 0.2s ease;
+}
+.star-input input:checked ~ label,
+.star-input label:hover,
+.star-input label:hover ~ label {
+    color: #f59e0b;
+}
+.star-input label:active { transform: scale(0.95); }
+
+.input-textarea {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    min-height: 110px;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input-textarea:focus {
+    outline: none;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(90deg, #ef4444, #f97316);
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-link {
+    display: inline-block;
+    margin-top: 6px;
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 20px 0 12px;
+}
+.summary-card, .distribution-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 16px;
+    background: #fff;
+}
+.summary-score {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    margin: 6px 0;
+}
+.summary-score__number { font-size: 40px; font-weight: 800; color: #ef4444; line-height: 1; }
+.summary-score__outof { color: #9ca3af; font-weight: 600; }
+.summary-meta { color: #6b7280; margin: 0; }
+.summary-stars { display: flex; gap: 4px; margin-top: 6px; }
+.summary-star { color: #e5e7eb; font-size: 18px; }
+.summary-star--filled { color: #fbbf24; }
+
+.distribution-list { display: grid; gap: 10px; }
+.distribution-row { display: grid; grid-template-columns: 60px 1fr 40px; align-items: center; gap: 8px; }
+.distribution-row__label { color: #4b5563; font-weight: 600; font-size: 0.95rem; }
+.distribution-row__bar {
+    background: #f3f4f6;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+}
+.distribution-row__fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+}
+.distribution-row__count { text-align: right; color: #6b7280; font-weight: 700; }
+
+.reviews-list { margin-top: 20px; }
+.reviews-list__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.reviews-stack { display: grid; gap: 14px; }
+.review-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px;
+    background: #fff;
+}
+.review-item__avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #fee2e2;
+}
+.review-item__meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.review-item__name { font-weight: 800; color: #111827; margin: 0; }
+.review-item__time { margin: 0; color: #9ca3af; font-size: 0.9rem; }
+.review-item__comment { margin: 8px 0 0; color: #374151; line-height: 1.6; }
+.review-item__stars { display: flex; gap: 4px; }
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    border: 1px dashed #e5e7eb;
+    border-radius: 16px;
+    background: #f9fafb;
+}
+.empty-icon { font-size: 26px; color: #d1d5db; margin-bottom: 8px; }
+
+.reviews-pagination { margin-top: 18px; }
+
+@media (max-width: 640px) {
+    .review-card__header { flex-direction: column; align-items: flex-start; }
+    .distribution-row { grid-template-columns: 55px 1fr 34px; }
+    .review-item { grid-template-columns: 1fr; }
+    .review-item__avatar { order: 1; }
 }
 </style>
 

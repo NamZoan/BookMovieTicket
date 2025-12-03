@@ -305,14 +305,36 @@
                 <td>{{ $booking->payment_method }}</td>
             </tr>
             <tr>
+                <th>Trạng thái đặt vé:</th>
+                <td>
+                    @if($booking->booking_status == 'Confirmed')
+                        <span class="badge rounded-pill bg-success">Đã Xác Nhận</span>
+                    @elseif($booking->booking_status == 'Pending')
+                        <span class="badge rounded-pill bg-warning text-dark">Chờ Xử Lý</span>
+                    @elseif($booking->booking_status == 'Cancelled')
+                        <span class="badge rounded-pill bg-danger">Đã Hủy</span>
+                    @elseif($booking->booking_status == 'Used')
+                        <span class="badge rounded-pill bg-info">Đã Sử Dụng</span>
+                    @elseif($booking->booking_status == 'Expired')
+                        <span class="badge rounded-pill bg-secondary">Hết Hạn</span>
+                    @else
+                        <span class="badge rounded-pill bg-secondary">{{ $booking->booking_status }}</span>
+                    @endif
+                </td>
+            </tr>
+            <tr>
                 <th>Trạng thái thanh toán:</th>
                 <td>
                     @if($booking->payment_status == 'Paid')
-                        <span class="badge rounded-pill bg-success">Đã thanh toán</span>
+                        <span class="badge rounded-pill bg-success">Đã Thanh Toán</span>
                     @elseif($booking->payment_status == 'Pending')
-                        <span class="badge rounded-pill bg-warning text-dark">Chờ thanh toán</span>
+                        <span class="badge rounded-pill bg-warning text-dark">Chờ Thanh Toán</span>
+                    @elseif($booking->payment_status == 'Failed')
+                        <span class="badge rounded-pill bg-danger">Thanh Toán Thất Bại</span>
+                    @elseif($booking->payment_status == 'Refunded')
+                        <span class="badge rounded-pill bg-info">Đã Hoàn Tiền</span>
                     @else
-                        <span class="badge rounded-pill bg-danger">{{ $booking->payment_status }}</span>
+                        <span class="badge rounded-pill bg-secondary">{{ $booking->payment_status }}</span>
                     @endif
                 </td>
             </tr>

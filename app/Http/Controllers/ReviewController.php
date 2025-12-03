@@ -74,42 +74,22 @@ class ReviewController extends Controller
      */
     public function destroy(Movie $movie, Review $review)
     {
-        // Check if user owns this review or is admin
-        if ($review->user_id !== Auth::id() && !Auth::user()->is_admin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Bạn không có quyền xoá đánh giá này.'
-            ], 403);
+        // Allow deletion only by the review owner or an admin
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Không được phép'], 403);
+        }
+
+        if ($review->user_id !== $user->user_id && !$user->isAdmin()) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền xoá đánh giá này.'], 403);
         }
 
         try {
             $review->delete();
-            return response()->json([
-                'success' => true,
-                'message' => 'Đã xoá đánh giá thành công.'
-            ]);
+            return response()->json(['success' => true, 'message' => 'Đã xoá đánh giá thành công.']);
         } catch (\Exception $e) {
             Log::error('Review deletion failed: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi xoá đánh giá.'
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra khi xoá đánh giá.'], 500);
         }
-    }
-}
-    }
-
-    /**
-     * Remove the specified review from storage.
-     */
-    public function destroy(Movie $movie, Review $review)
-    {
-        // Check if user owns this review or is admin
-        if ($review->user_id !== Auth::id() && !Auth::user()->is_admin) {
-            abort(403, 'Bạn không có quyền xoá đánh giá này.');
-        }
-
-        $review->delete();
-        return back()->with('success', 'Đã xoá đánh giá.');
     }
 }

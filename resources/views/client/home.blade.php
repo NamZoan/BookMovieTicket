@@ -196,7 +196,7 @@
                                         <div>{{ __('Còn :seats ghế', ['seats' => $showtime['available_seats']]) }}</div>
                                     </div>
                                     <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
-                                        <a href="{{ route('movies.show', $showtime['movie_id']) }}" class="btn btn-outline-brand btn-sm">{{ __('Chi tiết') }}</a>
+                                        <a href="{{ route('movies.showtimes', $showtime['movie_id']) }}" class="btn btn-outline-brand btn-sm">{{ __('Chi tiết') }}</a>
                                         <a href="{{ $showtime['booking_url'] }}" class="btn btn-brand btn-sm">{{ __('Giữ ghế') }}</a>
                                     </div>
                                 </div>
@@ -222,7 +222,7 @@
                     <div class="col-12 col-md-6 col-xl-3">
                         <div class="trailer-card card h-100 border-0 overflow-hidden">
                             <div class="position-relative">
-                                <img src="{{ $movie['poster_url'] }}" class="img-fluid w-100" alt="{{ $movie['title'] }}">
+                                <img src="{{ $movie['poster_url'] ?? asset('assets/img/default/cinema.jpg') }}" class="img-fluid w-100" alt="{{ $movie['title'] }}" onerror="this.src='{{ asset('assets/img/default/cinema.jpg') }}'">
                                 <button class="btn btn-brand rounded-circle position-absolute top-50 start-50 translate-middle js-open-trailer"
                                     data-movie-id="{{ $movie['id'] }}"
                                     data-trailer-url="{{ $entry['trailer_url'] }}"

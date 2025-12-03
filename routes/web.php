@@ -12,6 +12,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\VnPayController;
+use App\Http\Controllers\EmailVerificationController;
+use App\Http\Controllers\Admin\DashboardController;
 require __DIR__ . '/admin.php';
 
 /*
@@ -47,36 +49,28 @@ Route::prefix('movies')->name('movies.')->group(function () {
         ->name('showtimes.ajax')
         ->where('movie_id', '[0-9]+');
 
-    Route::get('/{movie}/trailer', [MovieController::class, 'trailer'])
-        ->name('trailer')
-        ->where('movie', '[0-9]+');
-
     Route::get('/{movie_id}/showtimes', [MovieController::class, 'showtimes'])
         ->name('showtimes')
         ->where('movie_id', '[0-9]+');
-    // Movie detail routes (should come last)
-    Route::get('/{movie}', [MovieController::class, 'show'])->name('show');
-    Route::get('/{movie}/reviews', [MovieController::class, 'reviews'])->name('reviews');
+
+    // Public endpoint to load reviews for a movie (used by AJAX)
+    Route::get('/{movie}/reviews', [MovieController::class, 'reviews'])
+        ->name('reviews')
+        ->where('movie', '[0-9]+');
+
+    // Reviews (store/destroy) - auth required
+    Route::middleware('auth')->group(function () {
+        Route::post('/{movie}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])
+            ->name('reviews.store')
+            ->middleware('can.review')
+            ->where('movie', '[0-9]+');
+
+        Route::delete('/{movie}/reviews/{review}', [\App\Http\Controllers\ReviewController::class, 'destroy'])
+            ->name('reviews.destroy')
+            ->where(['movie' => '[0-9]+', 'review' => '[0-9]+']);
+    });
 });
 
-// Review Routes
-// Public: list reviews for a movie (used by AJAX or direct include)
-Route::get('movies/{movie}/reviews', [ReviewController::class, 'index'])->name('movies.reviews.index');
-
-// Auth-protected routes for creating/updating/deleting reviews
-Route::middleware('auth')->prefix('movies/{movie}/reviews')->name('movies.reviews.')->group(function () {
-    Route::post('/', [ReviewController::class, 'store'])->name('store');
-    Route::put('/{review}', [ReviewController::class, 'update'])->name('update');
-    Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('delete');
-});
-
-// Review routes
-Route::post('/{movie}/reviews', [ReviewController::class, 'store'])
-    ->name('reviews.store')
-    ->middleware('auth');
-Route::delete('/{movie}/reviews/{review}', [ReviewController::class, 'destroy'])
-    ->name('reviews.destroy')
-    ->middleware('auth');
 
 /*
 |--------------------------------------------------------------------------
@@ -119,6 +113,18 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     });
+});
+
+// Email Verification Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
+        ->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
+        ->middleware('throttle:6,1')
+        ->name('verification.send');
 });
 
 // Booking Routes (Protected)

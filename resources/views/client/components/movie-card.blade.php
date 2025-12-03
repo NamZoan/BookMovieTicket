@@ -10,7 +10,7 @@
 
 <article class="movie-card h-100 d-flex flex-column overflow-hidden">
     <div class="movie-card__media position-relative">
-        <img src="{{ $movie['poster_url'] }}" class="img-fluid w-100" alt="{{ $movie['title'] }}">
+        <img src="{{ $movie['poster_url'] ?? asset('assets/img/default/cinema.jpg') }}" class="img-fluid w-100" alt="{{ $movie['title'] }}" onerror="this.src='{{ asset('assets/img/default/cinema.jpg') }}'">
 
         @if($status)
             <span class="badge badge-status position-absolute top-0 end-0 m-3 text-uppercase small">
@@ -29,7 +29,7 @@
     <div class="p-4 d-flex flex-column gap-3 flex-grow-1">
         <div>
             <h3 class="movie-card__title fs-5 fw-semibold mb-1">
-                <a href="{{ $movie['details_url'] }}" class="stretched-link text-decoration-none text-black">
+                <a href="{{ $movie['details_url'] ?? route('movies.showtimes', $movie['id'] ?? $movie['movie_id'] ?? 0) }}" class="text-decoration-none text-black">
                     {{ $movie['title'] }}
                 </a>
             </h3>
@@ -52,17 +52,11 @@
             @endforeach
         </div>
 
+
         <div class="d-flex flex-wrap gap-2 mt-auto">
-            <a href="{{ $movie['book_url'] }}" class="btn btn-sm btn-brand flex-grow-1">
-                <i class="bi bi-ticket-perforated me-1"></i>{{ __('Đặt vé') }}
+            <a href="{{ $movie['details_url'] ?? $movie['book_url'] ?? route('movies.showtimes', $movie['id'] ?? $movie['movie_id'] ?? 0) }}" class="btn btn-sm btn-brand flex-grow-1">
+                <i class="bi me-1"></i>{{ __('Đặt vé') }}
             </a>
-            <button type="button"
-                class="btn btn-sm btn-outline-brand js-open-trailer"
-                data-movie-id="{{ $movie['id'] }}"
-                data-trailer-url="{{ $movie['trailer_url'] }}"
-                data-movie-title="{{ $movie['title'] }}">
-                <i class="bi bi-play-circle me-1"></i>{{ __('Trailer') }}
-            </button>
         </div>
     </div>
 </article>

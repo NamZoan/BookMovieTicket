@@ -24,12 +24,12 @@ trait BuildsMovieViewData
             'genres' => $this->extractGenres($movie->genre),
             'language' => $movie->language,
             'country' => $movie->country,
-            'rating' => $this->formatRating($movie->rating),
+            'rating' => $this->formatRating($this->resolveMovieRating($movie)),
             'age_rating' => $movie->age_rating,
             'status' => $movie->status,
             'poster_url' => $this->resolvePosterUrl($movie->poster_url),
             'trailer_url' => $this->resolveTrailerUrl($movie->trailer_url),
-            'details_url' => route('movies.show', $movie->movie_id),
+            'details_url' => route('movies.showtimes', $movie->movie_id),
             'book_url' => route('movies.showtimes', $movie->movie_id),
             'badges' => $this->buildBadgeMeta($movie),
         ];
@@ -47,7 +47,7 @@ trait BuildsMovieViewData
             'background_image' => $this->resolvePosterUrl($movie->poster_url),
             'cta' => [
                 'label' => __('Đặt vé ngay'),
-                'url' => route('movies.show', $movie->movie_id),
+                'url' => route('movies.showtimes', $movie->movie_id),
             ],
         ]);
     }
@@ -161,6 +161,8 @@ trait BuildsMovieViewData
 
     protected function buildBadgeMeta(Movie $movie): array
     {
+        $rating = $this->resolveMovieRating($movie);
+
         return [
             'status' => [
                 'label' => $movie->status,
@@ -170,7 +172,12 @@ trait BuildsMovieViewData
                     default => 'secondary',
                 },
             ],
-            'rating' => $this->formatRating($movie->rating),
+            'rating' => $this->formatRating($rating),
         ];
+    }
+
+    protected function resolveMovieRating(Movie $movie): ?float
+    {
+        return $movie->computed_rating ?? $movie->rating;
     }
 }

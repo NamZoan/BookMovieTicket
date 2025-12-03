@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Movie extends Model
 {
@@ -43,6 +44,11 @@ class Movie extends Model
     public function showtimes()
     {
         return $this->hasMany(Showtime::class, 'movie_id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'movie_id', 'movie_id');
     }
 
     /*
@@ -142,5 +148,26 @@ class Movie extends Model
             ->unique()
             ->values()
             ->all();
+    }
+
+    /**
+     * Include aggregated review data on the query.
+     */
+    public function scopeWithRatingStats(Builder $query): Builder
+    {
+        return $query->withAvg('reviews as reviews_avg_rating', 'rating')
+            ->withCount('reviews');
+    }
+
+    /**
+     * Resolve the rating that should be shown to end users.
+     */
+    public function getComputedRatingAttribute(): ?float
+    {
+        if (!is_null($this->reviews_avg_rating ?? null)) {
+            return round(((float) $this->reviews_avg_rating) * 2, 1);
+        }
+
+        return $this->rating;
     }
 }

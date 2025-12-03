@@ -8,6 +8,8 @@ use App\Models\Movie;
 use App\Models\Cinema;
 use App\Models\Showtime;
 use App\Models\Review;
+use App\Models\Booking;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -26,10 +28,14 @@ class MovieController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Movie::query()->with(['showtimes' => function ($builder) {
-                $builder->select('showtime_id', 'movie_id', 'show_date', 'show_time', 'status')
-                    ->where('show_date', '>=', Carbon::today());
-            }]);
+            $ratingColumn = $this->ratingExpression();
+
+            $query = Movie::query()
+                ->withRatingStats()
+                ->with(['showtimes' => function ($builder) {
+                    $builder->select('showtime_id', 'movie_id', 'show_date', 'show_time', 'status')
+                        ->where('show_date', '>=', Carbon::today());
+                }]);
 
             // Filter by status
             if ($request->has('status')) {
@@ -53,7 +59,8 @@ class MovieController extends Controller
 
             // Filter by rating
             if ($request->has('min_rating') && is_numeric($request->min_rating)) {
-                $query->where('rating', '>=', $request->min_rating);
+                $minRating = (float) $request->min_rating;
+                $query->havingRaw("{$ratingColumn} >= ?", [$minRating]);
             }
 
             // Filter by language
@@ -85,13 +92,13 @@ class MovieController extends Controller
                     $query->orderBy('title', $sortDirection);
                     break;
                 case 'rating':
-                    $query->orderBy('rating', $sortDirection);
+                    $query->orderByRaw("{$ratingColumn} {$sortDirection}");
                     break;
                 case 'duration':
                     $query->orderBy('duration', $sortDirection);
                     break;
                 case 'popularity':
-                    $query->orderByDesc('updated_at')->orderBy('rating', $sortDirection);
+                    $query->orderByDesc('updated_at')->orderByRaw("{$ratingColumn} {$sortDirection}");
                     break;
                 case 'release_date':
                 default:
@@ -155,7 +162,7 @@ class MovieController extends Controller
         } catch (\Exception $e) {
             \Log::error('MovieController@index error: ' . $e->getMessage(), ['exception' => $e]);
 
-            if ($request->ajax()) {
+                if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => __('Không thể tải danh sách phim. Vui lòng thử lại.'),
@@ -172,6 +179,8 @@ class MovieController extends Controller
     public function nowShowing(Request $request)
     {
         try {
+            $ratingColumn = $this->ratingExpression();
+
             $query = Movie::where('status', 'Now Showing')
                 ->whereHas('showtimes', function ($q) {
                     $q->where('show_date', '>=', Carbon::today())
@@ -182,7 +191,7 @@ class MovieController extends Controller
             $this->applyFilters($query, $request);
 
             $movies = $query->with('showtimes')
-                ->orderBy('rating', 'desc')
+                ->orderByRaw("{$ratingColumn} desc")
                 ->paginate(12)
                 ->appends($request->query());
 
@@ -193,7 +202,7 @@ class MovieController extends Controller
                     'success' => true,
                     'html' => view('client.movies.partials.movie-card-grid', [
                         'movies' => $normalized,
-                        'emptyMessage' => __('Hiện chưa có phim đang chiếu phù hợp.'),
+                            'emptyMessage' => __('Hiện chưa có phim đang chiếu phù hợp.'),
                     ])->render(),
                     'movies' => $normalized->values()->all(),
                     'meta' => $this->buildPaginationMeta($movies),
@@ -206,10 +215,10 @@ class MovieController extends Controller
         } catch (\Exception $e) {
             \Log::error('MovieController@nowShowing error: ' . $e->getMessage(), ['exception' => $e]);
 
-            if ($request->ajax()) {
+                if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Không thể tải danh sách phim đang chiếu. Vui lòng thử lại.'),
+                        'message' => __('Không thể tải danh sách phim đang chiếu. Vui lòng thử lại.'),
                 ], 500);
             }
 
@@ -253,10 +262,10 @@ class MovieController extends Controller
         } catch (\Exception $e) {
             \Log::error('MovieController@comingSoon error: ' . $e->getMessage(), ['exception' => $e]);
 
-            if ($request->ajax()) {
+                if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Không thể tải danh sách phim sắp chiếu. Vui lòng thử lại.'),
+                        'message' => __('Không thể tải danh sách phim sắp chiếu. Vui lòng thử lại.'),
                 ], 500);
             }
 
@@ -270,13 +279,15 @@ class MovieController extends Controller
     public function byGenre(Request $request, $genre)
     {
         try {
+            $ratingColumn = $this->ratingExpression();
+
             $query = Movie::where('genre', 'LIKE', '%' . $genre . '%')
                 ->where('status', '!=', 'Ended');
 
             $this->applyFilters($query, $request);
 
             $movies = $query->with('showtimes')
-                ->orderBy('rating', 'desc')
+                ->orderByRaw("{$ratingColumn} desc")
                 ->paginate(12)
                 ->appends($request->query());
 
@@ -319,11 +330,11 @@ class MovieController extends Controller
     {
         $searchTerm = $request->get('q', '');
 
-        if (strlen($searchTerm) < 2) {
+            if (strlen($searchTerm) < 2) {
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => __('Từ khóa tìm kiếm phải có ít nhất 2 ký tự.'),
+                        'message' => __('Từ khóa tìm kiếm phải có ít nhất 2 ký tự.'),
                 ], 422);
             }
             return redirect()->route('movies.index')
@@ -331,6 +342,8 @@ class MovieController extends Controller
         }
 
         try {
+            $ratingColumn = $this->ratingExpression();
+
             $movies = Movie::where(function ($query) use ($searchTerm) {
                 $query->where('title', 'LIKE', '%' . $searchTerm . '%')
                     ->orWhere('original_title', 'LIKE', '%' . $searchTerm . '%')
@@ -340,7 +353,8 @@ class MovieController extends Controller
                     ->orWhere('genre', 'LIKE', '%' . $searchTerm . '%');
             })
                 ->where('status', '!=', 'Ended')
-                ->orderBy('rating', 'desc')
+                ->withRatingStats()
+                ->orderByRaw("{$ratingColumn} desc")
                 ->paginate(12)
                 ->appends($request->query());
 
@@ -386,14 +400,16 @@ class MovieController extends Controller
         $selectedCinema = $request->get('cinema');
 
         // Lấy thông tin phim
-        $movie = Movie::findOrFail($movie_id);
+        $movie = Movie::withRatingStats()->findOrFail($movie_id);
+        $movie->rating = $movie->computed_rating;
 
-        // Truy vấn lịch chiếu
+        // Truy vấn lịch chiếu - chỉ hiển thị showtimes hợp lệ
         $query = $movie->showtimes()
             ->with(['screen.cinema'])
             ->where('show_date', $selectedDate)
             ->where('status', 'Active')
-            ->where('available_seats', '>', 0);
+            ->where('available_seats', '>', 0)
+            ->where('show_date', '>=', Carbon::today()->toDateString());
 
         // Lọc theo rạp nếu được chọn
         if ($selectedCinema) {
@@ -439,7 +455,7 @@ class MovieController extends Controller
         ));
     }
 
-    // Thêm phương thức này vào MovieController
+    // Thêm phương thức showtimesAjax vào MovieController
     public function showtimesAjax(Request $request, $movie_id)
     {
         try {
@@ -448,14 +464,15 @@ class MovieController extends Controller
             $selectedCinema = $request->get('cinema');
 
             // Lấy thông tin phim
-            $movie = Movie::findOrFail($movie_id);
+            $movie = Movie::withRatingStats()->findOrFail($movie_id);
 
-            // Truy vấn lịch chiếu
+            // Truy vấn lịch chiếu - chỉ hiển thị showtimes hợp lệ
             $query = $movie->showtimes()
                 ->with(['screen.cinema'])
                 ->where('show_date', $selectedDate)
                 ->where('status', 'Active')
-                ->where('available_seats', '>', 0);
+                ->where('available_seats', '>', 0)
+                ->where('show_date', '>=', Carbon::today()->toDateString());
 
             // Lọc theo rạp nếu được chọn
             if ($selectedCinema) {
@@ -498,13 +515,14 @@ class MovieController extends Controller
             $selectedDate = $request->get('date', Carbon::today()->format('Y-m-d'));
             $selectedCinema = $request->get('cinema');
 
-            $movie = Movie::findOrFail($movie_id);
+            $movie = Movie::withRatingStats()->findOrFail($movie_id);
 
             $query = $movie->showtimes()
                 ->with(['screen.cinema'])
                 ->where('show_date', $selectedDate)
                 ->where('status', 'Active')
-                ->where('available_seats', '>', 0);
+                ->where('available_seats', '>', 0)
+                ->where('show_date', '>=', Carbon::today()->toDateString());
 
             if ($selectedCinema) {
                 $query->whereHas('screen.cinema', function ($q) use ($selectedCinema) {
@@ -527,7 +545,9 @@ class MovieController extends Controller
                                 'end_time' => $showtime->end_time,
                                 'end_time_formatted' => date('H:i', strtotime($showtime->end_time)),
                                 'available_seats' => $showtime->available_seats,
-                                'base_price' => $showtime->base_price,
+                                'price_seat_normal' => $showtime->price_seat_normal,
+                                'price_seat_vip' => $showtime->price_seat_vip,
+                                'price_seat_couple' => $showtime->price_seat_couple,
                                 'screen_name' => $showtime->screen->screen_name,
                                 'booking_url' => route('booking.seatSelection', $showtime->showtime_id)
                             ];
@@ -565,7 +585,7 @@ class MovieController extends Controller
      */
     public function getAvailableDates($movie_id)
     {
-        $movie = Movie::findOrFail($movie_id);
+        $movie = Movie::withRatingStats()->findOrFail($movie_id);
         $availableDates = [];
 
         for ($i = 0; $i < 7; $i++) {
@@ -728,6 +748,11 @@ class MovieController extends Controller
         $this->applyFilters($query, $request);
 
         $movies = $query->paginate(20);
+
+        $movies->getCollection()->transform(function (Movie $movie) {
+            $movie->rating = $movie->computed_rating;
+            return $movie;
+        });
 
         return response()->json([
             'success' => true,
@@ -905,12 +930,17 @@ class MovieController extends Controller
 
     private function applyFilters($query, Request $request)
     {
+        $ratingColumn = $this->ratingExpression();
+
+        $query->withRatingStats();
+
         if ($request->has('genre') && !empty($request->genre)) {
             $query->where('genre', 'LIKE', '%' . $request->genre . '%');
         }
 
         if ($request->has('min_rating') && is_numeric($request->min_rating)) {
-            $query->where('rating', '>=', $request->min_rating);
+            $minRating = (float) $request->min_rating;
+            $query->havingRaw("{$ratingColumn} >= ?", [$minRating]);
         }
 
         if ($request->has('language') && !empty($request->language)) {
@@ -925,6 +955,11 @@ class MovieController extends Controller
                     ->orWhere('director', 'LIKE', '%' . $searchTerm . '%');
             });
         }
+    }
+
+    private function ratingExpression(): string
+    {
+        return 'COALESCE(reviews_avg_rating * 2, rating)';
     }
 
     private function getAvailableGenres()
@@ -943,3 +978,4 @@ class MovieController extends Controller
             ->sort();
     }
 }
+
