@@ -58,8 +58,10 @@ class BookingController extends Controller
             // Check if showtime date/time is in the past
             // Use the model helper in case show_time/show_date use different storage formats
             try {
-                $showtimeDateTime = $showtime->startDateTime;
-                $showtimeDateTime = Carbon::parse(trim($showtime->getOriginal('show_date') . ' ' . $showtime->getOriginal('show_time')));
+                $show_date = $showtime->show_date;
+                $show_time = $showtime->show_time;
+                $showtimeDateTime = Carbon::parse($show_date->toDateString() . ' ' . $show_time->toTimeString());
+            
             } catch (\Exception $ex) {
                 // fallback and log more details
                 Log::warning('BookingController@seatSelection: failed to compute startDateTime - falling back to concatenation', [
@@ -68,9 +70,7 @@ class BookingController extends Controller
                     'raw_show_time' => $showtime->getOriginal('show_time'),
                     'exception' => $ex->getMessage()
                 ]);
-
             }
-            dd($showtimeDateTime);
             if ($showtimeDateTime->isPast()) {
                 return redirect()->route('movies.showtimes', $showtime->movie_id)
                     ->with('error', 'Suất chiếu này đã bắt đầu.');
