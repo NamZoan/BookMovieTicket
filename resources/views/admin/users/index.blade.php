@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 
 @section('content')
 <div class="container-xxl py-4">
@@ -26,7 +26,6 @@
                         <th>Họ tên</th>
                         <th>Email</th>
                         <th>Loại tài khoản</th>
-                        <th>Điểm thân thiết</th>
                         <th>Trạng thái</th>
                         <th>Ngày tạo</th>
                         <th>Hành động</th>
@@ -39,7 +38,6 @@
                             <td>{{ $u->name }}</td>
                             <td>{{ $u->email }}</td>
                             <td>{{ $u->user_type ?? 'Customer' }}</td>
-                            <td>{{ $u->loyalty_points ?? 0 }}</td>
                             <td>
                                 @if($u->is_active)
                                     <span class="badge bg-success">Active</span>
@@ -64,7 +62,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">Không có người dùng</td>
+                            <td colspan="7" class="text-center py-4">Không có người dùng</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -98,7 +96,7 @@ function toggleActive(userId, btn) {
             btn.disabled = false;
         }
     }).catch(()=> {
-        alert('Có lỗi mạng');
+        alert('Lỗi mạng');
         btn.disabled = false;
     });
 }

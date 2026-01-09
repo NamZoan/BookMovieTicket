@@ -74,7 +74,7 @@ class MovieController extends Controller
         ]);
 
 
-        return redirect()->route('admin.movies.edit', ['id' => $movie->movie_id])->with('success', 'Thêm mới phim thành công.');
+        return redirect()->route('admin.movies.edit', ['movie' => $movie->movie_id])->with('success', 'Thêm mới phim thành công.');
     }
 
     // Hiển thị form chỉnh sửa phim
@@ -133,7 +133,7 @@ class MovieController extends Controller
         // Cập nhật thông tin phim
         $movie->update($updateData);
 
-        return redirect()->route('admin.movies.edit', ['id' => $movie->movie_id])->with('success', 'Cập nhật phim thành công!');
+        return redirect()->route('admin.movies.edit', ['movie' => $movie->movie_id])->with('success', 'Cập nhật phim thành công!');
     }
 
     public function destroy($id)

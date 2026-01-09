@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -19,10 +19,8 @@
         <div class="form-container sign-up-container">
             <form method="POST" action="{{ route('auth.register.post') }}">
                 @csrf
+                <input type="hidden" name="redirect_to" value="{{ old('redirect_to', $redirectTo ?? route('client.home')) }}">
                 <h1>Tạo Tài Khoản</h1>
-                <div class="social-container">
-                    <a href="{{ route('auth.google.redirect') }}" class="social"><i class="fab fa-google-plus-g"></i></a>
-                </div>
                 <span>hoặc sử dụng email để đăng ký</span>
 
                 @if ($errors->any())
@@ -66,12 +64,8 @@
         <div class="form-container sign-in-container">
             <form method="POST" action="{{ route('auth.login.post') }}">
                 @csrf
+                <input type="hidden" name="redirect_to" value="{{ old('redirect_to', $redirectTo ?? route('client.home')) }}">
                 <h1>Đăng Nhập</h1>
-                <div class="social-container">
-                    <a href="{{ route('auth.google.redirect') }}" class="social" style="color: var(--theme-title);">
-                        <i class="fab fa-google-plus-g"></i>
-                    </a>
-                </div>
                 <span>hoặc sử dụng tài khoản của bạn</span>
                 <input name="email" type="email" placeholder="Email" value="{{ old('email') }}" required />
                 <input name="password" type="password" placeholder="Mật khẩu" required />
@@ -94,7 +88,7 @@
                 </div>
                 <div class="overlay-panel overlay-right">
                     <h1>Xin Chào!</h1>
-                    <p>Đăng ký và đặt vé ngay bây giờ!!!</p>
+                    <p>Đăng ký và bắt đầu trải nghiệm ngay bây giờ!!!</p>
                     <button class="ghost" id="signUp">Đăng Ký</button>
                 </div>
             </div>
@@ -108,4 +102,3 @@
 </body>
 
 </html>
-

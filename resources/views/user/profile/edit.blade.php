@@ -112,14 +112,6 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="loyalty_points" class="form-label">Điểm Tích Lũy</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           value="{{ number_format($user->loyalty_points ?? 0, 0, ',', '.') }} điểm"
-                                           disabled>
-                                    <small class="text-muted">Điểm tích lũy từ các giao dịch</small>
-                                </div>
                             </div>
                         </div>
 

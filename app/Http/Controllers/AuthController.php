@@ -6,14 +6,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class AuthController extends Controller
 {
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
-        return view('client.auth.login');
+        $redirectTo = $this->resolveRedirectTarget($request);
+
+        return view('client.auth.login', compact('redirectTo'));
     }
 
     public function login(Request $request)
@@ -23,28 +23,24 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            $user = Auth::user();
-
-            // Kiểm tra email đã được xác thực chưa
-            if (!$user->hasVerifiedEmail()) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Vui lòng xác thực email của bạn trước khi đăng nhập. Chúng tôi đã gửi link xác thực đến email của bạn.'
-                ])->withInput();
-            }
-
-            return redirect()->intended(route('client.home'));
+            return redirect()->intended(
+                $request->input('redirect_to', route('client.home'))
+            );
         }
 
-        return back()->withErrors(['email' => 'Thông tin đăng nhập không chính xác'])->withInput();
+        return back()->withErrors([
+            'email' => 'Thong tin dang nhap khong chinh xac',
+        ])->withInput();
     }
 
-    public function showRegistrationForm()
+    public function showRegistrationForm(Request $request)
     {
-        return view('client.auth.register');
+        $redirectTo = $this->resolveRedirectTarget($request);
+
+        return view('client.auth.register', compact('redirectTo'));
     }
 
     public function register(Request $request)
@@ -63,18 +59,37 @@ class AuthController extends Controller
             'phone' => $validated['phone'] ?? null,
             'user_type' => 'Customer',
             'is_active' => true,
+            'email_verified_at' => now(),
         ]);
-
-        event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect()->route('verification.notice');
+        return redirect()->to(
+            $request->input('redirect_to', route('client.home'))
+        );
     }
 
     public function logout()
     {
         auth()->logout();
+
         return redirect()->route('client.home');
+    }
+
+    private function resolveRedirectTarget(Request $request): string
+    {
+        $fallback = route('client.home');
+        $previous = url()->previous();
+
+        if (!$previous || $previous === $request->fullUrl()) {
+            return $fallback;
+        }
+
+        // Avoid looping back to auth pages
+        if (str_contains($previous, '/auth/login') || str_contains($previous, '/auth/register')) {
+            return $fallback;
+        }
+
+        return $previous;
     }
 }

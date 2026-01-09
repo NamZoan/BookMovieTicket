@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+﻿@extends('admin.layouts.app')
 
 @section('content')
 <div class="container-xxl py-4">
@@ -31,11 +31,6 @@
                     <option value="1" @selected(old('is_active', $user->is_active) == 1)>Active</option>
                     <option value="0" @selected(old('is_active', $user->is_active) == 0)>Inactive</option>
                 </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Điểm thân thiết</label>
-                <input type="number" name="loyalty_points" class="form-control" value="{{ old('loyalty_points', $user->loyalty_points ?? 0) }}" min="0">
             </div>
 
             <div class="col-md-4">

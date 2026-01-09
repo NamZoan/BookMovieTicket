@@ -53,8 +53,6 @@ class UserController extends Controller
         }
 
         $data['is_active'] = (bool) ($data['is_active'] ?? true);
-        $data['loyalty_points'] = 0;
-
         User::create($data);
 
         return redirect()->route('admin.users.index')->with('success', 'Tạo người dùng thành công.');
@@ -80,7 +78,6 @@ class UserController extends Controller
             'full_name' => 'required|string|max:150',
             'user_type' => ['required', Rule::in(['Customer','Staff','Admin'])],
             'is_active' => 'nullable|boolean',
-            'loyalty_points' => 'nullable|integer|min:0',
             'password' => 'nullable|string|min:6|confirmed',
         ]);
 
@@ -91,10 +88,6 @@ class UserController extends Controller
         $user->full_name = $data['full_name'];
         $user->user_type = $data['user_type'];
         $user->is_active = isset($data['is_active']) ? (bool)$data['is_active'] : $user->is_active;
-        if (isset($data['loyalty_points'])) {
-            $user->loyalty_points = $data['loyalty_points'];
-        }
-
         $user->save();
 
         return redirect()->route('admin.users.index')->with('success', 'Cập nhật người dùng thành công.');

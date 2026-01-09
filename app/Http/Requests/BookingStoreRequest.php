@@ -22,7 +22,7 @@ class BookingStoreRequest extends FormRequest
             'foods.*.item_id' => ['required_with:foods','integer','exists:food_items,item_id'],
             'foods.*.quantity' => ['required_with:foods','integer','min:1'],
             'promotion_code' => ['nullable','string','max:20'],
-            'payment_method' => ['required','in:Cash,Credit Card,Banking,E-Wallet,Loyalty Points'],
+            'payment_method' => ['required','in:Cash,Credit Card,Banking,E-Wallet'],
             'agree' => ['accepted'],
         ];
     }

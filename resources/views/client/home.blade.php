@@ -12,7 +12,7 @@
                     <div class="carousel-inner">
                         @foreach($heroSlides as $index => $slide)
                             <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                <div class="hero-slide" style="background-image: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75)), url('{{ $slide['background_image'] }}');">
+                                <div class="hero-slide" style="background-image: url('{{ asset('BG.png') }}'); background-size: cover; background-position: center;">
                                     <div class="hero-overlay w-100">
                                         <div class="row align-items-center g-4">
                                             <div class="col-lg-7">
@@ -71,7 +71,7 @@
                 @else
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <div class="hero-slide" style="background-image: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));">
+                            <div class="hero-slide" style="background-image:  url('{{ asset('images/BG.png') }}'); background-size: cover; background-position: center;">
                                 <div class="hero-overlay w-100">
                                     <h1 class="display-5 fw-bold mb-3">{{ __('Chào mừng đến MyShowz') }}</h1>
                                     <p class="fw-medium mb-4">{{ __('Khám phá và đặt vé phim yêu thích của bạn với trải nghiệm nhanh chóng và trực quan.') }}</p>

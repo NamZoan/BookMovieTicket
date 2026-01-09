@@ -59,6 +59,7 @@ class BookingController extends Controller
             // Use the model helper in case show_time/show_date use different storage formats
             try {
                 $showtimeDateTime = $showtime->startDateTime;
+                $showtimeDateTime = Carbon::parse(trim($showtime->getOriginal('show_date') . ' ' . $showtime->getOriginal('show_time')));
             } catch (\Exception $ex) {
                 // fallback and log more details
                 Log::warning('BookingController@seatSelection: failed to compute startDateTime - falling back to concatenation', [
@@ -67,8 +68,9 @@ class BookingController extends Controller
                     'raw_show_time' => $showtime->getOriginal('show_time'),
                     'exception' => $ex->getMessage()
                 ]);
-                $showtimeDateTime = Carbon::parse(trim($showtime->getOriginal('show_date') . ' ' . $showtime->getOriginal('show_time')));
+
             }
+            dd($showtimeDateTime);
             if ($showtimeDateTime->isPast()) {
                 return redirect()->route('movies.showtimes', $showtime->movie_id)
                     ->with('error', 'Suất chiếu này đã bắt đầu.');
@@ -972,8 +974,6 @@ class BookingController extends Controller
             case 'Banking':
             case 'E-Wallet':
                 return 'Pending';
-            case 'Loyalty Points':
-                return 'Paid';
             default:
                 return 'Pending';
         }
@@ -1027,29 +1027,6 @@ class BookingController extends Controller
                 ]
             ];
         }
-    }
-
-    private function processLoyaltyPointsPayment($booking)
-    {
-        $user = Auth::user();
-        $requiredPoints = ceil($booking->final_amount / 1000); // 1 point = 1000 VND
-
-        if ($user->loyalty_points < $requiredPoints) {
-            return [
-                'success' => false,
-                'message' => 'Không đủ điểm tích lũy. Bạn cần ' . $requiredPoints . ' điểm.'
-            ];
-        }
-
-        DB::table('users')
-            ->where('user_id', $user->user_id)
-            ->decrement('loyalty_points', $requiredPoints);
-
-        return [
-            'success' => true,
-            'message' => 'Đã thanh toán bằng điểm tích lũy.',
-            'points_used' => $requiredPoints
-        ];
     }
 
     private function canCancelBooking(Booking $booking)

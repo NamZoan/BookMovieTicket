@@ -114,11 +114,6 @@ public function handleReturn(Request $request)
 
                             // available_seats đã được giảm khi tạo booking, không cần giảm lại
 
-                            $loyaltyPoints = floor($booking->final_amount / 1000);
-                            if ($loyaltyPoints > 0 && $booking->user) {
-                                $booking->user->increment('loyalty_points', $loyaltyPoints);
-                            }
-
                             DB::commit();
                         } catch (\Exception $e) {
                             DB::rollBack();

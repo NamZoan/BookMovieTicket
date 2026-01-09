@@ -38,6 +38,60 @@ a:focus {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Primary buttons override Bootstrap blue with brand red */
+.btn-primary {
+    color: #fff;
+    background-color: #d62828;
+    border-color: #d62828;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    color: #fff;
+    background-color: #b71c1c;
+    border-color: #ad1a1a;
+    box-shadow: 0 0 0 0.2rem rgba(214, 40, 40, 0.25);
+}
+
+.btn-primary:disabled,
+.btn-primary.disabled {
+    background-color: #d62828;
+    border-color: #d62828;
+}
+
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: #a21a1a;
+    border-color: #941717;
+}
+
+.btn-primary:active:focus,
+.btn-primary.active:focus,
+.show > .btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(214, 40, 40, 0.25);
+}
+
+.btn-outline-primary {
+    color: #d62828;
+    border-color: #d62828;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: #fff;
+    background-color: #d62828;
+    border-color: #d62828;
+    box-shadow: 0 0 0 0.2rem rgba(214, 40, 40, 0.25);
+}
+
+.btn-outline-primary:disabled,
+.btn-outline-primary.disabled {
+    color: #d62828;
+    border-color: #d62828;
+    background-color: transparent;
+}
+
 .btn-brand:hover,
 .btn-brand:focus {
     background-color: var(--brand-primary-dark);
