@@ -6,7 +6,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerificationCodeMail;
+use Illuminate\Support\Carbon;
 class AuthController extends Controller
 {
     public function showLoginForm(Request $request)
@@ -23,8 +25,29 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        $remember = $request->boolean('remember');
+        $user = User::where('email', $credentials['email'])->first();
+
+        if ($user && $this->verifyPassword($user, $credentials['password'])) {
+            Auth::login($user, $remember);
             $request->session()->regenerate();
+
+            if (! $user->hasVerifiedEmail()) {
+                $redirectTarget = $request->input('redirect_to', route('client.home'));
+                $request->session()->put('url.intended', $redirectTarget);
+
+                if (! $user->otp_expires_at || $user->otp_expires_at->isPast()) {
+                    $user->sendEmailVerificationNotification();
+
+                    return redirect()
+                        ->route('verification.notice')
+                        ->with('status', 'otp-sent');
+                }
+
+                return redirect()
+                    ->route('verification.notice')
+                    ->with('status', 'otp-required');
+            }
 
             return redirect()->intended(
                 $request->input('redirect_to', route('client.home'))
@@ -32,7 +55,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Thong tin dang nhap khong chinh xac',
+            'email' => 'Thông tin đăng nhập không chính xác',
         ])->withInput();
     }
 
@@ -51,6 +74,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'phone' => 'nullable|string|max:15',
         ]);
+        $otpCode = sprintf('%06d', random_int(0, 999999));
 
         $user = User::create([
             'full_name' => $validated['full_name'],
@@ -59,14 +83,20 @@ class AuthController extends Controller
             'phone' => $validated['phone'] ?? null,
             'user_type' => 'Customer',
             'is_active' => true,
-            'email_verified_at' => now(),
+            'email_verified_at' => null,
+            'otp_code' => $otpCode,
+            'otp_expires_at' => Carbon::now()->addMinutes(3),
         ]);
 
+        Mail::to($user->email)->send(new VerificationCodeMail($otpCode));        
         Auth::login($user);
 
-        return redirect()->to(
-            $request->input('redirect_to', route('client.home'))
-        );
+        $redirectTarget = $request->input('redirect_to', route('client.home'));
+        $request->session()->put('url.intended', $redirectTarget);
+
+        return redirect()
+            ->route('verification.notice')
+            ->with('status', 'otp-sent');
     }
 
     public function logout()
@@ -91,5 +121,31 @@ class AuthController extends Controller
         }
 
         return $previous;
+    }
+
+    private function verifyPassword(User $user, string $plain): bool
+    {
+        $hash = (string) $user->password;
+        $isBcrypt = preg_match('/^\\$2[abyx]\\$/', $hash) === 1;
+        $isArgon = str_starts_with($hash, '$argon2i$') || str_starts_with($hash, '$argon2id$');
+
+        if ($isBcrypt || $isArgon) {
+            if (! password_verify($plain, $hash)) {
+                return false;
+            }
+
+            if ($isArgon || Hash::needsRehash($hash)) {
+                $user->forceFill(['password' => Hash::make($plain)])->save();
+            }
+
+            return true;
+        }
+
+        if (hash_equals($hash, $plain) || hash_equals($hash, md5($plain))) {
+            $user->forceFill(['password' => Hash::make($plain)])->save();
+            return true;
+        }
+
+        return false;
     }
 }

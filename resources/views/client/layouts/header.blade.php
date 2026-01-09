@@ -52,6 +52,7 @@
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.bookings.index') }}"><i class="bi bi-speedometer2"></i> {{ __('Bảng điều khiển') }}</a></li>
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.profile.edit') }}"><i class="bi bi-person-lines-fill"></i> {{ __('Thông tin cá nhân') }}</a></li>
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.bookings.index') }}"><i class="bi bi-ticket-perforated"></i> {{ __('Vé của tôi') }}</a></li>
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.reviews.index') }}"><i class="bi bi-chat-square-text"></i> {{ __('Review của tôi') }}</a></li>
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.change-password') }}"><i class="bi bi-key"></i> {{ __('Đổi mật khẩu') }}</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>

@@ -119,8 +119,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
         ->name('verification.notice');
-    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-        ->middleware(['signed'])
+    Route::post('/email/verify', [EmailVerificationController::class, 'verify'])
         ->name('verification.verify');
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'send'])
         ->middleware('throttle:6,1')
@@ -156,6 +155,9 @@ Route::middleware('auth')->prefix('my-account')->name('user.')->group(function (
     // Booking History Routes
     Route::get('/bookings', [App\Http\Controllers\User\BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [App\Http\Controllers\User\BookingController::class, 'show'])->name('bookings.show');
+
+    // Review History Routes
+    Route::get('/reviews', [App\Http\Controllers\User\ReviewController::class, 'index'])->name('reviews.index');
 
     // Profile Management Routes
     Route::get('/profile', [App\Http\Controllers\User\ProfileController::class, 'edit'])->name('profile.edit');

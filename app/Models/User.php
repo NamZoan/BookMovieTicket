@@ -6,8 +6,10 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
-use App\Notifications\VerifyEmail;
+use App\Mail\VerificationCodeMail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -20,7 +22,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
-        $this->notify(new VerifyEmail);
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $this->forceFill([
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes((int) config('auth.otp_expire', 10)),
+        ])->save();
+
+        Mail::to($this->getEmailForVerification())->send(new VerificationCodeMail($otp));
     }
 
     /**
@@ -54,6 +63,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'provider',
         'provider_id',
         'email_verified_at',
+        'otp_code',
+        'otp_expires_at',
     ];
 
     /**
@@ -70,6 +81,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'date_of_birth' => 'date',
         'is_active' => 'boolean',
+        'otp_expires_at' => 'datetime',
     ];
 
     /**

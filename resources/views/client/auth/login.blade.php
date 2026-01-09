@@ -54,6 +54,7 @@
         <div class="form-container sign-up-container">
             <form method="POST" action="{{ route('auth.register.post') }}">
                 @csrf
+                <input type="hidden" name="redirect_to" value="{{ $redirectTo ?? route('client.home') }}">
                 <h1>Tạo Tài Khoản</h1>
                 <div class="social-container">
                     <a href="{{ route('auth.google.redirect') }}" class="social">
@@ -120,6 +121,7 @@
         <div class="form-container sign-in-container">
             <form method="POST" action="{{ route('auth.login.post') }}" style="color: var(--theme-title);">
                 @csrf
+                <input type="hidden" name="redirect_to" value="{{ $redirectTo ?? route('client.home') }}">
                 <h1>Đăng Nhập</h1>
                 <div class="social-container">
                     <a href="{{ route('auth.google.redirect') }}" class="social" style="color: var(--theme-title);">
