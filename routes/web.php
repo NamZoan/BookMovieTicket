@@ -103,7 +103,7 @@ Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/register', [AuthController::class, 'register'])->name('register.post');
         Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('forgot-password');
         Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('forgot-password.post');
-        Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
+        Route::get('/reset-password/{token?}', [AuthController::class, 'showResetPasswordForm'])->name('reset-password');
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset-password.post');
         Route::get('/google/redirect', [SocialiteController::class, 'redirectToGoogle'])->name('google.redirect');
         Route::get('/google/call-back', [SocialiteController::class, 'handleGoogleCallback'])->name('google.callback');

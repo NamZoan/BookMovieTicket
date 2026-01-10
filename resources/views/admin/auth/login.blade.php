@@ -39,10 +39,14 @@
 
                             <div class="mb-3">
                                 <label for="password" class="form-label">Mật khẩu</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
 
-                            <button type="submit" class="btn btn-primary w-100">
+                        <div class="mb-3 text-end">
+                            <a href="{{ route('auth.forgot-password') }}" class="small">Quên mật khẩu?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
                                 <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
                             </button>
                         </form>

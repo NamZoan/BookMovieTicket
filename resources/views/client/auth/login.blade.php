@@ -55,14 +55,7 @@
             <form method="POST" action="{{ route('auth.register.post') }}">
                 @csrf
                 <input type="hidden" name="redirect_to" value="{{ $redirectTo ?? route('client.home') }}">
-                <h1>Tạo Tài Khoản</h1>
-                <div class="social-container">
-                    <a href="{{ route('auth.google.redirect') }}" class="social">
-                        <i class="fab fa-google-plus-g"></i>
-                    </a>
-                </div>
-                <span>hoặc sử dụng email để đăng ký</span>
-
+                <h3>Tạo Tài Khoản</h3>
                 @if ($errors->has('full_name') || $errors->has('email') || $errors->has('phone') || $errors->has('password'))
                     <div class="alert alert-danger">
                         <ul class="mb-0" style="padding-left: 20px;">
@@ -111,9 +104,6 @@
                 <input name="password_confirmation" type="password" placeholder="Xác nhận mật khẩu" required />
 
                 <button type="submit">Đăng Ký</button>
-                <p class="mt-3" style="margin-top: 15px; font-size: 14px;">
-                    Đã có tài khoản? <a href="{{ route('auth.login') }}" style="color: #0d6efd;">Đăng nhập</a>
-                </p>
             </form>
         </div>
 

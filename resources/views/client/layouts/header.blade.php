@@ -47,7 +47,7 @@
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="accountDropdown">
                                 @guest
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('auth.login') }}"><i class="bi bi-box-arrow-in-right"></i> {{ __('Đăng nhập') }}</a></li>
-                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('auth.register') }}"><i class="bi bi-person-plus"></i> {{ __('Đăng ký') }}</a></li>
+                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('auth.login') }}"><i class="bi bi-person-plus"></i> {{ __('Đăng ký') }}</a></li>
                                 @else
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.bookings.index') }}"><i class="bi bi-speedometer2"></i> {{ __('Bảng điều khiển') }}</a></li>
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('user.profile.edit') }}"><i class="bi bi-person-lines-fill"></i> {{ __('Thông tin cá nhân') }}</a></li>

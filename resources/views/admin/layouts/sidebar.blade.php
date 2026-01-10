@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="{{ route('admin.dashboard') }}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -53,14 +53,7 @@
     </div>
     <div class="menu-inner-shadow"></div>
 
-    <!-- Search -->
-    <div class="px-3 py-2">
-        <div class="nav-item d-flex align-items-center">
-            <i class="bx bx-search fs-4 lh-0"></i>
-            <input type="text" id="menu-search" class="form-control border-0 shadow-none" placeholder="Search..."
-                aria-label="Search..." />
-        </div>
-    </div>
+    
     <!-- /Search -->
 
     <ul class="menu-inner py-1">
@@ -68,7 +61,7 @@
         <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
             <a href="{{ route('admin.dashboard') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Dashboard</div>
+                <div data-i18n="Analytics">Bảng điều khiển</div>
             </a>
         </li>
 
@@ -242,25 +235,31 @@
             </ul>
         </li>
 
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Hệ Thống</span>
+        <li class="menu-item {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.reviews.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-star"></i>
+                <div data-i18n="Reviews">Đánh giá</div>
+            </a>
         </li>
 
-        <!-- System Management -->
-        <li class="menu-item {{ request()->routeIs('admin.system.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
+        <li class="menu-item {{ request()->routeIs('admin.system.routes') ? 'active' : '' }}">
+            <a href="{{ route('admin.system.routes') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div data-i18n="System">Cài đặt hệ thống</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.system.routes') ? 'active' : '' }}">
-                    <a href="{{ route('admin.system.routes') }}" class="menu-link">
-                        <div data-i18n="Routes">Quản Lý Route</div>
-                    </a>
-                </li>
-            </ul>
+                <div data-i18n="System">Hệ thống</div>
             </a>
         </li>
+
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Tài khoản</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.password.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.password.edit') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-key"></i>
+                <div data-i18n="Password">Đổi mật khẩu</div>
+            </a>
+        </li>
+
     </ul>
 </aside>
 

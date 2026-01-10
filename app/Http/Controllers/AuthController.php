@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationCodeMail;
+use App\Mail\PasswordResetOtpMail;
 use Illuminate\Support\Carbon;
 class AuthController extends Controller
 {
@@ -97,6 +98,95 @@ class AuthController extends Controller
         return redirect()
             ->route('verification.notice')
             ->with('status', 'otp-sent');
+    }
+
+    public function showForgotPasswordForm()
+    {
+        return view('client.auth.forgot-password');
+    }
+
+    public function sendResetLink(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user) {
+            return back()->withErrors([
+                'email' => 'Email không tồn tại trong hệ thống.',
+            ])->withInput();
+        }
+
+        $otpCode = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $user->forceFill([
+            'password_reset_otp' => $otpCode,
+            'password_reset_expires_at' => now()->addMinutes((int) config('auth.otp_expire', 10)),
+        ])->save();
+
+        Mail::to($user->email)->send(new PasswordResetOtpMail($otpCode));
+
+        $request->session()->put('password_reset_email', $user->email);
+
+        return redirect()
+            ->route('auth.reset-password')
+            ->with('status', 'Mã OTP đã được gửi. Vui lòng kiểm tra email.');
+    }
+
+    public function showResetPasswordForm(Request $request, ?string $token = null)
+    {
+        return view('client.auth.reset-password', [
+            'email' => $request->session()->get('password_reset_email'),
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|digits:6',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user) {
+            return back()->withErrors([
+                'email' => 'Email không tồn tại trong hệ thống.',
+            ])->withInput();
+        }
+
+        if (! $user->password_reset_otp || ! $user->password_reset_expires_at) {
+            return back()->withErrors([
+                'otp' => 'Mã OTP không hợp lệ. Vui lòng yêu cầu lại.',
+            ])->withInput();
+        }
+
+        if ($user->password_reset_expires_at->isPast()) {
+            return back()->withErrors([
+                'otp' => 'Mã OTP đã hết hạn. Vui lòng yêu cầu lại.',
+            ])->withInput();
+        }
+
+        if ($validated['otp'] !== $user->password_reset_otp) {
+            return back()->withErrors([
+                'otp' => 'Mã OTP không đúng.',
+            ])->withInput();
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($validated['password']),
+            'password_reset_otp' => null,
+            'password_reset_expires_at' => null,
+        ])->save();
+
+        $request->session()->forget('password_reset_email');
+
+        return redirect()
+            ->route('auth.login')
+            ->with('status', 'Mật khẩu đã được cập nhật. Vui lòng đăng nhập.');
     }
 
     public function logout()

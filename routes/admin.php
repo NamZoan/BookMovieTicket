@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\RouteController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\ProfileController;
 
 // Admin Authentication Routes
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -28,6 +29,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+        Route::get('/change-password', [ProfileController::class, 'editPassword'])->name('password.edit');
+        Route::put('/change-password', [ProfileController::class, 'updatePassword'])->name('password.update');
 
 
         Route::prefix('movies')->name('movies.')->group(function () {
@@ -78,4 +81,3 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 });
-

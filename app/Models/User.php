@@ -65,6 +65,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
         'otp_code',
         'otp_expires_at',
+        'password_reset_otp',
+        'password_reset_expires_at',
     ];
 
     /**
@@ -82,6 +84,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'date_of_birth' => 'date',
         'is_active' => 'boolean',
         'otp_expires_at' => 'datetime',
+        'password_reset_expires_at' => 'datetime',
     ];
 
     /**
