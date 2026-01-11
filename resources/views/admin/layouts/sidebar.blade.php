@@ -126,25 +126,6 @@
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('admin.seats.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-chair"></i>
-                <div data-i18n="Seats">Ghế Ngồi</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.seats.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.seats.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.seats.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.seats.create') }}" class="menu-link">
-                        <div data-i18n="Create">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-
         <li class="menu-item {{ request()->routeIs('admin.showtimes.*') ? 'active open' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-calendar"></i>
@@ -164,24 +145,6 @@
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('admin.pricing.*') ? 'active open' : '' }}">
-            <a href="javascript:void(0)" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-purchase-tag"></i>
-                <div data-i18n="Pricing">Giá Vé</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.pricing.index') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pricing.index') }}" class="menu-link">
-                        <div data-i18n="List">Danh sách</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.pricing.create') ? 'active' : '' }}">
-                    <a href="{{ route('admin.pricing.create') }}" class="menu-link">
-                        <div data-i18n="Create">Thêm mới</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
 
         <li class="menu-item {{ request()->routeIs('admin.food-items.*') ? 'active open' : '' }}">
             <a href="javascript:void(0)" class="menu-link menu-toggle">
@@ -239,13 +202,6 @@
             <a href="{{ route('admin.reviews.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-star"></i>
                 <div data-i18n="Reviews">Đánh giá</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.system.routes') ? 'active' : '' }}">
-            <a href="{{ route('admin.system.routes') }}" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div data-i18n="System">Hệ thống</div>
             </a>
         </li>
 
