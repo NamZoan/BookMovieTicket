@@ -25,6 +25,7 @@
         ->groupBy(fn ($item) => $item['showtime']->movie_id);
 
     $totalShowtimes = $upcomingMovies->flatten(1)->count();
+    $primaryMovieId = $upcomingMovies->keys()->first();
 @endphp
 
 @once
@@ -133,7 +134,7 @@
             <a href="{{ route('cinemas.show', $cinema->cinema_id ?? $cinema->id) }}" class="btn btn-ghost btn-sm">
                 {{ __('Chi tiết rạp') }}
             </a>
-            <a href="{{ route('movies.showtimes', $cinema->cinema_id ?? $cinema->id) }}" class="btn btn-brand btn-sm">
+            <a href="{{ route('movies.showtimes', $primaryMovieId ?? 0) }}" class="btn btn-brand btn-sm">
                 {{ __('Xem toàn bộ lịch chiếu') }}
             </a>
         </div>

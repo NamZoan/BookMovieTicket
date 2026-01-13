@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 26, 2025 lúc 03:31 AM
+-- Thời gian đã tạo: Th1 13, 2026 lúc 04:45 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -56,8 +56,7 @@ CREATE TABLE `bookings` (
 INSERT INTO `bookings` (`booking_id`, `user_id`, `customer_name`, `customer_phone`, `customer_email`, `showtime_id`, `booking_code`, `idempotency_key`, `total_amount`, `promotion_code`, `discount_amount`, `final_amount`, `payment_method`, `payment_status`, `booking_status`, `booking_date`, `payment_date`, `expires_at`, `notes`) VALUES
 (62, 2, 'Admin User', '0987654321', 'admin@example.com', 1, 'BK20251021D6321C', NULL, 760000.00, 'WELCOME50K', 50000.00, 710000.00, 'VNPAY', 'Pending', 'Pending', '2025-10-21 08:06:53', NULL, '2025-10-21 08:21:53', NULL),
 (63, 2, 'Admin User', '0987654321', 'admin@example.com', 1, 'BK20251021C2F3B6', NULL, 285000.00, 'WELCOME50K', 50000.00, 235000.00, 'Cash', 'Pending', 'Confirmed', '2025-10-21 08:07:24', NULL, '2025-10-21 08:22:24', NULL),
-(64, 2, 'Admin User', '0987654321', 'admin@example.com', 1, 'BK202510216D2C85', NULL, 340000.00, 'WELCOME50K', 50000.00, 290000.00, 'Cash', 'Pending', 'Confirmed', '2025-10-21 08:49:42', NULL, '2025-10-21 09:04:42', NULL),
-(65, 4, 'Nam Hoài', '0326684220', 'namblue2909@gmail.com', 1, 'BK2025102358A0BF', NULL, 295000.00, 'MORNING20', 30000.00, 265000.00, 'Cash', 'Pending', 'Confirmed', '2025-10-23 07:28:21', NULL, '2025-10-23 07:43:21', NULL);
+(64, 2, 'Admin User', '0987654321', 'admin@example.com', 1, 'BK202510216D2C85', NULL, 340000.00, 'WELCOME50K', 50000.00, 290000.00, 'Cash', 'Pending', 'Confirmed', '2025-10-21 08:49:42', NULL, '2025-10-21 09:04:42', NULL);
 
 -- --------------------------------------------------------
 
@@ -87,9 +86,7 @@ INSERT INTO `booking_food` (`booking_food_id`, `booking_id`, `item_id`, `quantit
 (85, 63, 7, 1, 45000.00, 45000.00),
 (86, 64, 2, 1, 55000.00, 55000.00),
 (87, 64, 6, 1, 40000.00, 40000.00),
-(88, 64, 7, 1, 45000.00, 45000.00),
-(89, 65, 2, 1, 55000.00, 55000.00),
-(90, 65, 6, 1, 40000.00, 40000.00);
+(88, 64, 7, 1, 45000.00, 45000.00);
 
 -- --------------------------------------------------------
 
@@ -116,9 +113,7 @@ INSERT INTO `booking_seats` (`booking_seat_id`, `booking_id`, `seat_id`, `seat_p
 (93, 63, 695, 100000.00),
 (94, 63, 709, 100000.00),
 (95, 64, 644, 100000.00),
-(96, 64, 645, 100000.00),
-(97, 65, 655, 100000.00),
-(98, 65, 669, 100000.00);
+(96, 64, 645, 100000.00);
 
 -- --------------------------------------------------------
 
@@ -296,7 +291,11 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (24, '2025_10_18_024244_create_sepay_table', 14),
 (25, '2025_10_18_073500_add_remember_token_to_users_table', 15),
 (26, '2025_10_18_010101_create_reviews_table', 16),
-(27, '2025_11_24_041259_add_email_verified_at_to_users_table', 17);
+(27, '2025_11_24_041259_add_email_verified_at_to_users_table', 17),
+(28, '2024_11_26_000001_drop_loyalty_points_from_users_table', 18),
+(29, '2026_01_09_213121_add_otp_code_to_users_table', 18),
+(30, '2026_01_09_220000_update_otp_code_length_in_users_table', 19),
+(31, '2026_01_11_030500_add_password_reset_otp_to_users_table', 20);
 
 -- --------------------------------------------------------
 
@@ -330,31 +329,31 @@ CREATE TABLE `movies` (
 --
 
 INSERT INTO `movies` (`movie_id`, `title`, `original_title`, `description`, `duration`, `release_date`, `director`, `cast`, `genre`, `language`, `country`, `rating`, `age_rating`, `poster_url`, `trailer_url`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Avengers: Endgame', 'Avengers: Endgame', 'Cuộc chiến cuối cùng để cứu vũ trụ khỏi tay Thanos.', 181, '2019-04-26', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Scarlett Johansson', NULL, 'Tiếng Anh', 'Mỹ', 6.0, 'T13', 'posters/1756197298_Avengers_Endgame_bia_teaser.jpg', 'https://example.com/trailer1.mp4', 'Now Showing', '2025-08-26 07:55:53', '2025-08-26 01:34:58'),
-(2, 'The Lion King', 'The Lion King', 'Cuộc phiêu lưu của Simba để trở thành vua của savanna.', 118, '2019-07-19', 'Jon Favreau', 'Donald Glover, Beyoncé, Seth Rogen', 'Hoạt hình, Gia đình', 'Tiếng Anh', 'Mỹ', 7.0, 'P', '', 'https://example.com/trailer2.mp4', 'Now Showing', '2025-08-26 07:55:53', '2025-08-26 07:55:53'),
-(3, 'Inception', 'Inception', 'Một nhóm đi vào những giấc mơ để ăn trộm thông tin quan trọng.', 148, '2010-07-16', 'Christopher Nolan', 'Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page', NULL, 'Tiếng Anh', 'Mỹ', 5.0, 'T16', 'posters/1756197946_unnamed.png', 'https://example.com/trailer3.mp4', 'Now Showing', '2025-08-26 07:55:53', '2025-08-26 01:45:46'),
-(4, 'Frozen II', 'Frozen II', 'Elsa và Anna phải đối mặt với một bí ẩn từ quá khứ của vương quốc.', 103, '2019-11-22', 'Chris Buck, Jennifer Lee', 'Idina Menzel, Kristen Bell, Josh Gad', NULL, 'Tiếng Anh', 'Mỹ', 4.0, 'P', 'posters/1756197900_Frozen_II_(2019_animated_film).jpg', 'https://example.com/trailer4.mp4', 'Ended', '2025-08-26 07:55:53', '2025-08-26 01:45:00'),
-(5, 'Spider-Man: No Way Home', 'Spider-Man: No Way Home', 'Peter Parker phải đối mặt với những thử thách mới khi lỗ hổng không gian thời gian mở ra.', 148, '2021-12-17', 'Jon Watts', 'Tom Holland, Zendaya, Benedict Cumberbatch', 'Hành động, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', 8.6, 'T13', '', 'https://example.com/trailer5.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
-(6, 'The Dark Knight', 'The Dark Knight', 'Batman đấu tranh với Joker, kẻ tâm thần muốn hủy hoại Gotham City.', 152, '2008-07-18', 'Christopher Nolan', 'Christian Bale, Heath Ledger, Aaron Eckhart', 'Hành động, Tội phạm', 'Tiếng Anh', 'Mỹ', 9.0, 'T16', '', 'https://example.com/trailer6.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
-(7, 'Toy Story 4', 'Toy Story 4', 'Woody và Buzz Lightyear phải đối mặt với những cuộc phiêu lưu mới khi gặp một món đồ chơi mới.', 100, '2019-06-21', 'Josh Cooley', 'Tom Hanks, Tim Allen, Tony Hale', 'Hoạt hình, Gia đình', 'Tiếng Anh', 'Mỹ', 7.8, 'P', '', 'https://example.com/trailer7.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
-(8, 'Jurassic World: Dominion', 'Jurassic World: Dominion', 'Dinosaur và con người phải sống chung trong một thế giới hỗn loạn.', 147, '2022-06-10', 'Colin Trevorrow', 'Chris Pratt, Bryce Dallas Howard, Sam Neill', 'Hành động, Phiêu lưu, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', 6.8, 'T13', '', 'https://example.com/trailer8.mp4', 'Coming Soon', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
+(1, 'Avengers: Endgame', 'Avengers: Endgame', 'Cuộc chiến cuối cùng để cứu vũ trụ khỏi tay Thanos.', 181, '2019-04-26', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Evans, Scarlett Johansson', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T13', 'posters/1756197298_Avengers_Endgame_bia_teaser.jpg', 'https://example.com/trailer1.mp4', 'Now Showing', '2025-08-26 07:55:53', '2025-08-26 01:34:58'),
+(2, 'The Lion King', 'The Lion King', 'Cuộc phiêu lưu của Simba để trở thành vua của savanna.', 118, '2019-07-19', 'Jon Favreau', 'Donald Glover, Beyoncé, Seth Rogen', 'Hoạt hình, Gia đình', 'Tiếng Anh', 'Mỹ', NULL, 'P', '', 'https://example.com/trailer2.mp4', 'Now Showing', '2025-08-26 07:55:53', '2025-08-26 07:55:53'),
+(3, 'Inception', 'Inception', 'Một nhóm đi vào những giấc mơ để ăn trộm thông tin quan trọng.', 148, '2010-07-16', 'Christopher Nolan', 'Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T16', 'posters/1756197946_unnamed.png', 'https://example.com/trailer3.mp4', 'Now Showing', '2025-08-26 07:55:53', '2025-08-26 01:45:46'),
+(4, 'Frozen II', 'Frozen II', 'Elsa và Anna phải đối mặt với một bí ẩn từ quá khứ của vương quốc.', 103, '2019-11-22', 'Chris Buck, Jennifer Lee', 'Idina Menzel, Kristen Bell, Josh Gad', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'P', 'posters/1756197900_Frozen_II_(2019_animated_film).jpg', 'https://example.com/trailer4.mp4', 'Ended', '2025-08-26 07:55:53', '2025-08-26 01:45:00'),
+(5, 'Spider-Man: No Way Home', 'Spider-Man: No Way Home', 'Peter Parker phải đối mặt với những thử thách mới khi lỗ hổng không gian thời gian mở ra.', 148, '2021-12-17', 'Jon Watts', 'Tom Holland, Zendaya, Benedict Cumberbatch', 'Hành động, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', NULL, 'T13', '', 'https://example.com/trailer5.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
+(6, 'The Dark Knight', 'The Dark Knight', 'Batman đấu tranh với Joker, kẻ tâm thần muốn hủy hoại Gotham City.', 152, '2008-07-18', 'Christopher Nolan', 'Christian Bale, Heath Ledger, Aaron Eckhart', 'Hành động, Tội phạm', 'Tiếng Anh', 'Mỹ', NULL, 'T16', '', 'https://example.com/trailer6.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
+(7, 'Toy Story 4', 'Toy Story 4', 'Woody và Buzz Lightyear phải đối mặt với những cuộc phiêu lưu mới khi gặp một món đồ chơi mới.', 100, '2019-06-21', 'Josh Cooley', 'Tom Hanks, Tim Allen, Tony Hale', 'Hoạt hình, Gia đình', 'Tiếng Anh', 'Mỹ', NULL, 'P', '', 'https://example.com/trailer7.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
+(8, 'Jurassic World: Dominion', 'Jurassic World: Dominion', 'Dinosaur và con người phải sống chung trong một thế giới hỗn loạn.', 147, '2022-06-10', 'Colin Trevorrow', 'Chris Pratt, Bryce Dallas Howard, Sam Neill', 'Hành động, Phiêu lưu, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', NULL, 'T13', '', 'https://example.com/trailer8.mp4', 'Coming Soon', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
 (9, 'Guardians of the Galaxy Vol. 3', 'Guardians of the Galaxy Vol. 3', 'Các Guardian phải đối mặt với thử thách lớn để cứu người bạn Rocket của mình.', 150, '2023-05-05', 'James Gunn', 'Chris Pratt, Zoe Saldana, Dave Bautista', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T13', 'posters/1756197925_p17845781_v_v13_ar.jpg', 'https://example.com/trailer9.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 01:45:25'),
-(10, 'Shang-Chi and the Legend of the Ten Rings', 'Shang-Chi and the Legend of the Ten Rings', 'Shang-Chi khám phá bí mật gia đình mình và đấu với những thế lực siêu nhiên.', 132, '2021-09-03', 'Destin Daniel Cretton', 'Simu Liu, Awkwafina, Tony Leung', 'Hành động, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', 7.9, 'T13', '', 'https://example.com/trailer10.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
-(11, 'Fast & Furious 9', 'Fast & Furious 9', 'Dominic Toretto và đội của mình đối đầu với kẻ thù mới, là em trai của Toretto.', 145, '2021-06-25', 'Justin Lin', 'Vin Diesel, Michelle Rodriguez, John Cena', NULL, 'Tiếng Anh', 'Mỹ', 9.0, 'T13', 'posters/1756197834_unnamed.jpg', 'https://example.com/trailer11.mp4', 'Ended', '2025-08-26 07:57:18', '2025-08-26 01:43:54'),
-(12, 'Black Panther: Wakanda Forever', 'Black Panther: Wakanda Forever', 'Wakanda phải tìm cách bảo vệ quốc gia sau cái chết của Black Panther.', 161, '2022-11-11', 'Ryan Coogler', 'Letitia Wright, Angela Bassett, Lupita Nyong\'o', NULL, 'Tiếng Anh', 'Mỹ', 6.8, 'T13', 'posters/1756197371_pp_disney_blackpanther_wakandaforever_1289_d3419b8f.jpeg', 'https://example.com/trailer12.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 01:36:11'),
+(10, 'Shang-Chi and the Legend of the Ten Rings', 'Shang-Chi and the Legend of the Ten Rings', 'Shang-Chi khám phá bí mật gia đình mình và đấu với những thế lực siêu nhiên.', 132, '2021-09-03', 'Destin Daniel Cretton', 'Simu Liu, Awkwafina, Tony Leung', 'Hành động, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', NULL, 'T13', '', 'https://example.com/trailer10.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
+(11, 'Fast & Furious 9', 'Fast & Furious 9', 'Dominic Toretto và đội của mình đối đầu với kẻ thù mới, là em trai của Toretto.', 145, '2021-06-25', 'Justin Lin', 'Vin Diesel, Michelle Rodriguez, John Cena', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T13', 'posters/1756197834_unnamed.jpg', 'https://example.com/trailer11.mp4', 'Ended', '2025-08-26 07:57:18', '2025-08-26 01:43:54'),
+(12, 'Black Panther: Wakanda Forever', 'Black Panther: Wakanda Forever', 'Wakanda phải tìm cách bảo vệ quốc gia sau cái chết của Black Panther.', 161, '2022-11-11', 'Ryan Coogler', 'Letitia Wright, Angela Bassett, Lupita Nyong\'o', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T13', 'posters/1756197371_pp_disney_blackpanther_wakandaforever_1289_d3419b8f.jpeg', 'https://example.com/trailer12.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 01:36:11'),
 (13, 'Doctor Strange in the Multiverse of Madness', 'Doctor Strange in the Multiverse of Madness', 'Doctor Strange đối mặt với những mối đe dọa từ vũ trụ đa chiều.', 126, '2022-05-06', 'Sam Raimi', 'Benedict Cumberbatch, Elizabeth Olsen, Benedict Wong', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T16', 'posters/1756197803_p_drstrangeinthemultiverseofmadness_245_476cabb1.jpeg', 'https://example.com/trailer13.mp4', 'Now Showing', '2025-08-26 07:57:18', '2025-08-26 01:43:23'),
 (14, 'Avengers: Infinity War', 'Avengers: Infinity War', 'Avengers hợp sức để ngừng Thanos thu thập các viên đá vô cực.', 149, '2018-04-27', 'Anthony Russo, Joe Russo', 'Robert Downey Jr., Chris Hemsworth, Mark Ruffalo', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T13', 'posters/1756197341_Avengers_Infinity_war_poster.webp', 'https://example.com/trailer14.mp4', 'Ended', '2025-08-26 07:57:18', '2025-08-26 01:35:41'),
-(15, 'The Matrix Resurrections', 'The Matrix Resurrections', 'Neo trở lại trong một vũ trụ mới đầy nguy hiểm và bất ngờ.', 148, '2021-12-22', 'Lana Wachowski', 'Keanu Reeves, Carrie-Anne Moss, Yahya Abdul-Mateen II', 'Hành động, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', 5.7, 'T16', '', 'https://example.com/trailer15.mp4', 'Ended', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
-(16, 'Avatar', 'Avatar', 'Một thế giới Pandora tuyệt đẹp, nơi con người và người bản địa giao tranh vì tài nguyên.', 162, '2009-12-18', 'James Cameron', 'Sam Worthington, Zoe Saldana, Sigourney Weaver', 'Hoạt hình', 'Tiếng Anh', 'Mỹ', 3.7, 'T13', 'posters/1756197189_avatar.jfif', 'https://example.com/trailer16.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 01:41:58'),
-(17, 'The Shawshank Redemption', 'The Shawshank Redemption', 'Câu chuyện về tình bạn và sự hy vọng trong một nhà tù khắc nghiệt.', 142, '1994-09-22', 'Frank Darabont', 'Tim Robbins, Morgan Freeman, Bob Gunton', 'Tội phạm, Chính kịch', 'Tiếng Anh', 'Mỹ', 9.3, 'T16', '', 'https://example.com/trailer17.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(18, 'Forrest Gump', 'Forrest Gump', 'Một người đàn ông đơn giản nhưng đã có cuộc đời đầy ắp những sự kiện lịch sử.', 142, '1994-07-06', 'Robert Zemeckis', 'Tom Hanks, Robin Wright, Gary Sinise', NULL, 'Tiếng Anh', 'Mỹ', 4.8, 'T13', 'posters/1756197871_gump.jpg', 'https://example.com/trailer18.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 01:44:31'),
-(19, 'The Godfather', 'The Godfather', 'Một gia đình mafia và cuộc chiến nội bộ dẫn đến sự trả thù đẫm máu.', 175, '1972-03-24', 'Francis Ford Coppola', 'Marlon Brando, Al Pacino, James Caan', 'Tội phạm, Chính kịch', 'Tiếng Anh', 'Mỹ', 9.2, 'T16', '', 'https://example.com/trailer19.mp4', 'Ended', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(20, 'Pulp Fiction', 'Pulp Fiction', 'Một loạt câu chuyện giao nhau về tội ác và cuộc sống ngoài vòng pháp luật.', 154, '1994-10-14', 'Quentin Tarantino', 'John Travolta, Uma Thurman, Samuel L. Jackson', 'Tội phạm, Chính kịch', 'Tiếng Anh', 'Mỹ', 8.9, 'T16', '', 'https://example.com/trailer20.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(21, 'The Dark Knight Rises', 'The Dark Knight Rises', 'Batman quay lại Gotham để đối đầu với Bane, kẻ muốn phá hủy thành phố.', 164, '2012-07-20', 'Christopher Nolan', 'Christian Bale, Tom Hardy, Anne Hathaway', 'Hành động, Tội phạm', 'Tiếng Anh', 'Mỹ', 8.4, 'T13', '', 'https://example.com/trailer21.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(22, 'The Lord of the Rings: The Fellowship of the Ring', 'The Lord of the Rings: The Fellowship of the Ring', 'Cuộc hành trình của Frodo và những người bạn để tiêu diệt chiếc nhẫn quyền lực.', 178, '2001-12-19', 'Peter Jackson', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 'Hành động, Phiêu lưu, Fantasty', 'Tiếng Anh', 'New Zealand', 8.8, 'T13', '', 'https://example.com/trailer22.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(23, 'The Lord of the Rings: The Two Towers', 'The Lord of the Rings: The Two Towers', 'Frodo và Sam tiếp tục hành trình, trong khi Gandalf và Aragorn chuẩn bị chiến đấu chống lại Sauron.', 179, '2002-12-18', 'Peter Jackson', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 'Hành động, Phiêu lưu, Fantasty', 'Tiếng Anh', 'New Zealand', 8.7, 'T13', '', 'https://example.com/trailer23.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(24, 'The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Return of the King', 'Cuộc chiến cuối cùng giữa các lực lượng thiện và ác để giành lấy chiếc nhẫn quyền lực.', 201, '2003-12-17', 'Peter Jackson', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 'Hành động, Phiêu lưu, Fantasty', 'Tiếng Anh', 'New Zealand', 8.9, 'T13', '', 'https://example.com/trailer24.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
-(25, 'Schindler\'s List', 'Schindler\'s List', 'Một câu chuyện có thật về Oskar Schindler, người đã cứu sống hàng nghìn người Do Thái trong cuộc diệt chủng Holocaust.', 195, '1993-12-15', 'Steven Spielberg', 'Liam Neeson, Ben Kingsley, Ralph Fiennes', 'Chính kịch, Lịch sử', 'Tiếng Anh', 'Mỹ', 9.0, 'T16', '', 'https://example.com/trailer25.mp4', 'Ended', '2025-08-26 07:57:27', '2025-08-26 07:57:27');
+(15, 'The Matrix Resurrections', 'The Matrix Resurrections', 'Neo trở lại trong một vũ trụ mới đầy nguy hiểm và bất ngờ.', 148, '2021-12-22', 'Lana Wachowski', 'Keanu Reeves, Carrie-Anne Moss, Yahya Abdul-Mateen II', 'Hành động, Khoa học viễn tưởng', 'Tiếng Anh', 'Mỹ', NULL, 'T16', '', 'https://example.com/trailer15.mp4', 'Ended', '2025-08-26 07:57:18', '2025-08-26 07:57:18'),
+(16, 'Avatar', 'Avatar', 'Một thế giới Pandora tuyệt đẹp, nơi con người và người bản địa giao tranh vì tài nguyên.', 162, '2009-12-18', 'James Cameron', 'Sam Worthington, Zoe Saldana, Sigourney Weaver', 'Hoạt hình', 'Tiếng Anh', 'Mỹ', 5.0, 'T13', 'posters/1756197189_avatar.jfif', 'https://example.com/trailer16.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 01:41:58'),
+(17, 'The Shawshank Redemption', 'The Shawshank Redemption', 'Câu chuyện về tình bạn và sự hy vọng trong một nhà tù khắc nghiệt.', 142, '1994-09-22', 'Frank Darabont', 'Tim Robbins, Morgan Freeman, Bob Gunton', 'Tội phạm, Chính kịch', 'Tiếng Anh', 'Mỹ', NULL, 'T16', '', 'https://example.com/trailer17.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(18, 'Forrest Gump', 'Forrest Gump', 'Một người đàn ông đơn giản nhưng đã có cuộc đời đầy ắp những sự kiện lịch sử.', 142, '1994-07-06', 'Robert Zemeckis', 'Tom Hanks, Robin Wright, Gary Sinise', NULL, 'Tiếng Anh', 'Mỹ', NULL, 'T13', 'posters/1756197871_gump.jpg', 'https://example.com/trailer18.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 01:44:31'),
+(19, 'The Godfather', 'The Godfather', 'Một gia đình mafia và cuộc chiến nội bộ dẫn đến sự trả thù đẫm máu.', 175, '1972-03-24', 'Francis Ford Coppola', 'Marlon Brando, Al Pacino, James Caan', 'Tội phạm, Chính kịch', 'Tiếng Anh', 'Mỹ', NULL, 'T16', '', 'https://example.com/trailer19.mp4', 'Ended', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(20, 'Pulp Fiction', 'Pulp Fiction', 'Một loạt câu chuyện giao nhau về tội ác và cuộc sống ngoài vòng pháp luật.', 154, '1994-10-14', 'Quentin Tarantino', 'John Travolta, Uma Thurman, Samuel L. Jackson', 'Tội phạm, Chính kịch', 'Tiếng Anh', 'Mỹ', NULL, 'T16', '', 'https://example.com/trailer20.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(21, 'The Dark Knight Rises', 'The Dark Knight Rises', 'Batman quay lại Gotham để đối đầu với Bane, kẻ muốn phá hủy thành phố.', 164, '2012-07-20', 'Christopher Nolan', 'Christian Bale, Tom Hardy, Anne Hathaway', 'Hành động, Tội phạm', 'Tiếng Anh', 'Mỹ', NULL, 'T13', '', 'https://example.com/trailer21.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(22, 'The Lord of the Rings: The Fellowship of the Ring', 'The Lord of the Rings: The Fellowship of the Ring', 'Cuộc hành trình của Frodo và những người bạn để tiêu diệt chiếc nhẫn quyền lực.', 178, '2001-12-19', 'Peter Jackson', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 'Hành động, Phiêu lưu, Fantasty', 'Tiếng Anh', 'New Zealand', NULL, 'T13', '', 'https://example.com/trailer22.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(23, 'The Lord of the Rings: The Two Towers', 'The Lord of the Rings: The Two Towers', 'Frodo và Sam tiếp tục hành trình, trong khi Gandalf và Aragorn chuẩn bị chiến đấu chống lại Sauron.', 179, '2002-12-18', 'Peter Jackson', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 'Hành động, Phiêu lưu, Fantasty', 'Tiếng Anh', 'New Zealand', NULL, 'T13', '', 'https://example.com/trailer23.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(24, 'The Lord of the Rings: The Return of the King', 'The Lord of the Rings: The Return of the King', 'Cuộc chiến cuối cùng giữa các lực lượng thiện và ác để giành lấy chiếc nhẫn quyền lực.', 201, '2003-12-17', 'Peter Jackson', 'Elijah Wood, Ian McKellen, Viggo Mortensen', 'Hành động, Phiêu lưu, Fantasty', 'Tiếng Anh', 'New Zealand', NULL, 'T13', '', 'https://example.com/trailer24.mp4', 'Now Showing', '2025-08-26 07:57:27', '2025-08-26 07:57:27'),
+(25, 'Schindler\'s List', 'Schindler\'s List', 'Một câu chuyện có thật về Oskar Schindler, người đã cứu sống hàng nghìn người Do Thái trong cuộc diệt chủng Holocaust.', 195, '1993-12-15', 'Steven Spielberg', 'Liam Neeson, Ben Kingsley, Ralph Fiennes', 'Chính kịch, Lịch sử', 'Tiếng Anh', 'Mỹ', NULL, 'T16', '', 'https://example.com/trailer25.mp4', 'Ended', '2025-08-26 07:57:27', '2025-08-26 07:57:27');
 
 -- --------------------------------------------------------
 
@@ -470,7 +469,7 @@ INSERT INTO `screens` (`screen_id`, `cinema_id`, `screen_name`, `total_seats`, `
 (2, 30, 'Phòng 2', 108, '2025-09-03 20:51:46', '2025-09-03 20:51:46'),
 (3, 33, 'Phòng 2', 50, '2025-09-03 20:53:13', '2025-09-03 20:53:13'),
 (4, 33, 'Phòng 3', 50, '2025-09-04 20:46:28', '2025-09-04 20:46:40'),
-(5, 35, 'DEMO123', 50, '2025-10-21 07:56:52', '2025-10-21 07:57:07');
+(5, 35, 'DEMO123', 30, '2025-10-21 07:56:52', '2026-01-11 13:01:13');
 
 -- --------------------------------------------------------
 
@@ -809,56 +808,36 @@ INSERT INTO `seats` (`seat_id`, `screen_id`, `row_name`, `seat_number`, `seat_ty
 (1539, 2, 'H', 10, 'Normal', '2025-10-18 09:05:04', '2025-10-18 09:05:04'),
 (1540, 2, 'H', 11, 'Disabled', '2025-10-18 09:05:04', '2025-10-18 09:05:04'),
 (1541, 2, 'H', 12, 'Couple', '2025-10-18 09:05:04', '2025-10-18 09:05:04'),
-(1652, 5, 'A', 1, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1653, 5, 'A', 2, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1654, 5, 'A', 3, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1655, 5, 'A', 4, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1656, 5, 'A', 5, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1657, 5, 'A', 6, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1658, 5, 'A', 7, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1659, 5, 'A', 8, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1660, 5, 'A', 9, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1661, 5, 'A', 10, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1662, 5, 'B', 1, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1663, 5, 'B', 2, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1664, 5, 'B', 3, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1665, 5, 'B', 4, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1666, 5, 'B', 5, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1667, 5, 'B', 6, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1668, 5, 'B', 7, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1669, 5, 'B', 8, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1670, 5, 'B', 9, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1671, 5, 'B', 10, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1672, 5, 'C', 1, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1673, 5, 'C', 2, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1674, 5, 'C', 3, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1675, 5, 'C', 4, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1676, 5, 'C', 5, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1677, 5, 'C', 6, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1678, 5, 'C', 7, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1679, 5, 'C', 8, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1680, 5, 'C', 9, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1681, 5, 'C', 10, 'VIP', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1682, 5, 'D', 1, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1683, 5, 'D', 2, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1684, 5, 'D', 3, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1685, 5, 'D', 4, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1686, 5, 'D', 5, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1687, 5, 'D', 6, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1688, 5, 'D', 7, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1689, 5, 'D', 8, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1690, 5, 'D', 9, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1691, 5, 'D', 10, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1692, 5, 'F', 1, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1693, 5, 'F', 2, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1694, 5, 'F', 3, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1695, 5, 'F', 4, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1696, 5, 'F', 5, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1697, 5, 'F', 6, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1698, 5, 'F', 7, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1699, 5, 'F', 8, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1700, 5, 'F', 9, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16'),
-(1701, 5, 'F', 10, 'Normal', '2025-10-21 07:57:16', '2025-10-21 07:57:16');
+(1702, 5, 'A', 1, 'Disabled', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1703, 5, 'A', 2, 'Disabled', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1704, 5, 'A', 3, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1705, 5, 'A', 4, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1706, 5, 'A', 5, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1707, 5, 'A', 6, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1708, 5, 'A', 7, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1709, 5, 'A', 8, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1710, 5, 'A', 9, 'Disabled', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1711, 5, 'A', 10, 'Disabled', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1712, 5, 'D', 1, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1713, 5, 'D', 2, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1714, 5, 'D', 3, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1715, 5, 'D', 4, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1716, 5, 'D', 5, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1717, 5, 'D', 6, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1718, 5, 'D', 7, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1719, 5, 'D', 8, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1720, 5, 'D', 9, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1721, 5, 'D', 10, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1722, 5, 'F', 1, 'VIP', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1723, 5, 'F', 2, 'Couple', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1724, 5, 'F', 3, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1725, 5, 'F', 4, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1726, 5, 'F', 5, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1727, 5, 'F', 6, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1728, 5, 'F', 7, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1729, 5, 'F', 8, 'Normal', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1730, 5, 'F', 9, 'Couple', '2026-01-11 13:01:13', '2026-01-11 13:01:13'),
+(1731, 5, 'F', 10, 'VIP', '2026-01-11 13:01:13', '2026-01-11 13:01:13');
 
 -- --------------------------------------------------------
 
@@ -887,16 +866,17 @@ CREATE TABLE `showtimes` (
 --
 
 INSERT INTO `showtimes` (`showtime_id`, `movie_id`, `screen_id`, `show_date`, `show_time`, `end_time`, `available_seats`, `status`, `created_at`, `updated_at`, `price_seat_normal`, `price_seat_vip`, `price_seat_couple`) VALUES
-(1, 16, 1, '2025-11-27', '14:30:00', '17:12:00', 39, 'Active', '2025-08-28 02:34:55', '2025-10-23 07:28:21', 100000.00, 120000.00, 130000.00),
-(2, 16, 3, '2025-10-05', '14:45:00', '17:27:00', 50, 'Active', '2025-08-28 18:52:11', '2025-09-08 01:17:44', 100000.00, 120000.00, 130000.00),
-(3, 16, 2, '2025-10-05', '09:00:00', '11:42:00', 108, 'Active', '2025-09-04 20:24:56', '2025-09-08 01:21:42', 100000.00, 120000.00, 130000.00),
-(4, 16, 2, '2025-10-05', '10:00:00', '12:42:00', 108, 'Active', '2025-09-04 20:26:42', '2025-09-16 01:52:55', 100000.00, 120000.00, 130000.00),
-(5, 16, 1, '2025-09-24', '01:49:00', '04:31:00', 108, 'Active', '2025-09-04 20:27:10', '2025-09-16 01:53:26', 100000.00, 120000.00, 130000.00),
-(6, 16, 2, '2025-09-24', '06:00:00', '08:42:00', 108, 'Active', '2025-09-04 20:28:08', '2025-09-08 01:10:47', 0.00, 0.00, 0.00),
-(7, 16, 1, '2025-09-24', '10:57:00', '13:39:00', 108, 'Active', '2025-09-10 20:58:02', '2025-09-10 20:58:02', 100000.00, 120000.00, 130000.00),
-(8, 16, 2, '2025-09-24', '06:44:00', '09:45:00', 108, 'Active', '2025-09-11 01:17:00', '2025-09-16 01:52:07', 50000.00, 100000.00, 120000.00),
-(9, 16, 4, '2025-09-24', '09:00:00', '11:42:00', 50, 'Active', '2025-09-11 01:18:12', '2025-09-11 01:18:12', 70000.00, 80000.00, 100000.00),
-(10, 16, 5, '2025-10-23', '10:00:00', '12:42:00', 50, 'Active', '2025-10-21 08:01:27', '2025-10-21 08:01:27', 100000.00, 120000.00, 140000.00);
+(1, 16, 1, '2026-01-09', '22:00:00', '17:12:00', 39, 'Active', '2025-08-28 02:34:55', '2026-01-10 21:09:17', 100000.00, 120000.00, 130000.00),
+(2, 16, 3, '2026-01-10', '14:45:00', '17:27:00', 50, 'Active', '2025-08-28 18:52:11', '2026-01-10 21:09:17', 100000.00, 120000.00, 130000.00),
+(3, 16, 2, '2026-01-11', '09:00:00', '11:42:00', 108, 'Active', '2025-09-04 20:24:56', '2025-09-08 01:21:42', 100000.00, 120000.00, 130000.00),
+(4, 16, 2, '2026-01-12', '10:00:00', '12:42:00', 108, 'Active', '2025-09-04 20:26:42', '2025-09-16 01:52:55', 100000.00, 120000.00, 130000.00),
+(5, 16, 1, '2025-09-24', '01:49:00', '04:31:00', 108, 'over', '2025-09-04 20:27:10', '2026-01-10 21:09:17', 100000.00, 120000.00, 130000.00),
+(6, 16, 2, '2025-09-24', '06:00:00', '08:42:00', 108, 'over', '2025-09-04 20:28:08', '2026-01-10 21:09:17', 0.00, 0.00, 0.00),
+(7, 16, 1, '2025-09-24', '10:57:00', '13:39:00', 108, 'over', '2025-09-10 20:58:02', '2026-01-10 21:09:17', 100000.00, 120000.00, 130000.00),
+(8, 16, 2, '2025-09-24', '06:44:00', '09:45:00', 108, 'over', '2025-09-11 01:17:00', '2026-01-10 21:09:17', 50000.00, 100000.00, 120000.00),
+(9, 16, 4, '2025-09-24', '09:00:00', '11:42:00', 50, 'over', '2025-09-11 01:18:12', '2026-01-10 21:09:17', 70000.00, 80000.00, 100000.00),
+(10, 16, 5, '2025-10-23', '10:00:00', '12:42:00', 50, 'over', '2025-10-21 08:01:27', '2026-01-10 21:09:17', 100000.00, 120000.00, 140000.00),
+(11, 16, 3, '2026-01-22', '05:05:00', '07:47:00', 50, 'Active', '2026-01-10 21:05:58', '2026-01-10 21:05:58', 100000.00, 120000.00, 140000.00);
 
 -- --------------------------------------------------------
 
@@ -909,32 +889,36 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
+  `otp_code` varchar(255) DEFAULT NULL,
   `remember_token` varchar(100) DEFAULT NULL,
   `full_name` varchar(100) NOT NULL,
   `phone` varchar(15) DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
   `gender` enum('Male','Female') DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `loyalty_points` int(11) NOT NULL DEFAULT 0,
   `user_type` enum('Customer','Admin','Staff') NOT NULL DEFAULT 'Customer',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `provider` varchar(255) DEFAULT NULL,
   `provider_id` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `otp_expires_at` timestamp NULL DEFAULT NULL,
+  `password_reset_otp` varchar(10) DEFAULT NULL,
+  `password_reset_expires_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`user_id`, `email`, `email_verified_at`, `password`, `remember_token`, `full_name`, `phone`, `date_of_birth`, `gender`, `address`, `loyalty_points`, `user_type`, `is_active`, `provider`, `provider_id`, `created_at`, `updated_at`) VALUES
-(1, 'customer@example.com', NULL, '$2y$12$lZLQe5HOl4Vk3P3A8k67CeOAsXA5oyBmqGSvVxdJoaCJOU0eqSoWq', NULL, 'John Doe', '0123456789', '1990-01-01', 'Male', '123 Main Street, City, Country', 0, 'Customer', 0, NULL, NULL, '2025-08-06 21:14:41', '2025-08-06 21:14:41'),
-(2, 'admin@example.com', NULL, '$2y$12$TM1udSXkz2MyOVgRhyR2nO90yKu0WPB07UMKmIxkPk2jGXFmQq8Ha', NULL, 'Admin User', '0987654321', '1985-05-10', 'Female', '456 Admin Ave, City, Country', 0, 'Admin', 1, NULL, NULL, '2025-08-06 21:14:42', '2025-08-06 21:14:42'),
-(3, 'staff@example.com', NULL, '$2y$12$I4/Z8H5LFXYiuj27nNG7xu6aYsCwhw9y0wR.2eZi3omGQjh1T5HBG', NULL, 'Staff Member', '0222333444', '1995-12-25', 'Male', '789 Staff Road, City, Country', 0, 'Staff', 1, NULL, NULL, '2025-08-06 21:14:42', '2025-08-06 21:14:42'),
-(4, 'namblue2909@gmail.com', NULL, NULL, 'T62ObO1NtFf5abtlRJTTn9oReyV6goc8TQ6TNgniJuiM2M85uQUbaGU4hQpK', 'Nam Hoài', NULL, NULL, NULL, NULL, 605, 'Customer', 1, 'google', '102578549864023559403', '2025-09-08 21:03:42', '2025-09-08 21:03:42'),
-(5, 'buihoainam2.vn@gmail.com', NULL, NULL, NULL, 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 0, 'Customer', 1, 'google', '102359496558502341111', '2025-09-09 00:23:14', '2025-09-09 00:23:14'),
-(6, 'buihoainam2002.vn@gmail.com', NULL, NULL, NULL, 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 0, 'Customer', 1, 'google', '116147379371202979584', '2025-10-11 21:39:14', '2025-10-11 21:39:14');
+INSERT INTO `users` (`user_id`, `email`, `email_verified_at`, `password`, `otp_code`, `remember_token`, `full_name`, `phone`, `date_of_birth`, `gender`, `address`, `user_type`, `is_active`, `provider`, `provider_id`, `created_at`, `updated_at`, `otp_expires_at`, `password_reset_otp`, `password_reset_expires_at`) VALUES
+(1, 'customer@example.com', NULL, '$2y$12$lZLQe5HOl4Vk3P3A8k67CeOAsXA5oyBmqGSvVxdJoaCJOU0eqSoWq', NULL, NULL, 'John Doe', '0123456789', '1990-01-01', 'Male', '123 Main Street, City, Country', 'Customer', 0, NULL, NULL, '2025-08-06 21:14:41', '2025-08-06 21:14:41', NULL, NULL, NULL),
+(2, 'admin@example.com', NULL, '$2y$12$TM1udSXkz2MyOVgRhyR2nO90yKu0WPB07UMKmIxkPk2jGXFmQq8Ha', NULL, NULL, 'Admin User', '0987654321', '1985-05-10', 'Female', '456 Admin Ave, City, Country', 'Admin', 1, NULL, NULL, '2025-08-06 21:14:42', '2025-08-06 21:14:42', NULL, NULL, NULL),
+(3, 'staff@example.com', NULL, '$2y$12$I4/Z8H5LFXYiuj27nNG7xu6aYsCwhw9y0wR.2eZi3omGQjh1T5HBG', NULL, NULL, 'Staff Member', '0222333444', '1995-12-25', 'Male', '789 Staff Road, City, Country', 'Staff', 1, NULL, NULL, '2025-08-06 21:14:42', '2025-08-06 21:14:42', NULL, NULL, NULL),
+(5, 'buihoainam2.vn@gmail.com', '2026-01-07 09:15:44', NULL, NULL, 'i6pRi0R9S4pmEHeTEcf5m4t1kF519EMDQoAGCFUnbljDGSnrhI426ZYhN6w7', 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 'Customer', 1, 'google', '102359496558502341111', '2025-09-09 00:23:14', '2026-01-07 09:15:44', NULL, NULL, NULL),
+(6, 'buihoainam2002.vn@gmail.com', NULL, NULL, NULL, NULL, 'Nam Bùi Hoài', NULL, NULL, NULL, NULL, 'Customer', 1, 'google', '116147379371202979584', '2025-10-11 21:39:14', '2025-10-11 21:39:14', NULL, NULL, NULL),
+(15, 'buihoainam.vn@gmail.com', NULL, '$2y$12$ZpH5tyYrcOKdORsNiQ/Qpe703nHlmIXlBbMhpoF.Y7AvosnzPW1fW', '343262', NULL, 'Bùi Hoài Nam', '0326684220', NULL, NULL, NULL, 'Customer', 1, NULL, NULL, '2026-01-09 15:16:18', '2026-01-09 15:16:18', '2026-01-09 15:19:18', NULL, NULL),
+(17, 'namblue2909@gmail.com', '2026-01-09 15:24:41', '$2y$12$6fgL0eD/medeIVlvk.wi1Oi9tcIY/oD0pWprbDAm.APAdNIBRVnhm', NULL, NULL, 'Bùi Hoài Nam', '0326684220', NULL, NULL, NULL, 'Customer', 1, NULL, NULL, '2026-01-09 15:24:13', '2026-01-10 20:39:59', NULL, NULL, NULL);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -1103,7 +1087,7 @@ ALTER TABLE `food_items`
 -- AUTO_INCREMENT cho bảng `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT cho bảng `movies`
@@ -1127,7 +1111,7 @@ ALTER TABLE `promotions`
 -- AUTO_INCREMENT cho bảng `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `review_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `review_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `screens`
@@ -1139,19 +1123,19 @@ ALTER TABLE `screens`
 -- AUTO_INCREMENT cho bảng `seats`
 --
 ALTER TABLE `seats`
-  MODIFY `seat_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1702;
+  MODIFY `seat_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1732;
 
 --
 -- AUTO_INCREMENT cho bảng `showtimes`
 --
 ALTER TABLE `showtimes`
-  MODIFY `showtime_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `showtime_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

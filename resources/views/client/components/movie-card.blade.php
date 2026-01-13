@@ -6,6 +6,9 @@
 @php
     $status = data_get($movie, 'badges.status');
     $rating = data_get($movie, 'badges.rating');
+    $movieStatus = data_get($movie, 'status') ?? data_get($status, 'label');
+    $isNowShowing = $movieStatus === 'Now Showing';
+    $buttonLabel = $isNowShowing ? __('Đặt vé') : ($movieStatus ?? 'Unavailable');
 @endphp
 
 <article class="movie-card h-100 d-flex flex-column overflow-hidden">
@@ -54,9 +57,15 @@
 
 
         <div class="d-flex flex-wrap gap-2 mt-auto">
-            <a href="{{ $movie['details_url'] ?? $movie['book_url'] ?? route('movies.showtimes', $movie['id'] ?? $movie['movie_id'] ?? 0) }}" class="btn btn-sm btn-brand flex-grow-1">
-                <i class="bi me-1"></i>{{ __('Đặt vé') }}
-            </a>
+            @if($isNowShowing)
+                <a href="{{ route('movies.showtimes', $movie['id'] ?? $movie['movie_id'] ?? 0) }}" class="btn btn-sm btn-brand flex-grow-1">
+                    <i class="bi me-1"></i>{{ $buttonLabel }}
+                </a>
+            @else
+                <button type="button" class="btn btn-sm btn-brand flex-grow-1" disabled>
+                    <i class="bi me-1"></i>{{ $buttonLabel }}
+                </button>
+            @endif
         </div>
     </div>
 </article>
