@@ -18,9 +18,12 @@ trait BuildsMovieViewData
             'id' => $movie->movie_id,
             'title' => $movie->title,
             'original_title' => $movie->original_title,
+            'tagline' => $movie->tagline ?? null,
+            'description' => $movie->description ?? '',
             'summary' => Str::limit(strip_tags((string) $movie->description), 140),
             'duration' => $this->formatDuration($movie->duration),
-            'release_date' => optional($movie->release_date)->format('d/m/Y'),
+            'release_date' => optional($movie->release_date)->format('Y-m-d'),
+            'release_date_formatted' => optional($movie->release_date)->format('d/m/Y'),
             'genres' => $this->extractGenres($movie->genre),
             'language' => $movie->language,
             'country' => $movie->country,
@@ -28,7 +31,8 @@ trait BuildsMovieViewData
             'age_rating' => $movie->age_rating,
             'status' => $movie->status,
             'poster_url' => $this->resolvePosterUrl($movie->poster_url),
-            'trailer_url' => $this->resolveTrailerUrl($movie->trailer_url),
+            'backdrop_url' => $this->resolveBackdropUrl($movie->backdrop_url ?? $movie->poster_url),
+            'trailer_url' => $movie->trailer_url,
             'details_url' => route('movies.showtimes', $movie->movie_id),
             'book_url' => route('movies.showtimes', $movie->movie_id),
             'badges' => $this->buildBadgeMeta($movie),
@@ -147,6 +151,23 @@ trait BuildsMovieViewData
         }
 
         return $trailerUrl;
+    }
+
+    protected function resolveBackdropUrl(?string $backdropUrl): string
+    {
+        if (blank($backdropUrl)) {
+            return $this->resolvePosterUrl($backdropUrl);
+        }
+
+        if (Str::startsWith($backdropUrl, ['http://', 'https://'])) {
+            return $backdropUrl;
+        }
+
+        if (Str::startsWith($backdropUrl, ['storage/', 'assets/'])) {
+            return asset($backdropUrl);
+        }
+
+        return asset('storage/' . ltrim($backdropUrl, '/'));
     }
 
     protected function defaultPosterUrl(): string

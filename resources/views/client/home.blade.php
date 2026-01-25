@@ -12,7 +12,7 @@
                     <div class="carousel-inner">
                         @foreach($heroSlides as $index => $slide)
                             <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                <div class="hero-slide" style="background-image: url('{{ asset('BG.png') }}'); background-size: cover; background-position: center;">
+                                <div class="hero-slide" style="background-image: url('{{ $slide['poster_url'] }}'); background-size: cover; background-position: center;">
                                     <div class="hero-overlay w-100">
                                         <div class="row align-items-center g-4">
                                             <div class="col-lg-7">

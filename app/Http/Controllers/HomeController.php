@@ -28,9 +28,10 @@ class HomeController extends Controller
         try {
             $featuredMovies = Cache::remember('home:featured', now()->addMinutes(5), function () {
                 return $this->normalizeMovies(
-                    Movie::featured()
+                    Movie::where('status', 'Now Showing')
                         ->withRatingStats()
                         ->with('showtimes')
+                        ->orderByDesc('rating')
                         ->limit(5)
                         ->get()
                 )->all();
@@ -114,7 +115,24 @@ class HomeController extends Controller
             })
             ->all();
 
+        // Prepare hero movies for slideshow
+        $heroMovies = collect($featuredMovies)->map(function (array $movie) {
+            return [
+                'id' => $movie['id'],
+                'title' => $movie['title'],
+                'tagline' => $movie['tagline'] ?? null,
+                'image' => $movie['backdrop_url'] ?? $movie['poster_url'],
+                'rating' => $movie['rating'],
+                'duration' => $movie['duration'],
+                'release_date' => $movie['release_date_formatted'] ?? $movie['release_date'],
+                'description' => $movie['description'],
+                'genres' => $movie['genres'] ?? [],
+                'trailer_url' => $movie['trailer_url'] ?? null,
+            ];
+        })->all();
+
         $homepageViewData = [
+            'heroMovies' => $heroMovies,
             'heroSlides' => $heroSlides,
             'nowShowingMovies' => $nowShowingMovies,
             'comingSoonMovies' => $comingSoonMovies,

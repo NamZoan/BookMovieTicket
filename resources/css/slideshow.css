@@ -1,0 +1,206 @@
+/* ============================================
+   SLIDESHOW STYLES
+   ============================================ */
+
+/* Slide Container */
+#slideshow-container {
+    position: relative;
+    width: 100%;
+    height: 85vh;
+    min-height: 600px;
+    overflow: hidden;
+    background: #000;
+}
+
+/* Individual Slides */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 0;
+    transform: scale(1.05);
+    transition: opacity 1000ms ease-in-out, transform 1000ms ease-in-out;
+    pointer-events: none;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 10;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+/* Hero Slide - Dark overlay 70% */
+.hero-slide {
+    position: relative;
+    filter: brightness(0.3);
+}
+
+/* Slide Background */
+.slide > .absolute:first-child {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Slide Gradients */
+.slide .absolute:nth-child(2) {
+    background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+}
+
+.slide .absolute:nth-child(3) {
+    background: linear-gradient(to right, #000 0%, rgba(0, 0, 0, 0.3) 30%, transparent 100%);
+}
+
+/* Slide Content */
+.slide-content {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1000ms ease-in-out 300ms;
+}
+
+.slide.active .slide-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Genre Tags */
+.genre-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.genre-tag {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    display: inline-block;
+}
+
+/* Navigation Buttons */
+.slide-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    padding: 0.75rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+#slideshow-container:hover .slide-nav {
+    opacity: 1;
+}
+
+.slide-nav:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slide-nav-prev {
+    left: 1rem;
+}
+
+.slide-nav-next {
+    right: 1rem;
+}
+
+/* Indicators */
+.slide-indicator {
+    height: 0.375rem;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.3);
+    width: 1.5rem;
+}
+
+.slide-indicator:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.slide-indicator.active {
+    width: 3rem;
+    background: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #slideshow-container {
+        height: 70vh;
+        min-height: 500px;
+    }
+
+    .slide-nav {
+        display: none !important;
+    }
+
+    .slide > .absolute:nth-child(4) {
+        padding: 1rem;
+    }
+
+    .slide-content {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    #slideshow-container {
+        height: 60vh;
+    }
+
+    .slide > .absolute:nth-child(4) h1 {
+        font-size: 2rem !important;
+    }
+
+    .slide > .absolute:nth-child(4) p:first-of-type {
+        font-size: 1rem !important;
+    }
+}
+
+/* Smooth Fade Effects */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
