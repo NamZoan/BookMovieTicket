@@ -71,7 +71,7 @@
                 @else
                     <div class="carousel-inner">
                         <div class="carousel-item active">
-                            <div class="hero-slide" style="background-image:  url('{{ asset('images/BG.png') }}'); background-size: cover; background-position: center;">
+                            <div class="hero-slide" style="background-image: ; background-size: cover; background-position: center;">
                                 <div class="hero-overlay w-100">
                                     <h1 class="display-5 fw-bold mb-3">{{ __('Chào mừng đến MyShowz') }}</h1>
                                     <p class="fw-medium mb-4">{{ __('Khám phá và đặt vé phim yêu thích của bạn với trải nghiệm nhanh chóng và trực quan.') }}</p>
@@ -201,39 +201,6 @@
                                     </div>
                                 </div>
                             @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5">
-        <div class="container">
-            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
-                <div>
-                    <h2 class="section-title mb-1">{{ __('Trailer nổi bật') }}</h2>
-                    <p class="fw-medium mb-0">{{ __('Xem trước những thước phim ấn tượng vừa cập nhật.') }}</p>
-                </div>
-            </div>
-            <div class="row g-4">
-                @foreach($latestTrailers as $entry)
-                    @php($movie = $entry['movie'])
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <div class="trailer-card card h-100 border-0 overflow-hidden">
-                            <div class="position-relative">
-                                <img src="{{ $movie['poster_url'] ?? asset('assets/img/default/cinema.jpg') }}" class="img-fluid w-100" alt="{{ $movie['title'] }}" onerror="this.src='{{ asset('assets/img/default/cinema.jpg') }}'">
-                                <button class="btn btn-brand rounded-circle position-absolute top-50 start-50 translate-middle js-open-trailer"
-                                    data-movie-id="{{ $movie['id'] }}"
-                                    data-trailer-url="{{ $entry['trailer_url'] }}"
-                                    data-movie-title="{{ $movie['title'] }}">
-                                    <i class="bi bi-play-fill fs-4"></i>
-                                </button>
-                            </div>
-                            <div class="card-body d-flex flex-column gap-2">
-                                <h3 class="fs-6 fw-semibold mb-0">{{ $movie['title'] }}</h3>
-                                <p class="mb-0">{{ $movie['summary'] }}</p>
-                            </div>
                         </div>
                     </div>
                 @endforeach

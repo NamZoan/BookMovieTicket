@@ -255,6 +255,16 @@ class ScreenController extends Controller
                 throw new \Exception('Không thể xóa phòng chiếu có vé đã được đặt');
             }
 
+            // Guard against deleting seats that are already referenced by bookings
+            $hasBookedSeats = DB::table('booking_seats')
+                ->join('seats', 'booking_seats.seat_id', '=', 'seats.seat_id')
+                ->where('seats.screen_id', $screen->screen_id)
+                ->exists();
+
+            if ($hasBookedSeats) {
+                throw new \Exception('Cannot delete screen with booked seats');
+            }
+
             // Delete all seats first
             $screen->seats()->delete();
 
@@ -1439,3 +1449,6 @@ class ScreenController extends Controller
         }
     }
 }
+
+
+
