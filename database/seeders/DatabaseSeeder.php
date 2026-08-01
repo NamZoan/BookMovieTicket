@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
-
+            AdminSeeder::class,
             FoodItemsSeeder::class, // Gọi seeder cho bảng food_items
         ]);
     }
