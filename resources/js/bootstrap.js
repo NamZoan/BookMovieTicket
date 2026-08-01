@@ -16,18 +16,22 @@ window.Pusher = Pusher;
 
 // Enable Pusher logging
 
-window.Echo = new Echo({
-    broadcaster: 'reverb',
-    key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-    wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
-    enabledTransports: ['ws', 'wss'],
-    disableStats: true,
-    encrypted: false,
-    forceTLS: false,
-    cluster: 'mt1', // Add cluster
-    authEndpoint: '/broadcasting/auth', // Add auth endpoint
-});
+const echoKey = import.meta.env.VITE_REVERB_APP_KEY || import.meta.env.VITE_PUSHER_APP_KEY;
+
+if (echoKey) {
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: echoKey,
+        wsHost: import.meta.env.VITE_REVERB_HOST || window.location.hostname,
+        wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
+        wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
+        enabledTransports: ['ws', 'wss'],
+        disableStats: true,
+        encrypted: false,
+        forceTLS: false,
+        cluster: 'mt1', // Add cluster
+        authEndpoint: '/broadcasting/auth', // Add auth endpoint
+    });
+}
 
 
