@@ -52,10 +52,11 @@ class MovieController extends Controller
 
         // Xử lý file poster nếu có
         $posterPath = null;
+        $disk = config('filesystems.default', 'public');
         if ($request->hasFile('poster_url')) {
             $fileName = $request->file('poster_url')->getClientOriginalName();
             $timeStampedFileName = time() . '_' . $fileName;
-            $posterPath = $request->file('poster_url')->storeAs('posters', $timeStampedFileName, 'public');
+            $posterPath = $request->file('poster_url')->storeAs('posters', $timeStampedFileName, $disk);
         }
 
         // Tạo mới bộ phim
@@ -119,14 +120,15 @@ class MovieController extends Controller
         ];
 
         if ($request->hasFile('poster_url')) {
+            $disk = config('filesystems.default', 'public');
             // Xóa poster cũ nếu có
-            if ($movie->poster_url && Storage::disk('public')->exists($movie->poster_url)) {
-                Storage::disk('public')->delete($movie->poster_url);
+            if ($movie->poster_url && Storage::disk($disk)->exists($movie->poster_url)) {
+                Storage::disk($disk)->delete($movie->poster_url);
             }
 
             // Upload poster mới
             $fileName = time() . '_' . $request->file('poster_url')->getClientOriginalName();
-            $posterPath = $request->file('poster_url')->storeAs('posters', $fileName, 'public');
+            $posterPath = $request->file('poster_url')->storeAs('posters', $fileName, $disk);
             $updateData['poster_url'] = $posterPath;
         }
 

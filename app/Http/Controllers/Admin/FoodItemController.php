@@ -46,10 +46,11 @@ class FoodItemController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
+            $disk = config('filesystems.default', 'public');
             $image = $request->file('image');
             $filename = 'food_' . time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('public/food_items', $filename);
-            $data['image_url'] = Storage::url($path);
+            $path = $image->storeAs('food_items', $filename, $disk);
+            $data['image_url'] = Storage::disk($disk)->url($path);
         }
 
         $item = FoodItem::create($data);
@@ -87,18 +88,19 @@ class FoodItemController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
+            $disk = config('filesystems.default', 'public');
             // Delete old image if exists
             if ($food_item->image_url && !Str::startsWith($food_item->image_url, 'http')) {
-                $oldPath = str_replace('/storage/', 'public/', $food_item->image_url);
-                if (Storage::exists($oldPath)) {
-                    Storage::delete($oldPath);
+                $oldPath = str_replace('/storage/', '', $food_item->image_url);
+                if (Storage::disk($disk)->exists($oldPath)) {
+                    Storage::disk($disk)->delete($oldPath);
                 }
             }
             
             $image = $request->file('image');
             $filename = 'food_' . time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $path = $image->storeAs('public/food_items', $filename);
-            $data['image_url'] = Storage::url($path);
+            $path = $image->storeAs('food_items', $filename, $disk);
+            $data['image_url'] = Storage::disk($disk)->url($path);
         }
 
         $food_item->update($data);
@@ -112,9 +114,10 @@ class FoodItemController extends Controller
     {
         // Delete image file if exists
         if ($food_item->image_url && !Str::startsWith($food_item->image_url, 'http')) {
-            $path = str_replace('/storage/', 'public/', $food_item->image_url);
-            if (Storage::exists($path)) {
-                Storage::delete($path);
+            $disk = config('filesystems.default', 'public');
+            $path = str_replace('/storage/', '', $food_item->image_url);
+            if (Storage::disk($disk)->exists($path)) {
+                Storage::disk($disk)->delete($path);
             }
         }
 
