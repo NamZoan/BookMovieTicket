@@ -13,7 +13,7 @@
 
 <article class="movie-card h-100 d-flex flex-column overflow-hidden">
     <div class="movie-card__media position-relative">
-        <img src="{{ $movie['poster_url'] ?? asset('assets/img/default/cinema.jpg') }}" class="img-fluid w-100" alt="{{ $movie['title'] }}" onerror="this.src='{{ asset('storage/' . $movie['poster_url']) }}'">
+        <img src="{{ $movie['poster_url'] ?? asset('assets/img/default/cinema.jpg') }}" class="img-fluid w-100" alt="{{ $movie['title'] }}" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';">
 
         @if($status)
             <span class="badge badge-status position-absolute top-0 end-0 m-3 text-uppercase small">
