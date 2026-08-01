@@ -9,8 +9,15 @@ if (!function_exists('movie_poster_url')) {
             return asset('assets/img/default/cinema.jpg');
         }
 
+        $url = trim($url);
+
         if (Str::startsWith($url, ['http://', 'https://'])) {
             return $url;
+        }
+
+        $supabaseUrl = env('SUPABASE_STORAGE_URL') ?: env('AWS_URL');
+        if ($supabaseUrl && !Str::startsWith($url, ['storage/', 'assets/'])) {
+            return rtrim($supabaseUrl, '/') . '/' . ltrim($url, '/');
         }
 
         $disk = config('filesystems.default', env('FILESYSTEM_DISK', 'local'));

@@ -129,19 +129,7 @@ trait BuildsMovieViewData
 
     protected function resolvePosterUrl(?string $posterUrl): string
     {
-        if (blank($posterUrl)) {
-            return $this->defaultPosterUrl();
-        }
-
-        if (Str::startsWith($posterUrl, ['http://', 'https://'])) {
-            return $posterUrl;
-        }
-
-        if (Str::startsWith($posterUrl, ['storage/', 'assets/'])) {
-            return asset($posterUrl);
-        }
-
-        return asset('storage/' . ltrim($posterUrl, '/'));
+        return movie_poster_url($posterUrl);
     }
 
     protected function resolveTrailerUrl(?string $trailerUrl): string
@@ -156,18 +144,10 @@ trait BuildsMovieViewData
     protected function resolveBackdropUrl(?string $backdropUrl): string
     {
         if (blank($backdropUrl)) {
-            return $this->resolvePosterUrl($backdropUrl);
+            return $this->defaultPosterUrl();
         }
 
-        if (Str::startsWith($backdropUrl, ['http://', 'https://'])) {
-            return $backdropUrl;
-        }
-
-        if (Str::startsWith($backdropUrl, ['storage/', 'assets/'])) {
-            return asset($backdropUrl);
-        }
-
-        return asset('storage/' . ltrim($backdropUrl, '/'));
+        return movie_poster_url($backdropUrl);
     }
 
     protected function defaultPosterUrl(): string

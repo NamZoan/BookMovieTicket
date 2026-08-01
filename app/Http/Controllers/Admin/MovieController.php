@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Movie;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MovieController extends Controller
 {
@@ -16,10 +18,7 @@ class MovieController extends Controller
 
         // Chuẩn hóa URL ảnh hiển thị
         $movies->transform(function ($movie) {
-            $posterPath = $movie->poster_url; // có thể là null hoặc 'posters/xxx.jpg'
-            $movie->display_image_url = $posterPath
-                ? asset('storage/' . ltrim($posterPath, '/'))
-                : asset('assets/img/default/cinema.jpg');
+            $movie->display_image_url = movie_poster_url($movie->poster_url);
             return $movie;
         });
 
@@ -46,17 +45,19 @@ class MovieController extends Controller
             'cast' => 'nullable|string',
             'genre' => 'nullable|string|max:100',
             'rating' => 'nullable|numeric|min:1|max:10',
-            'poster_url' => 'nullable|image|max:2048', // Kiểm tra file ảnh
+            'poster_url' => 'nullable',
             'status' => 'required|in:Coming Soon,Now Showing,Ended',
         ]);
 
-        // Xử lý file poster nếu có
+        // Xử lý file poster nếu có hoặc chuỗi URL
         $posterPath = null;
         $disk = config('filesystems.default', 'public');
         if ($request->hasFile('poster_url')) {
             $fileName = $request->file('poster_url')->getClientOriginalName();
             $timeStampedFileName = time() . '_' . $fileName;
             $posterPath = $request->file('poster_url')->storeAs('posters', $timeStampedFileName, $disk);
+        } elseif ($request->filled('poster_url') && is_string($request->input('poster_url'))) {
+            $posterPath = trim($request->input('poster_url'));
         }
 
         // Tạo mới bộ phim
@@ -74,6 +75,7 @@ class MovieController extends Controller
             'status' => $request->status,
         ]);
 
+        $this->clearMovieCache();
 
         return redirect()->route('admin.movies.edit', ['movie' => $movie->movie_id])->with('success', 'Thêm mới phim thành công.');
     }
@@ -101,7 +103,7 @@ class MovieController extends Controller
             'cast' => 'nullable|string',
             'genre' => 'nullable|string|max:100',
             'rating' => 'nullable|numeric|min:1|max:10',
-            'poster_url' => 'nullable|image|max:2048',
+            'poster_url' => 'nullable',
             'status' => 'required|in:Coming Soon,Now Showing,Ended',
         ]);
 
@@ -122,7 +124,7 @@ class MovieController extends Controller
         if ($request->hasFile('poster_url')) {
             $disk = config('filesystems.default', 'public');
             // Xóa poster cũ nếu có
-            if ($movie->poster_url && Storage::disk($disk)->exists($movie->poster_url)) {
+            if ($movie->poster_url && !Str::startsWith($movie->poster_url, ['http://', 'https://']) && Storage::disk($disk)->exists($movie->poster_url)) {
                 Storage::disk($disk)->delete($movie->poster_url);
             }
 
@@ -130,10 +132,13 @@ class MovieController extends Controller
             $fileName = time() . '_' . $request->file('poster_url')->getClientOriginalName();
             $posterPath = $request->file('poster_url')->storeAs('posters', $fileName, $disk);
             $updateData['poster_url'] = $posterPath;
+        } elseif ($request->filled('poster_url') && is_string($request->input('poster_url'))) {
+            $updateData['poster_url'] = trim($request->input('poster_url'));
         }
 
         // Cập nhật thông tin phim
         $movie->update($updateData);
+        $this->clearMovieCache();
 
         return redirect()->route('admin.movies.edit', ['movie' => $movie->movie_id])->with('success', 'Cập nhật phim thành công!');
     }
@@ -143,11 +148,25 @@ class MovieController extends Controller
         $movie = Movie::findOrFail($id);
 
         // Xóa poster nếu có
-        if ($movie->poster_url) {
+        if ($movie->poster_url && !Str::startsWith($movie->poster_url, ['http://', 'https://'])) {
             Storage::disk('public')->delete($movie->poster_url);
         }
 
         $movie->delete();
+        $this->clearMovieCache();
+
         return redirect()->route('admin.movies.index')->with('success', 'Xóa phim thành công!');
+    }
+
+    private function clearMovieCache(): void
+    {
+        Cache::forget('home:featured');
+        Cache::forget('home:now-showing');
+        Cache::forget('home:coming-soon');
+        Cache::forget('home:trending');
+        Cache::forget('home:latest-trailers');
+        Cache::forget('home:stats');
+        Cache::forget('movies:filters');
+        Cache::forget('movies:stats-tiles');
     }
 }
