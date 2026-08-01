@@ -39,8 +39,9 @@
                                     @php $movie = $movieGroup['movie']; @endphp
                                     <div class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center mb-3">
                                         <div class="d-flex gap-3 align-items-start flex-grow-1">
-                                            <img src="{{ $movie && $movie->poster_url ? asset('storage/' . ltrim($movie->poster_url, '/')) : asset('assets/img/default/cinema.jpg') }}"
+                                            <img src="{{ movie_poster_url($movie?->poster_url) }}"
                                                  alt="{{ $movie?->title }}"
+                                                 onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';"
                                                  class="rounded" style="width:80px;height:110px;object-fit:cover;">
                                             <div>
                                                 <p class="mb-1 fw-semibold">{{ $movie?->title ?? __('Phim chưa xác định') }}</p>

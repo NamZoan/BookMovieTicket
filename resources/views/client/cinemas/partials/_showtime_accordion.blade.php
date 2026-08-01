@@ -1,4 +1,4 @@
-﻿@php
+@php
     use Carbon\Carbon;
 @endphp
 
@@ -47,8 +47,8 @@
                     <div class="d-flex flex-column flex-md-row gap-3 align-items-start align-items-md-center mb-3">
                         <div class="d-flex gap-3 flex-grow-1 align-items-center">
                             <div class="flex-shrink-0">
-                                <img src="{{ $movie?->poster_url ? asset('storage/' . $movie->poster_url) : asset('assets/img/default/cinema.jpg') }}"
-                                     alt="{{ $movie?->title }}" style="width: 70px; height: 100px; object-fit: cover; border-radius: 10px;">
+                                <img src="{{ movie_poster_url($movie?->poster_url) }}"
+                                     alt="{{ $movie?->title }}" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';" style="width: 70px; height: 100px; object-fit: cover; border-radius: 10px;">
                             </div>
                             <div>
                                 <p class="mb-1 fw-semibold">{{ $movie?->title ?? __('Phim chưa xác định') }}</p>

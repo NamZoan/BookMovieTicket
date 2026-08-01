@@ -274,9 +274,8 @@
             <div class="code-display">{{ $booking->booking_code }}</div>
         </div>
 
-        <div class="movie-info">
-            <img src="{{ '/storage/' . $booking->showtime->movie->poster_url ?? 'https://via.placeholder.com/120x160/1E1E1E/A0A0A0?text=Poster' }}"
-                 alt="{{ $booking->showtime->movie->title }}" class="movie-poster">
+            <img src="{{ movie_poster_url($booking->showtime->movie->poster_url ?? null) }}"
+                 alt="{{ $booking->showtime->movie->title }}" class="movie-poster" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';">
             <div class="movie-details">
                 <h3 class="h2">{{ $booking->showtime->movie->title }}</h3>
                 <p class="text-muted"><strong>Rạp:</strong> {{ $booking->showtime->screen->cinema->name }} - {{ $booking->showtime->screen->name }}</p>

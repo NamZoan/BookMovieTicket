@@ -33,10 +33,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @php
-                                                $posterPath = $showtime->movie->poster_url ?? null;
-                                                $posterUrl = $posterPath
-                                                    ? asset('storage/' . $posterPath)
-                                                    : asset('assets/img/default/cinema.jpg');
+                                                $posterUrl = movie_poster_url($showtime->movie->poster_url ?? null);
                                             @endphp
                                             <img src="{{ $posterUrl }}" alt="Poster" class="rounded me-3"
                                                 style="width: 48px; height: 48px; object-fit: cover;">

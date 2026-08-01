@@ -334,9 +334,8 @@
                 <div class="booking-summary">
                     <h3 class="mb-3">Thông tin đặt vé</h3>
 
-                    <div class="movie-info">
-                        <img src="{{ '/storage/' . $showtime->movie->poster_url ?? 'https://via.placeholder.com/120x160/1E1E1E/A0A0A0?text=Poster' }}"
-                            alt="{{ $showtime->movie->title }}" class="movie-poster">
+                        <img src="{{ movie_poster_url($showtime->movie->poster_url ?? null) }}"
+                            alt="{{ $showtime->movie->title }}" class="movie-poster" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';">
                         <div class="movie-details">
                             <h3>{{ $showtime->movie->title }}</h3>
                             <p class="text-muted"><strong>Rạp:</strong> {{ $showtime->screen->cinema->name }} - {{ $showtime->screen->name }}</p>

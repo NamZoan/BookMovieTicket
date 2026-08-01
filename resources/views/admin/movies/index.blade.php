@@ -22,7 +22,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             @php
-                                                $poster = $movie->display_image_url ?? ($movie->poster_url ? asset('storage/' . $movie->poster_url) : asset('assets/img/default/cinema.jpg'));
+                                                $poster = movie_poster_url($movie->poster_url ?? null);
                                             @endphp
                                             <img src="{{ $poster }}" alt="Poster" class="rounded me-3" style="width: 48px; height: 48px; object-fit: cover;">
                                             <div>

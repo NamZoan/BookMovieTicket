@@ -613,8 +613,8 @@
         <!-- Movie Header -->
         <section class="movie-header">
             <div class="movie-content">
-                <img src="{{ $movie->poster_url ? asset('storage/' . $movie->poster_url) : asset('assets/img/default/cinema.jpg') }}"
-                    alt="{{ $movie->title }}" class="movie-poster">
+                <img src="{{ movie_poster_url($movie->poster_url) }}"
+                    alt="{{ $movie->title }}" class="movie-poster" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';">
 
                 <div class="movie-info">
                     <h1>{{ $movie->title }}</h1>

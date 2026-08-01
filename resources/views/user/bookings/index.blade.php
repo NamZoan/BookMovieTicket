@@ -1,4 +1,4 @@
-﻿@extends('client.layouts.app')
+@extends('client.layouts.app')
 
 @section('title', 'Lịch Sử Đặt Vé')
 
@@ -121,8 +121,7 @@
                             <div class="col-md-8">
                                 <div class="d-flex align-items-start">
                                     <div class="me-3">
-                                        @if($booking->showtime->movie->poster_url ?? false)
-                                            <img src="{{ asset('storage/' . $booking->showtime->movie->poster_url) }}"
+                                            <img src="{{ movie_poster_url($booking->showtime->movie->poster_url ?? null) }}"
                                                  alt="{{ $booking->showtime->movie->title }}"
                                                  class="rounded"
                                                  style="width: 80px; height: 120px; object-fit: cover;">

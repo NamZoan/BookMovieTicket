@@ -1,4 +1,4 @@
-﻿@extends('client.layouts.app')
+@extends('client.layouts.app')
 
 @section('title', 'Chi Tiết Vé - ' . $booking->booking_code)
 
@@ -78,8 +78,7 @@
                     <!-- Movie Information -->
                     <div class="row mb-4 g-3 align-items-center">
                         <div class="col-md-3">
-                            @if($booking->showtime->movie->poster_url ?? false)
-                                <img src="{{ asset('storage/' . $booking->showtime->movie->poster_url) }}"
+                                <img src="{{ movie_poster_url($booking->showtime->movie->poster_url ?? null) }}"
                                      alt="{{ $booking->showtime->movie->title }}"
                                      class="img-fluid rounded shadow">
                             @else

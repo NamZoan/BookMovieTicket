@@ -1,4 +1,4 @@
-﻿@php
+@php
     use Carbon\Carbon;
 
     $upcomingMovies = collect($cinema->screens ?? [])
@@ -102,8 +102,9 @@
                 @endphp
                 <div class="movie-pill d-flex align-items-start gap-3 flex-wrap">
                     <div class="flex-shrink-0">
-                        <img src="{{ $movie?->poster_url ? asset('storage/' . $movie->poster_url) : asset('assets/img/default/cinema.jpg') }}"
+                        <img src="{{ movie_poster_url($movie?->poster_url) }}"
                              alt="{{ $movie?->title }}"
+                             onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';"
                              style="width: 70px; height: 100px; object-fit: cover; border-radius: 10px;">
                     </div>
                     <div class="flex-grow-1">

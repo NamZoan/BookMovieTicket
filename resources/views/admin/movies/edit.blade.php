@@ -183,7 +183,7 @@
                                         <div id="currentImage" class="mb-3 text-center">
                                             @if($movie->poster_url)
                                                 <div class="position-relative d-inline-block">
-                                                    <img src="{{ asset('storage/' . $movie->poster_url) }}"
+                                                    <img src="{{ movie_poster_url($movie->poster_url) }}"
                                                          alt="Current Movie Poster"
                                                          class="img-fluid rounded shadow-sm"
                                                          style="max-height: 300px; max-width: 100%;">

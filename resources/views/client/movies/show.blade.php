@@ -91,7 +91,7 @@
         <div class="col-lg-4">
             <!-- Movie Poster -->
             <div class="card shadow-sm mb-4">
-                <img src="{{ asset('storage/'.$movie->poster_url) }}" class="card-img-top" alt="{{ $movie->title }}">
+                <img src="{{ movie_poster_url($movie->poster_url) }}" class="card-img-top" alt="{{ $movie->title }}" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';">
                 @if($movie->trailer_url)
                     <div class="card-body text-center">
                         <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#trailerModal">

@@ -536,9 +536,8 @@
         {{-- Movie Information --}}
         <div class="movie-info-card">
             <div class="row">
-                <div class="col-md-3">
-                    <img src="{{ '/storage/' . optional($showtime->movie)->poster_url ?? 'https://bizmac.com/Images/Editor/images/404-not-found-la-gi.jpg' }}"
-                        alt="{{ optional($showtime->movie)->title ?? 'Không có tên phim' }}" class="movie-poster">
+                    <img src="{{ movie_poster_url(optional($showtime->movie)->poster_url) }}"
+                        alt="{{ optional($showtime->movie)->title ?? 'Không có tên phim' }}" class="movie-poster" onerror="this.onerror=null; this.src='{{ asset('assets/img/default/cinema.jpg') }}';">
                 </div>
                 <div class="col-md-9">
                     <h2 class="movie-title mb-3">{{ $showtime->movie->title }}</h2>

@@ -53,8 +53,7 @@
                     <div class="card-body">
                         <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center">
                             <div class="flex-shrink-0">
-                                @if($review->movie && $review->movie->poster_url)
-                                    <img src="{{ asset('storage/' . $review->movie->poster_url) }}"
+                                    <img src="{{ movie_poster_url($review->movie->poster_url ?? null) }}"
                                          alt="{{ $review->movie->title }}"
                                          class="rounded"
                                          style="width: 72px; height: 108px; object-fit: cover;">
