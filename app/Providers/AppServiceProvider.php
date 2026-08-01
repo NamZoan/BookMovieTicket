@@ -19,8 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        require_once app_path('helpers.php');
-
         if (env('APP_ENV') !== 'local') {
             \Illuminate\Support\Facades\URL::forceScheme('https'); // Thêm dấu \ ở đầu
         }

@@ -4,7 +4,7 @@ use Illuminate\Support\Str;
 
 if (!function_exists('movie_poster_url')) {
     function movie_poster_url(?string $url): string {
-        if (blank($url)) {
+        if (empty($url) || trim($url) === '') {
             return asset('assets/img/default/cinema.jpg');
         }
 
