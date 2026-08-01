@@ -19,26 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        require_once app_path('helpers.php');
+
         if (env('APP_ENV') !== 'local') {
             \Illuminate\Support\Facades\URL::forceScheme('https'); // Thêm dấu \ ở đầu
         }
-    }
-}
-
-if (!function_exists('movie_poster_url')) {
-    function movie_poster_url(?string $url): string {
-        if (blank($url)) {
-            return asset('assets/img/default/cinema.jpg');
-        }
-
-        if (\Illuminate\Support\Str::startsWith($url, ['http://', 'https://'])) {
-            return $url;
-        }
-
-        if (\Illuminate\Support\Str::startsWith($url, ['storage/', 'assets/'])) {
-            return asset($url);
-        }
-
-        return asset('storage/' . ltrim($url, '/'));
     }
 }
