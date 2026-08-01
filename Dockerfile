@@ -26,5 +26,6 @@ RUN npm run build
 # 7. Expose port cho Render
 EXPOSE $PORT
 
-# 8. Chạy Migration và khởi động Server
-CMD php artisan migrate --force && php -S 0.0.0.0:$PORT -t public
+# 8. Cấp quyền và khởi chạy ứng dụng qua start.sh
+RUN chmod +x start.sh
+CMD ["./start.sh"]
